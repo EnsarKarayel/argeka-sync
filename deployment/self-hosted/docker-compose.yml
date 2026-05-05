@@ -1,4 +1,42 @@
 services:
+  akis-crm-db:
+    image: postgres:17-alpine
+    container_name: akis-crm-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: akis_crm
+      POSTGRES_USER: akis
+      POSTGRES_PASSWORD: akis
+    volumes:
+      - akis-crm-db-data:/var/lib/postgresql/data
+      - ../../db/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
+      - ../../db/seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U akis -d akis_crm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  akis-crm-api:
+    build:
+      context: ../..
+      dockerfile: deployment/backend/Dockerfile
+    container_name: akis-crm-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://akis:akis@akis-crm-db:5432/akis_crm
+      PORT: 3000
+    depends_on:
+      akis-crm-db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   akis-crm-web:
     build:
       context: ../..
@@ -7,8 +45,14 @@ services:
     restart: unless-stopped
     ports:
       - "8080:80"
+    depends_on:
+      akis-crm-api:
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost/"]
       interval: 30s
       timeout: 5s
       retries: 3
+
+volumes:
+  akis-crm-db-data:

@@ -46,11 +46,13 @@ Kurulumsuz çalışan ilk web CRM prototipi. Dosyayı tarayıcıda açarak pipel
 - Desktop Starter: Windows kurulum paketi, tek kullanıcı veya küçük ofis
 - Enterprise: özel entegrasyon, kurulum ve destek
 
-Self-hosted statik prototipi Docker ile çalıştırmak için:
+Self-hosted paketi Docker ile çalıştırmak için:
 
 ```powershell
 docker compose -f deployment/self-hosted/docker-compose.yml up -d --build
 ```
+
+Bu komut web, API ve PostgreSQL servislerini birlikte başlatır.
 
 Ürün ve lisans detayları:
 
