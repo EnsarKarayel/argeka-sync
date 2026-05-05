@@ -1,4 +1,4 @@
-﻿const http = require("node:http");
+const http = require("node:http");
 const { createHash, randomBytes, randomUUID } = require("node:crypto");
 const { Pool } = require("pg");
 const bcrypt = require("bcryptjs");
@@ -143,7 +143,7 @@ async function createOpportunity(req, res) {
      returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at`,
     [
       tid,
-      body.title || body.company || "Yeni fÄ±rsat",
+      body.title || body.company || "Yeni fırsat",
       body.stage || "new",
       Number(body.value || 0),
       Number(body.probability || 20),
@@ -216,7 +216,7 @@ async function createMeeting(req, res) {
     [
       randomUUID(),
       tid,
-      body.title || "CRM toplantÄ±sÄ±",
+      body.title || "CRM toplantısı",
       body.startsAt || new Date().toISOString(),
       body.provider || "Google Calendar",
       JSON.stringify(body.attendees || []),

@@ -1,99 +1,99 @@
-﻿# ARGEKA CRM
+# ARGEKA CRM
 
-Kurulumsuz Ã§alÄ±ÅŸan ilk web CRM prototipi. DosyayÄ± tarayÄ±cÄ±da aÃ§arak pipeline, sÃ¼rÃ¼kle-bÄ±rak fÄ±rsat yÃ¶netimi, e-posta taslak akÄ±ÅŸÄ±, veri gÃ¶nder-al formu ve abonelik taslaÄŸÄ±nÄ± deneyebilirsiniz.
+Kurulumsuz çalışan ilk web CRM prototipi. Dosyayı tarayıcıda açarak pipeline, sürükle-bırak fırsat yönetimi, e-posta taslak akışı, veri gönder-al formu ve abonelik taslağını deneyebilirsiniz.
 
 ## Calistirma
 
-`index.html` dosyasÄ±nÄ± tarayÄ±cÄ±da aÃ§Ä±n. Node, npm veya sunucu gerekmez. PWA service worker sadece gerÃ§ek `https` veya `localhost` ortamÄ±nda devreye girer; `file://` ile aÃ§Ä±ldÄ±ÄŸÄ±nda uygulama yine Ã§alÄ±ÅŸÄ±r.
+`index.html` dosyasını tarayıcıda açın. Node, npm veya sunucu gerekmez. PWA service worker sadece gerçek `https` veya `localhost` ortamında devreye girer; `file://` ile açıldığında uygulama yine çalışır.
 
 ## Bu ilk surumde var
 
-- SÃ¼rÃ¼kle-bÄ±rak satÄ±ÅŸ pipeline
-- Yeni fÄ±rsat oluÅŸturma, fÄ±rsat seÃ§me ve kopyalama
-- Odoo CRM benzeri hÄ±zlÄ± fÄ±rsat kanbanÄ±
-- SAP CRM/Sales Cloud benzeri forecast, olasÄ±lÄ±k, kapanÄ±ÅŸ ve sorumlu tablosu
-- MeetingBooster benzeri toplantÄ± ajandasÄ±, tutanak ve aksiyon maddeleri
-- Google Calendar, Outlook Calendar ve iOS uyumlu takvim modÃ¼lÃ¼
-- Gmail/Outlook baÄŸlantÄ± durumunu simÃ¼le eden entegrasyon ekranÄ±
-- Ã–rnek gelen e-postayÄ± fÄ±rsata dÃ¶nÃ¼ÅŸtÃ¼rme
-- Webhook, ERP, Google Sheets veya Ã¶zel API hedefi iÃ§in veri gÃ¶nder-al taslaÄŸÄ±
-- JSON iÃ§e/dÄ±ÅŸa aktarma
-- ICS takvim Ã§Ä±ktÄ±sÄ±
-- IndexedDB tabanlÄ± yerel veri katmanÄ±
-- SEO meta etiketleri, favicon, manifest ve iOS Home Screen uyumluluÄŸu
-- Ãœcretli Pro plan ve Ã¶deme akÄ±ÅŸÄ± yeri
-- Cloud, self-hosted ve desktop satÄ±ÅŸ paketi tasarÄ±mÄ±
-- Docker/Nginx self-hosted statik daÄŸÄ±tÄ±m taslaÄŸÄ±
+- Sürükle-bırak satış pipeline
+- Yeni fırsat oluşturma, fırsat seçme ve kopyalama
+- Odoo CRM benzeri hızlı fırsat kanbanı
+- SAP CRM/Sales Cloud benzeri forecast, olasılık, kapanış ve sorumlu tablosu
+- MeetingBooster benzeri toplantı ajandası, tutanak ve aksiyon maddeleri
+- Google Calendar, Outlook Calendar ve iOS uyumlu takvim modülü
+- Gmail/Outlook bağlantı durumunu simüle eden entegrasyon ekranı
+- Örnek gelen e-postayı fırsata dönüştürme
+- Webhook, ERP, Google Sheets veya özel API hedefi için veri gönder-al taslağı
+- JSON içe/dışa aktarma
+- ICS takvim çıktısı
+- IndexedDB tabanlı yerel veri katmanı
+- SEO meta etiketleri, favicon, manifest ve iOS Home Screen uyumluluğu
+- Ücretli Pro plan ve ödeme akışı yeri
+- Cloud, self-hosted ve desktop satış paketi tasarımı
+- Docker/Nginx self-hosted statik dağıtım taslağı
 
 ## Gercek urun icin sonraki mimari
 
 - Frontend: Next.js veya React
 - Backend: Node.js/NestJS ya da Laravel
-- VeritabanÄ±: PostgreSQL
+- Veritabanı: PostgreSQL
 - Kuyruk: Redis + BullMQ
 - Kimlik: e-posta/sifre, Google OAuth, Microsoft OAuth
 - E-posta: Gmail API ve Microsoft Graph
-- Ã–deme: Stripe Billing veya yerel sanal POS/iyzico
-- Veri kÃ¶prÃ¼sÃ¼: webhook alÄ±cÄ±larÄ±, outbound webhook, REST API anahtarlarÄ±
-- GÃ¼venlik: tenant ayrÄ±mÄ±, ÅŸifreli token saklama, audit log, rol bazlÄ± yetki
-- DaÄŸÄ±tÄ±m: Cloud SaaS, Docker self-hosted ve Windows desktop paketleri
-- Lisans: cloud abonelik, server lisansÄ±, desktop lisansÄ±
+- Ödeme: Stripe Billing veya yerel sanal POS/iyzico
+- Veri köprüsü: webhook alıcıları, outbound webhook, REST API anahtarları
+- Güvenlik: tenant ayrımı, şifreli token saklama, audit log, rol bazlı yetki
+- Dağıtım: Cloud SaaS, Docker self-hosted ve Windows desktop paketleri
+- Lisans: cloud abonelik, server lisansı, desktop lisansı
 
 ## Dagitim paketleri
 
-- Cloud Pro: bizim altyapÄ±mÄ±zda aylÄ±k abonelik
-- Self-hosted Server: mÃ¼ÅŸterinin kendi sunucusunda yÄ±llÄ±k lisans
-- Desktop Starter: Windows kurulum paketi, tek kullanÄ±cÄ± veya kÃ¼Ã§Ã¼k ofis
-- Enterprise: Ã¶zel entegrasyon, kurulum ve destek
+- Cloud Pro: bizim altyapımızda aylık abonelik
+- Self-hosted Server: müşterinin kendi sunucusunda yıllık lisans
+- Desktop Starter: Windows kurulum paketi, tek kullanıcı veya küçük ofis
+- Enterprise: özel entegrasyon, kurulum ve destek
 
-Self-hosted paketi Docker ile Ã§alÄ±ÅŸtÄ±rmak iÃ§in:
+Self-hosted paketi Docker ile çalıştırmak için:
 
 ```powershell
 docker compose -f deployment/self-hosted/docker-compose.yml up -d --build
 ```
 
-Bu komut web, API ve PostgreSQL servislerini birlikte baÅŸlatÄ±r.
+Bu komut web, API ve PostgreSQL servislerini birlikte başlatır.
 
-ÃœrÃ¼n ve lisans detaylarÄ±:
+Ürün ve lisans detayları:
 
 - `docs/business/product-packages.md`
 - `docs/business/license-strategy.md`
 
 ## SaaS ve veritabani
 
-CanlÄ± SaaS Ã¼rÃ¼ne geÃ§iÅŸ iÃ§in PostgreSQL taslaÄŸÄ± `db/schema.sql` dosyasÄ±ndadÄ±r. Bu ÅŸema tenant, kullanÄ±cÄ±, hesap, kiÅŸi, fÄ±rsat, toplantÄ±, tutanak, aksiyon, OAuth baÄŸlantÄ±sÄ± ve webhook uÃ§larÄ±nÄ± kapsar.
+Canlı SaaS ürüne geçiş için PostgreSQL taslağı `db/schema.sql` dosyasındadır. Bu şema tenant, kullanıcı, hesap, kişi, fırsat, toplantı, tutanak, aksiyon, OAuth bağlantısı ve webhook uçlarını kapsar.
 
-TarayÄ±cÄ± prototipinde veriler IndexedDB Ã¼zerinde saklanÄ±r. Bu sayede kurulum yapmadan DB davranÄ±ÅŸÄ±nÄ± deneyebilir, daha sonra aynÄ± veri modelini backend API ve PostgreSQL tarafÄ±na taÅŸÄ±yabiliriz.
+Tarayıcı prototipinde veriler IndexedDB üzerinde saklanır. Bu sayede kurulum yapmadan DB davranışını deneyebilir, daha sonra aynı veri modelini backend API ve PostgreSQL tarafına taşıyabiliriz.
 
 ## Urun yonu
 
-Bu prototipin ana yÃ¶nÃ¼:
+Bu prototipin ana yönü:
 
-- Odoo tarafÄ±ndaki akÄ±cÄ± pipeline ve gÃ¼nlÃ¼k satÄ±ÅŸ aktiviteleri
-- SAP tarafÄ±ndaki kurumsal fÄ±rsat yÃ¶netimi, forecast ve hesap disiplini
-- MeetingBooster tarafÄ±ndaki toplantÄ± tutanaÄŸÄ±, aksiyon sahipliÄŸi ve takip mantÄ±ÄŸÄ±
+- Odoo tarafındaki akıcı pipeline ve günlük satış aktiviteleri
+- SAP tarafındaki kurumsal fırsat yönetimi, forecast ve hesap disiplini
+- MeetingBooster tarafındaki toplantı tutanağı, aksiyon sahipliği ve takip mantığı
 
-Ä°kinci fazda hesap kartÄ±, teklif modÃ¼lÃ¼, Ã¼rÃ¼n/hizmet satÄ±rlarÄ±, rol bazlÄ± yetkilendirme, gerÃ§ek OAuth baÄŸlantÄ±larÄ± ve abonelik Ã¶deme akÄ±ÅŸÄ± eklenmelidir.
+İkinci fazda hesap kartı, teklif modülü, ürün/hizmet satırları, rol bazlı yetkilendirme, gerçek OAuth bağlantıları ve abonelik ödeme akışı eklenmelidir.
 
 ## Entegrasyon notlari
 
-Gmail tarafÄ±nda gerÃ§ek baÄŸlantÄ± iÃ§in Google Cloud projesi, OAuth consent screen ve dar kapsamlÄ± Gmail API scope seÃ§imi gerekir.
+Gmail tarafında gerçek bağlantı için Google Cloud projesi, OAuth consent screen ve dar kapsamlı Gmail API scope seçimi gerekir.
 
-Outlook tarafÄ±nda gerÃ§ek baÄŸlantÄ± iÃ§in Microsoft Entra uygulama kaydÄ±, Microsoft Graph OAuth izinleri ve posta API uÃ§larÄ± gerekir.
+Outlook tarafında gerçek bağlantı için Microsoft Entra uygulama kaydı, Microsoft Graph OAuth izinleri ve posta API uçları gerekir.
 
-Takvim tarafÄ±nda Google Calendar `events.insert/list`, Microsoft Graph calendar `events` ve iOS iÃ§in ICS/PWA stratejisi kullanÄ±lmalÄ±dÄ±r.
+Takvim tarafında Google Calendar `events.insert/list`, Microsoft Graph calendar `events` ve iOS için ICS/PWA stratejisi kullanılmalıdır.
 
-Abonelik tarafÄ±nda en hÄ±zlÄ± canlÄ± yol Stripe Checkout + Billing + webhook ile abonelik durumunu backend'de doÄŸrulamaktÄ±r.
+Abonelik tarafında en hızlı canlı yol Stripe Checkout + Billing + webhook ile abonelik durumunu backend'de doğrulamaktır.
 
 ## Kaynaklar
 
-- Gmail API scope dokÃ¼manÄ±: https://developers.google.com/workspace/gmail/api/auth/scopes
-- Microsoft Graph Outlook mail dokÃ¼manÄ±: https://learn.microsoft.com/en-us/graph/outlook-mail-concept-overview
-- Stripe Subscriptions dokÃ¼manÄ±: https://docs.stripe.com/subscriptions
-- Google Calendar Events insert dokÃ¼manÄ±: https://developers.google.com/workspace/calendar/api/v3/reference/events/insert
-- Microsoft Graph calendar events dokÃ¼manÄ±: https://learn.microsoft.com/en-us/graph/api/calendar-list-events
-- Google favicon dokÃ¼manÄ±: https://developers.google.com/search/docs/appearance/favicon-in-search
-- Odoo CRM dokÃ¼manÄ±: https://www.odoo.com/documentation/19.0/applications/sales/crm.html
-- SAP Opportunity dokÃ¼manÄ±: https://help.sap.com/docs/sap-cloud-for-customer/solution-guide-for-sap-sales-cloud/opportunities
-- MeetingBooster action items dokÃ¼manÄ±: https://www.meetingbooster.com/meeting-action-items
+- Gmail API scope dokümanı: https://developers.google.com/workspace/gmail/api/auth/scopes
+- Microsoft Graph Outlook mail dokümanı: https://learn.microsoft.com/en-us/graph/outlook-mail-concept-overview
+- Stripe Subscriptions dokümanı: https://docs.stripe.com/subscriptions
+- Google Calendar Events insert dokümanı: https://developers.google.com/workspace/calendar/api/v3/reference/events/insert
+- Microsoft Graph calendar events dokümanı: https://learn.microsoft.com/en-us/graph/api/calendar-list-events
+- Google favicon dokümanı: https://developers.google.com/search/docs/appearance/favicon-in-search
+- Odoo CRM dokümanı: https://www.odoo.com/documentation/19.0/applications/sales/crm.html
+- SAP Opportunity dokümanı: https://help.sap.com/docs/sap-cloud-for-customer/solution-guide-for-sap-sales-cloud/opportunities
+- MeetingBooster action items dokümanı: https://www.meetingbooster.com/meeting-action-items
 

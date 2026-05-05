@@ -1,14 +1,14 @@
-﻿const columns = [
-  { id: "new", label: "Yeni fÄ±rsat", accent: "#087f74" },
-  { id: "contacted", label: "GÃ¶rÃ¼ÅŸme", accent: "#2d5fa8" },
+const columns = [
+  { id: "new", label: "Yeni fırsat", accent: "#087f74" },
+  { id: "contacted", label: "Görüşme", accent: "#2d5fa8" },
   { id: "proposal", label: "Teklif", accent: "#b7791f" },
-  { id: "won", label: "KazanÄ±ldÄ±", accent: "#247a4a" }
+  { id: "won", label: "Kazanıldı", accent: "#247a4a" }
 ];
 
 const initialDeals = [
   {
     id: "deal-1001",
-    contact: "AyÅŸe YÄ±lmaz",
+    contact: "Ayşe Yılmaz",
     company: "Nova Teknoloji",
     email: "ayse@novatek.example",
     value: 84000,
@@ -20,9 +20,9 @@ const initialDeals = [
     forecast: "Pipeline",
     sector: "Teknoloji",
     territory: "TR Marmara",
-    nextAction: "Demo takvimi gÃ¶nder",
-    note: "Demo isteÄŸi ve fiyat bilgisi bekliyor.",
-    updatedAt: "BugÃ¼n"
+    nextAction: "Demo takvimi gönder",
+    note: "Demo isteği ve fiyat bilgisi bekliyor.",
+    updatedAt: "Bugün"
   },
   {
     id: "deal-1002",
@@ -32,19 +32,19 @@ const initialDeals = [
     value: 126000,
     stage: "contacted",
     source: "Outlook",
-    owner: "SatÄ±ÅŸ",
+    owner: "Satış",
     probability: 45,
     closeDate: "2026-05-24",
     forecast: "Best case",
     sector: "Lojistik",
-    territory: "TR Ä°Ã§ Anadolu",
-    nextAction: "Karar vericiyle toplantÄ±",
-    note: "Outlook mesajÄ±ndan otomatik fÄ±rsat aÃ§Ä±ldÄ±.",
-    updatedAt: "DÃ¼n"
+    territory: "TR İç Anadolu",
+    nextAction: "Karar vericiyle toplantı",
+    note: "Outlook mesajından otomatik fırsat açıldı.",
+    updatedAt: "Dün"
   },
   {
     id: "deal-1003",
-    contact: "Derya KoÃ§",
+    contact: "Derya Koç",
     company: "Vera Medikal",
     email: "derya@vera.example",
     value: 212000,
@@ -54,16 +54,16 @@ const initialDeals = [
     probability: 70,
     closeDate: "2026-06-03",
     forecast: "Commit",
-    sector: "SaÄŸlÄ±k",
+    sector: "Sağlık",
     territory: "TR Ege",
     nextAction: "Teklif revizyonu",
-    note: "Teklif revizyonu hazÄ±rlanacak.",
-    updatedAt: "2 gÃ¼n Ã¶nce"
+    note: "Teklif revizyonu hazırlanacak.",
+    updatedAt: "2 gün önce"
   },
   {
     id: "deal-1004",
     contact: "Can Demir",
-    company: "Mira EndÃ¼stri",
+    company: "Mira Endüstri",
     email: "can@mira.example",
     value: 76000,
     stage: "won",
@@ -72,46 +72,46 @@ const initialDeals = [
     probability: 100,
     closeDate: "2026-05-09",
     forecast: "Closed won",
-    sector: "Ãœretim",
+    sector: "Üretim",
     territory: "TR Marmara",
-    nextAction: "ERP aktarÄ±mÄ±",
-    note: "ERP aktarÄ±mÄ± bekleniyor.",
-    updatedAt: "3 gÃ¼n Ã¶nce"
+    nextAction: "ERP aktarımı",
+    note: "ERP aktarımı bekleniyor.",
+    updatedAt: "3 gün önce"
   }
 ];
 
 const initialMeetings = [
   {
     id: "meeting-1",
-    title: "HaftalÄ±k satÄ±ÅŸ komitesi",
+    title: "Haftalık satış komitesi",
     date: "2026-05-06",
     owner: "Ensar",
-    attendees: "SatÄ±ÅŸ, Operasyon, Finans",
-    agenda: ["Pipeline riski", "Teklif onaylarÄ±", "Tahsilat ve abonelik"]
+    attendees: "Satış, Operasyon, Finans",
+    agenda: ["Pipeline riski", "Teklif onayları", "Tahsilat ve abonelik"]
   },
   {
     id: "meeting-2",
-    title: "Nova Teknoloji demo hazÄ±rlÄ±ÄŸÄ±",
+    title: "Nova Teknoloji demo hazırlığı",
     date: "2026-05-07",
-    owner: "SatÄ±ÅŸ",
-    attendees: "AyÅŸe YÄ±lmaz, Teknik ekip",
-    agenda: ["Ä°htiyaÃ§ listesi", "Gmail akÄ±ÅŸÄ±", "Webhook senaryosu"]
+    owner: "Satış",
+    attendees: "Ayşe Yılmaz, Teknik ekip",
+    agenda: ["İhtiyaç listesi", "Gmail akışı", "Webhook senaryosu"]
   }
 ];
 
 const initialActions = [
   {
     id: "action-1",
-    title: "Nova demo ajandasÄ±nÄ± paylaÅŸ",
+    title: "Nova demo ajandasını paylaş",
     owner: "Ensar",
     due: "2026-05-05",
-    priority: "YÃ¼ksek",
+    priority: "Yüksek",
     meetingId: "meeting-2",
     done: false
   },
   {
     id: "action-2",
-    title: "Teklif ÅŸablonunu gÃ¼ncelle",
+    title: "Teklif şablonunu güncelle",
     owner: "Finans",
     due: "2026-05-08",
     priority: "Normal",
@@ -124,7 +124,7 @@ const initialMinutes = [
   {
     id: "minute-1",
     meetingId: "meeting-1",
-    text: "KapanÄ±ÅŸ ihtimali yÃ¼ksek fÄ±rsatlar iÃ§in forecast haftalÄ±k izlenecek."
+    text: "Kapanış ihtimali yüksek fırsatlar için forecast haftalık izlenecek."
   }
 ];
 
@@ -140,7 +140,7 @@ const initialCalendarEvents = [
   },
   {
     id: "event-2",
-    title: "Atlas karar verici gÃ¶rÃ¼ÅŸmesi",
+    title: "Atlas karar verici görüşmesi",
     date: "2026-05-08",
     time: "14:00",
     provider: "Outlook Calendar",
@@ -153,23 +153,23 @@ const sampleEmails = [
   {
     id: "mail-1",
     from: "elif@riva.example",
-    subject: "CRM entegrasyonu iÃ§in gÃ¶rÃ¼ÅŸelim",
+    subject: "CRM entegrasyonu için görüşelim",
     channel: "Gmail",
-    preview: "Teklif ve demo takvimi iÃ§in dÃ¶nÃ¼ÅŸ bekliyoruz."
+    preview: "Teklif ve demo takvimi için dönüş bekliyoruz."
   },
   {
     id: "mail-2",
     from: "finans@kuzey.example",
-    subject: "Teklif onayÄ±",
+    subject: "Teklif onayı",
     channel: "Outlook",
-    preview: "GÃ¶nderdiÄŸiniz paketi aylÄ±k abonelikle baÅŸlatmak istiyoruz."
+    preview: "Gönderdiğiniz paketi aylık abonelikle başlatmak istiyoruz."
   },
   {
     id: "mail-3",
     from: "it@delta.example",
-    subject: "Webhook baÄŸlantÄ±sÄ±",
+    subject: "Webhook bağlantısı",
     channel: "API",
-    preview: "Yeni fÄ±rsatlarÄ± ERP tarafÄ±na aktarmamÄ±z gerekiyor."
+    preview: "Yeni fırsatları ERP tarafına aktarmamız gerekiyor."
   }
 ];
 
@@ -267,7 +267,7 @@ function renderSession() {
   loginScreen.classList.toggle("is-hidden", authenticated);
   document.querySelector("#accountName").textContent = state.session?.tenant?.name || "ARGEKA Demo";
   document.querySelector("#accountMeta").textContent = state.session?.user
-    ? `${state.session.user.fullName} Â· ${state.session.user.role}`
+    ? `${state.session.user.fullName} · ${state.session.user.role}`
     : "Oturum bekleniyor";
 }
 
@@ -285,8 +285,8 @@ async function restoreSession() {
 function apiOpportunityToDeal(item) {
   return {
     id: item.id,
-    contact: item.contact || "CRM kaydÄ±",
-    company: item.company || item.title || "FÄ±rsat",
+    contact: item.contact || "CRM kaydı",
+    company: item.company || item.title || "Fırsat",
     email: item.email || "kayit@akis-crm.local",
     value: Number(item.value || 0),
     stage: item.stage || "new",
@@ -297,7 +297,7 @@ function apiOpportunityToDeal(item) {
     forecast: item.forecast || "Pipeline",
     sector: item.sector || "Genel",
     territory: item.territory || "TR",
-    nextAction: item.nextAction || "Ä°lk temas",
+    nextAction: item.nextAction || "İlk temas",
     note: item.note || "",
     updatedAt: "API"
   };
@@ -327,11 +327,11 @@ async function syncOpportunitiesFromApi() {
       state.selectedDealId = apiDeals.some((deal) => deal.id === state.selectedDealId)
         ? state.selectedDealId
         : apiDeals[0].id;
-      logActivity("FÄ±rsatlar PostgreSQL API Ã¼zerinden yÃ¼klendi.");
+      logActivity("Fırsatlar PostgreSQL API üzerinden yüklendi.");
     }
   } catch {
     state.apiOnline = false;
-    logActivity("API baÄŸlantÄ±sÄ± yok, yerel veriyle devam ediliyor.");
+    logActivity("API bağlantısı yok, yerel veriyle devam ediliyor.");
   }
 }
 
@@ -402,7 +402,7 @@ async function loadState() {
     state.actions = initialActions;
     state.minutes = initialMinutes;
     state.calendarEvents = initialCalendarEvents;
-    state.activity = ["MVP Ã§alÄ±ÅŸma alanÄ± hazÄ±rlandÄ±."];
+    state.activity = ["MVP çalışma alanı hazırlandı."];
     return;
   }
 
@@ -430,7 +430,7 @@ async function loadState() {
     state.actions = initialActions;
     state.minutes = initialMinutes;
     state.calendarEvents = initialCalendarEvents;
-    state.activity = ["KayÄ±tlÄ± veri okunamadÄ±, Ã¶rnek veri yÃ¼klendi."];
+    state.activity = ["Kayıtlı veri okunamadı, örnek veri yüklendi."];
   }
 }
 
@@ -540,12 +540,12 @@ function handleDrop(event) {
   const previous = columns.find((column) => column.id === deal.stage)?.label || deal.stage;
   const next = columns.find((column) => column.id === stage)?.label || stage;
   deal.stage = stage;
-  deal.updatedAt = "Az Ã¶nce";
+  deal.updatedAt = "Az önce";
   state.selectedDealId = deal.id;
-  logActivity(`${deal.company} taÅŸÄ±ndÄ±: ${previous} â†’ ${next}.`);
+  logActivity(`${deal.company} taşındı: ${previous} → ${next}.`);
   updateOpportunityOnApi(deal).catch(() => {
     state.apiOnline = false;
-    logActivity("AÅŸama deÄŸiÅŸimi yerelde kaldÄ±, API senkronu sonra denenecek.");
+    logActivity("Aşama değişimi yerelde kaldı, API senkronu sonra denenecek.");
     render();
   });
   render();
@@ -555,7 +555,7 @@ function renderDetail() {
   const deal = state.deals.find((item) => item.id === state.selectedDealId);
   if (!deal) {
     detailPanel.className = "detail-panel empty-state";
-    detailPanel.textContent = "Bir fÄ±rsat seÃ§in";
+    detailPanel.textContent = "Bir fırsat seçin";
     return;
   }
 
@@ -563,14 +563,14 @@ function renderDetail() {
   detailPanel.innerHTML = `
     <h2>${escapeHtml(deal.company)}</h2>
     <dl>
-      <dt>KiÅŸi</dt><dd>${escapeHtml(deal.contact)}</dd>
+      <dt>Kişi</dt><dd>${escapeHtml(deal.contact)}</dd>
       <dt>E-posta</dt><dd>${escapeHtml(deal.email)}</dd>
-      <dt>DeÄŸer</dt><dd>${formatMoney.format(deal.value)}</dd>
-      <dt>OlasÄ±lÄ±k</dt><dd>%${Number(deal.probability || 0)}</dd>
-      <dt>KapanÄ±ÅŸ</dt><dd>${escapeHtml(deal.closeDate || "Planlanacak")}</dd>
+      <dt>Değer</dt><dd>${formatMoney.format(deal.value)}</dd>
+      <dt>Olasılık</dt><dd>%${Number(deal.probability || 0)}</dd>
+      <dt>Kapanış</dt><dd>${escapeHtml(deal.closeDate || "Planlanacak")}</dd>
       <dt>Forecast</dt><dd>${escapeHtml(deal.forecast || "Pipeline")}</dd>
-      <dt>SektÃ¶r</dt><dd>${escapeHtml(deal.sector || "Genel")}</dd>
-      <dt>BÃ¶lge</dt><dd>${escapeHtml(deal.territory || "TR")}</dd>
+      <dt>Sektör</dt><dd>${escapeHtml(deal.sector || "Genel")}</dd>
+      <dt>Bölge</dt><dd>${escapeHtml(deal.territory || "TR")}</dd>
       <dt>Kaynak</dt><dd>${escapeHtml(deal.source)}</dd>
       <dt>Sahip</dt><dd>${escapeHtml(deal.owner || "-")}</dd>
       <dt>Sonraki</dt><dd>${escapeHtml(deal.nextAction || "-")}</dd>
@@ -624,9 +624,9 @@ function renderIntegrations() {
 function setIntegrationStatus(key, connected) {
   const status = document.querySelector(`#${key}Status`);
   const button = document.querySelector(`[data-connect="${key}"]`);
-  status.textContent = connected ? "BaÄŸlÄ±" : "BaÄŸlÄ± deÄŸil";
+  status.textContent = connected ? "Bağlı" : "Bağlı değil";
   status.classList.toggle("is-connected", connected);
-  button.textContent = connected ? "BaÄŸlantÄ±yÄ± yenile" : `${key === "gmail" ? "Gmail" : "Outlook"} baÄŸla`;
+  button.textContent = connected ? "Bağlantıyı yenile" : `${key === "gmail" ? "Gmail" : "Outlook"} bağla`;
 }
 
 function renderEmails() {
@@ -641,7 +641,7 @@ function renderEmails() {
       </header>
       <small>${escapeHtml(email.from)}</small>
       <p>${escapeHtml(email.preview)}</p>
-      <button class="secondary-button" type="button" data-email-id="${email.id}">FÄ±rsata dÃ¶nÃ¼ÅŸtÃ¼r</button>
+      <button class="secondary-button" type="button" data-email-id="${email.id}">Fırsata dönüştür</button>
     `;
     emailList.appendChild(item);
   });
@@ -690,7 +690,7 @@ function renderMeetings() {
           <strong>${escapeHtml(action.title)}</strong>
           <span class="source-tag">${escapeHtml(action.priority)}</span>
         </header>
-        <small>${escapeHtml(action.owner)} Â· ${escapeHtml(action.due)}</small>
+        <small>${escapeHtml(action.owner)} · ${escapeHtml(action.due)}</small>
       `;
       actionList.appendChild(card);
     });
@@ -701,8 +701,8 @@ function renderCalendar() {
   document.querySelectorAll("[data-calendar-connect]").forEach((button) => {
     const key = button.dataset.calendarConnect;
     button.textContent = state.integrations[key]
-      ? `${button.textContent.replace(" izni", "").replace(" baÄŸlÄ±", "")} baÄŸlÄ±`
-      : button.textContent.replace(" baÄŸlÄ±", " izni");
+      ? `${button.textContent.replace(" izni", "").replace(" bağlı", "")} bağlı`
+      : button.textContent.replace(" bağlı", " izni");
   });
 
   state.calendarEvents
@@ -719,8 +719,8 @@ function renderCalendar() {
         </time>
         <div>
           <strong>${escapeHtml(event.title)}</strong>
-          <small>${escapeHtml(event.provider)} Â· ${escapeHtml(event.attendees || "KatÄ±lÄ±mcÄ± yok")}</small>
-          <span>${escapeHtml(deal ? deal.company : "CRM etkinliÄŸi")}</span>
+          <small>${escapeHtml(event.provider)} · ${escapeHtml(event.attendees || "Katılımcı yok")}</small>
+          <span>${escapeHtml(deal ? deal.company : "CRM etkinliği")}</span>
         </div>
       `;
       calendarAgenda.appendChild(item);
@@ -741,18 +741,18 @@ async function addDeal(deal) {
     ...deal,
     id: `deal-${Date.now()}`,
     stage: deal.stage || "new",
-    updatedAt: "Az Ã¶nce",
+    updatedAt: "Az önce",
     value: Number(deal.value || 0),
     probability: Number(deal.probability || 20),
     closeDate: deal.closeDate || "Planlanacak",
     forecast: deal.forecast || "Pipeline",
     sector: deal.sector || "Genel",
     territory: deal.territory || "TR",
-    nextAction: deal.nextAction || "Ä°lk temas"
+    nextAction: deal.nextAction || "İlk temas"
   };
   state.deals.unshift(newDeal);
   state.selectedDealId = newDeal.id;
-  logActivity(`${deal.company} iÃ§in yeni fÄ±rsat aÃ§Ä±ldÄ±.`);
+  logActivity(`${deal.company} için yeni fırsat açıldı.`);
   render();
   try {
     const apiDeal = await createOpportunityOnApi(newDeal);
@@ -771,7 +771,7 @@ async function addDeal(deal) {
     }
   } catch {
     state.apiOnline = false;
-    logActivity(`${newDeal.company} yerelde kaydedildi, API baÄŸlantÄ±sÄ± bekleniyor.`);
+    logActivity(`${newDeal.company} yerelde kaydedildi, API bağlantısı bekleniyor.`);
     render();
   }
 }
@@ -798,12 +798,12 @@ function switchView(viewId) {
   });
   const titleMap = {
     pipeline: "Pipeline",
-    meetings: "ToplantÄ±lar",
+    meetings: "Toplantılar",
     calendar: "Takvim",
     inbox: "E-posta",
     integrations: "Entegrasyon",
     billing: "Abonelik",
-    distribution: "DaÄŸÄ±tÄ±m"
+    distribution: "Dağıtım"
   };
   document.querySelector("#view-title").textContent = titleMap[viewId] || "ARGEKA CRM";
 }
@@ -814,7 +814,7 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  loginMessage.textContent = "GiriÅŸ yapÄ±lÄ±yor...";
+  loginMessage.textContent = "Giriş yapılıyor...";
   const formData = new FormData(loginForm);
   try {
     const payload = await apiRequest("/api/auth/login", {
@@ -822,12 +822,12 @@ loginForm.addEventListener("submit", async (event) => {
       body: JSON.stringify(Object.fromEntries(formData.entries()))
     });
     saveSession(payload);
-    loginMessage.textContent = "GiriÅŸ baÅŸarÄ±lÄ±.";
+    loginMessage.textContent = "Giriş başarılı.";
     await syncOpportunitiesFromApi();
     render();
   } catch {
     saveSession(null);
-    loginMessage.textContent = "GiriÅŸ baÅŸarÄ±sÄ±z.";
+    loginMessage.textContent = "Giriş başarısız.";
     render();
   }
 });
@@ -865,7 +865,7 @@ document.querySelector("#duplicateButton").addEventListener("click", () => {
   addDeal({
     ...deal,
     company: `${deal.company} kopya`,
-    note: `${deal.note || ""} Kopyalanan kayÄ±t.`
+    note: `${deal.note || ""} Kopyalanan kayıt.`
   });
 });
 
@@ -873,25 +873,25 @@ document.querySelector("#bridgeForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const deal = state.deals.find((item) => item.id === state.selectedDealId);
   if (!deal) {
-    logActivity("GÃ¶nderim iÃ§in fÄ±rsat seÃ§ilmedi.");
+    logActivity("Gönderim için fırsat seçilmedi.");
     render();
     return;
   }
   const target = document.querySelector("#bridgeTarget").value;
-  const endpoint = document.querySelector("#bridgeEndpoint").value || "taslak uÃ§ nokta";
-  logActivity(`${deal.company} verisi ${target} hedefine gÃ¶nderildi: ${endpoint}.`);
+  const endpoint = document.querySelector("#bridgeEndpoint").value || "taslak uç nokta";
+  logActivity(`${deal.company} verisi ${target} hedefine gönderildi: ${endpoint}.`);
   render();
 });
 
 document.querySelector("#receiveButton").addEventListener("click", () => {
   addDeal({
-    contact: "Yeni API KiÅŸisi",
-    company: "Webhook KaydÄ±",
+    contact: "Yeni API Kişisi",
+    company: "Webhook Kaydı",
     email: "lead@webhook.example",
     value: 59000,
     source: document.querySelector("#bridgeTarget").value,
     owner: "Otomasyon",
-    note: "Veri kÃ¶prÃ¼sÃ¼nden alÄ±nan Ã¶rnek kayÄ±t."
+    note: "Veri köprüsünden alınan örnek kayıt."
   });
 });
 
@@ -899,7 +899,7 @@ document.querySelectorAll("[data-connect]").forEach((button) => {
   button.addEventListener("click", () => {
     const key = button.dataset.connect;
     state.integrations[key] = true;
-    logActivity(`${key === "gmail" ? "Gmail" : "Outlook"} baÄŸlantÄ±sÄ± taslak olarak etkinleÅŸti.`);
+    logActivity(`${key === "gmail" ? "Gmail" : "Outlook"} bağlantısı taslak olarak etkinleşti.`);
     render();
   });
 });
@@ -908,13 +908,13 @@ document.querySelectorAll("[data-calendar-connect]").forEach((button) => {
   button.addEventListener("click", () => {
     const key = button.dataset.calendarConnect;
     state.integrations[key] = true;
-    logActivity(`${key === "googleCalendar" ? "Google Calendar" : "Outlook Calendar"} izni taslak olarak etkinleÅŸti.`);
+    logActivity(`${key === "googleCalendar" ? "Google Calendar" : "Outlook Calendar"} izni taslak olarak etkinleşti.`);
     render();
   });
 });
 
 document.querySelector("#syncInboxButton").addEventListener("click", () => {
-  logActivity("E-posta senkronizasyonu Ã§alÄ±ÅŸtÄ±rÄ±ldÄ±.");
+  logActivity("E-posta senkronizasyonu çalıştırıldı.");
   render();
 });
 
@@ -951,7 +951,7 @@ document.querySelector("#addMinuteButton").addEventListener("click", () => {
     text
   });
   minuteText.value = "";
-  logActivity("ToplantÄ± tutanaÄŸÄ± gÃ¼ncellendi.");
+  logActivity("Toplantı tutanağı güncellendi.");
   render();
 });
 
@@ -977,11 +977,11 @@ document.querySelector("#createMeetingDealButton").addEventListener("click", () 
     company: meeting.title,
     email: "toplanti@akis-crm.local",
     value: 35000,
-    source: "ToplantÄ±",
+    source: "Toplantı",
     owner: meeting.owner,
     probability: 30,
     forecast: "Pipeline",
-    nextAction: "ToplantÄ± aksiyonlarÄ±nÄ± takip et",
+    nextAction: "Toplantı aksiyonlarını takip et",
     note: meeting.agenda.join(", ")
   });
   switchView("pipeline");
@@ -997,7 +997,7 @@ document.querySelector("#calendarForm").addEventListener("submit", (event) => {
     ...Object.fromEntries(formData.entries())
   });
   event.currentTarget.reset();
-  logActivity("Takvim etkinliÄŸi CRM kaydÄ±na eklendi.");
+  logActivity("Takvim etkinliği CRM kaydına eklendi.");
   render();
 });
 
@@ -1006,14 +1006,14 @@ document.querySelector("#createDealCalendarButton").addEventListener("click", ()
   if (!deal) return;
   state.calendarEvents.push({
     id: `event-${Date.now()}`,
-    title: `${deal.company} satÄ±ÅŸ gÃ¶rÃ¼ÅŸmesi`,
+    title: `${deal.company} satış görüşmesi`,
     date: deal.closeDate && deal.closeDate !== "Planlanacak" ? deal.closeDate : "2026-05-12",
     time: "11:00",
     provider: deal.source === "Outlook" ? "Outlook Calendar" : "Google Calendar",
     attendees: deal.email,
     dealId: deal.id
   });
-  logActivity(`${deal.company} iÃ§in takvim etkinliÄŸi oluÅŸturuldu.`);
+  logActivity(`${deal.company} için takvim etkinliği oluşturuldu.`);
   render();
 });
 
@@ -1028,7 +1028,7 @@ document.querySelector("#downloadIcsButton").addEventListener("click", () => {
   anchor.download = "akis-crm-toplanti.ics";
   anchor.click();
   URL.revokeObjectURL(url);
-  logActivity("iOS uyumlu Ã¶rnek ICS dosyasÄ± hazÄ±rlandÄ±.");
+  logActivity("iOS uyumlu örnek ICS dosyası hazırlandı.");
   render();
 });
 
@@ -1044,7 +1044,7 @@ function createIcs(event) {
     `DTSTAMP:${compactDate}T${compactTime}`,
     `DTSTART:${compactDate}T${compactTime}`,
     `SUMMARY:${event.title}`,
-    `DESCRIPTION:${event.provider} Ã¼zerinden CRM toplantÄ±sÄ±`,
+    `DESCRIPTION:${event.provider} üzerinden CRM toplantısı`,
     "END:VEVENT",
     "END:VCALENDAR"
   ].join("\r\n");
@@ -1053,15 +1053,15 @@ function createIcs(event) {
 document.querySelector("#saveRuleButton").addEventListener("click", () => {
   const trigger = document.querySelector("#ruleTrigger").value;
   const action = document.querySelector("#ruleAction").value;
-  logActivity(`Kural kaydedildi: ${trigger} â†’ ${action}.`);
+  logActivity(`Kural kaydedildi: ${trigger} → ${action}.`);
   render();
 });
 
 document.querySelector("#checkoutButton").addEventListener("click", () => {
   const item = document.createElement("li");
-  item.textContent = "Checkout oturumu iÃ§in backend uÃ§ noktasÄ± tasarlanacak.";
+  item.textContent = "Checkout oturumu için backend uç noktası tasarlanacak.";
   billingLog.prepend(item);
-  logActivity("Ã–deme sayfasÄ± hazÄ±rlama isteÄŸi oluÅŸturuldu.");
+  logActivity("Ödeme sayfası hazırlama isteği oluşturuldu.");
   render();
 });
 
@@ -1078,7 +1078,7 @@ document.querySelector("#exportButton").addEventListener("click", () => {
   anchor.download = "akis-crm-veri.json";
   anchor.click();
   URL.revokeObjectURL(url);
-  logActivity("CRM verisi JSON olarak dÄ±ÅŸa aktarÄ±ldÄ±.");
+  logActivity("CRM verisi JSON olarak dışa aktarıldı.");
   render();
 });
 
@@ -1099,10 +1099,10 @@ importFile.addEventListener("change", async () => {
     state.minutes = parsed.minutes || state.minutes;
     state.calendarEvents = parsed.calendarEvents || state.calendarEvents;
     state.activity = parsed.activity || [];
-    logActivity("JSON verisi iÃ§e aktarÄ±ldÄ±.");
+    logActivity("JSON verisi içe aktarıldı.");
     render();
   } catch {
-    logActivity("Ä°Ã§e aktarma baÅŸarÄ±sÄ±z oldu.");
+    logActivity("İçe aktarma başarısız oldu.");
     render();
   } finally {
     importFile.value = "";

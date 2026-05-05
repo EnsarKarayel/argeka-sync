@@ -1,7 +1,7 @@
-﻿{
+{
   "name": "ARGEKA CRM",
   "short_name": "ARGEKA CRM",
-  "description": "Gmail, Outlook, takvim, pipeline ve toplantÄ± odaklÄ± SaaS CRM.",
+  "description": "Gmail, Outlook, takvim, pipeline ve toplantı odaklı SaaS CRM.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

@@ -1,21 +1,21 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="tr">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ARGEKA CRM; Gmail, Outlook, takvim, pipeline, toplantÄ± ve webhook akÄ±ÅŸlarÄ±nÄ± birleÅŸtiren SaaS CRM prototipi.">
+    <meta name="description" content="ARGEKA CRM; Gmail, Outlook, takvim, pipeline, toplantı ve webhook akışlarını birleştiren SaaS CRM prototipi.">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#087f74">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="ARGEKA CRM">
     <meta property="og:title" content="ARGEKA CRM">
-    <meta property="og:description" content="SÃ¼rÃ¼kle-bÄ±rak pipeline, Gmail/Outlook, takvim, toplantÄ± ve SaaS veri katmanÄ±.">
+    <meta property="og:description" content="Sürükle-bırak pipeline, Gmail/Outlook, takvim, toplantı ve SaaS veri katmanı.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="assets/icons/favicon.svg">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="ARGEKA CRM">
-    <meta name="twitter:description" content="Gmail, Outlook ve takvim odaklÄ± SaaS CRM.">
+    <meta name="twitter:description" content="Gmail, Outlook ve takvim odaklı SaaS CRM.">
     <title>ARGEKA CRM | SaaS Pipeline, E-posta ve Takvim CRM</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
@@ -33,25 +33,25 @@
           "price": "749",
           "priceCurrency": "TRY"
         },
-        "description": "Gmail, Outlook, takvim, pipeline, toplantÄ± ve webhook akÄ±ÅŸlarÄ±nÄ± birleÅŸtiren SaaS CRM."
+        "description": "Gmail, Outlook, takvim, pipeline, toplantı ve webhook akışlarını birleştiren SaaS CRM."
       }
     </script>
   </head>
   <body>
-    <section class="login-screen" id="loginScreen" aria-label="GiriÅŸ">
+    <section class="login-screen" id="loginScreen" aria-label="Giriş">
       <form class="login-panel" id="loginForm">
         <span class="brand-mark">A</span>
         <h1>ARGEKA CRM</h1>
-        <p>Åirket Ã§alÄ±ÅŸma alanÄ±na giriÅŸ yapÄ±n.</p>
+        <p>�?irket çalışma alanına giriş yapın.</p>
         <label>
           E-posta
           <input name="email" type="email" value="admin@akis-crm.local" required>
         </label>
         <label>
-          Åifre
+          �?ifre
           <input name="password" type="password" value="admin123" required>
         </label>
-        <button class="primary-button" type="submit">GiriÅŸ yap</button>
+        <button class="primary-button" type="submit">Giriş yap</button>
         <small id="loginMessage">Demo: admin@akis-crm.local / admin123</small>
       </form>
     </section>
@@ -61,38 +61,38 @@
           <span class="brand-mark">A</span>
           <div>
             <strong>ARGEKA CRM</strong>
-            <span>SatÄ±ÅŸ ve veri merkezi</span>
+            <span>Satış ve veri merkezi</span>
           </div>
         </div>
 
         <nav class="nav-stack">
           <button class="nav-item is-active" type="button" data-view-target="pipeline">
-            <span aria-hidden="true">â–¦</span>
+            <span aria-hidden="true">▦</span>
             Pipeline
           </button>
           <button class="nav-item" type="button" data-view-target="meetings">
-            <span aria-hidden="true">â˜·</span>
-            ToplantÄ±lar
+            <span aria-hidden="true">☷</span>
+            Toplantılar
           </button>
           <button class="nav-item" type="button" data-view-target="calendar">
-            <span aria-hidden="true">â—´</span>
+            <span aria-hidden="true">◴</span>
             Takvim
           </button>
           <button class="nav-item" type="button" data-view-target="inbox">
-            <span aria-hidden="true">âœ‰</span>
+            <span aria-hidden="true">✉</span>
             E-posta
           </button>
           <button class="nav-item" type="button" data-view-target="integrations">
-            <span aria-hidden="true">âŒ˜</span>
+            <span aria-hidden="true">⌘</span>
             Entegrasyon
           </button>
           <button class="nav-item" type="button" data-view-target="billing">
-            <span aria-hidden="true">â‚º</span>
+            <span aria-hidden="true">₺</span>
             Abonelik
           </button>
           <button class="nav-item" type="button" data-view-target="distribution">
-            <span aria-hidden="true">â–£</span>
-            DaÄŸÄ±tÄ±m
+            <span aria-hidden="true">▣</span>
+            Dağıtım
           </button>
         </nav>
 
@@ -100,30 +100,30 @@
           <span class="pill success">Pro deneme</span>
           <strong id="accountName">ARGEKA Demo</strong>
           <span id="accountMeta">Oturum bekleniyor</span>
-          <button class="ghost-button" id="logoutButton" type="button">Ã‡Ä±kÄ±ÅŸ</button>
+          <button class="ghost-button" id="logoutButton" type="button">Çıkış</button>
         </div>
       </aside>
 
       <main class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">Web tabanlÄ± CRM prototipi</p>
+            <p class="eyebrow">Web tabanlı CRM prototipi</p>
             <h1 id="view-title">Pipeline</h1>
           </div>
           <div class="topbar-actions">
             <label class="search-box">
-              <span aria-hidden="true">âŒ•</span>
-              <input id="searchInput" type="search" placeholder="KiÅŸi, firma, kaynak ara">
+              <span aria-hidden="true">⌕</span>
+              <input id="searchInput" type="search" placeholder="Kişi, firma, kaynak ara">
             </label>
-            <button class="icon-button" id="importButton" type="button" aria-label="Veri iÃ§e aktar" title="Veri iÃ§e aktar">
-              <span aria-hidden="true">â†¥</span>
+            <button class="icon-button" id="importButton" type="button" aria-label="Veri içe aktar" title="Veri içe aktar">
+              <span aria-hidden="true">↥</span>
             </button>
-            <button class="icon-button" id="exportButton" type="button" aria-label="Veri dÄ±ÅŸa aktar" title="Veri dÄ±ÅŸa aktar">
-              <span aria-hidden="true">â†§</span>
+            <button class="icon-button" id="exportButton" type="button" aria-label="Veri dışa aktar" title="Veri dışa aktar">
+              <span aria-hidden="true">↧</span>
             </button>
             <button class="primary-button" id="newDealButton" type="button">
               <span aria-hidden="true">+</span>
-              Yeni fÄ±rsat
+              Yeni fırsat
             </button>
             <input id="importFile" type="file" accept="application/json" hidden>
           </div>
@@ -131,18 +131,18 @@
 
         <section class="view is-active" id="pipeline" aria-labelledby="view-title">
           <div class="content-grid">
-            <section class="board-panel" aria-label="SatÄ±ÅŸ pipeline">
+            <section class="board-panel" aria-label="Satış pipeline">
               <div class="metric-strip">
                 <article>
-                  <span>Toplam deÄŸer</span>
-                  <strong id="totalValue">â‚º0</strong>
+                  <span>Toplam değer</span>
+                  <strong id="totalValue">₺0</strong>
                 </article>
                 <article>
-                  <span>AÃ§Ä±k fÄ±rsat</span>
+                  <span>Açık fırsat</span>
                   <strong id="openDeals">0</strong>
                 </article>
                 <article>
-                  <span>BaÄŸlÄ± kanal</span>
+                  <span>Bağlı kanal</span>
                   <strong id="connectedChannels">0</strong>
                 </article>
               </div>
@@ -151,17 +151,17 @@
 
               <div class="manager-block">
                 <div class="section-heading">
-                  <span>FÄ±rsat yÃ¶neticisi</span>
+                  <span>Fırsat yöneticisi</span>
                   <span class="pill">Forecast</span>
                 </div>
                 <div class="table-scroll">
                   <table class="opportunity-table">
                     <thead>
                       <tr>
-                        <th>FÄ±rsat</th>
-                        <th>AÅŸama</th>
-                        <th>OlasÄ±lÄ±k</th>
-                        <th>KapanÄ±ÅŸ</th>
+                        <th>Fırsat</th>
+                        <th>Aşama</th>
+                        <th>Olasılık</th>
+                        <th>Kapanış</th>
                         <th>Forecast</th>
                         <th>Sorumlu</th>
                       </tr>
@@ -172,21 +172,21 @@
               </div>
             </section>
 
-            <aside class="side-panel" aria-label="FÄ±rsat detaylarÄ±">
+            <aside class="side-panel" aria-label="Fırsat detayları">
               <section class="panel-section">
                 <div class="section-heading">
-                  <span>SeÃ§ili kayÄ±t</span>
+                  <span>Seçili kayıt</span>
                   <button class="ghost-button" id="duplicateButton" type="button">Kopyala</button>
                 </div>
                 <div id="detailPanel" class="detail-panel empty-state">
-                  Bir fÄ±rsat seÃ§in
+                  Bir fırsat seçin
                 </div>
               </section>
 
               <section class="panel-section">
                 <div class="section-heading">
-                  <span>Veri kÃ¶prÃ¼sÃ¼</span>
-                  <span class="pill">CanlÄ± taslak</span>
+                  <span>Veri köprüsü</span>
+                  <span class="pill">Canlı taslak</span>
                 </div>
                 <form class="bridge-form" id="bridgeForm">
                   <label>
@@ -195,7 +195,7 @@
                       <option value="Webhook">Webhook</option>
                       <option value="ERP">ERP</option>
                       <option value="Google Sheets">Google Sheets</option>
-                      <option value="Ozel API">Ã–zel API</option>
+                      <option value="Ozel API">Özel API</option>
                     </select>
                   </label>
                   <label>
@@ -204,7 +204,7 @@
                   </label>
                   <div class="button-row">
                     <button class="secondary-button" id="receiveButton" type="button">Veri al</button>
-                    <button class="primary-button" type="submit">Veri gÃ¶nder</button>
+                    <button class="primary-button" type="submit">Veri gönder</button>
                   </div>
                 </form>
               </section>
@@ -212,12 +212,12 @@
           </div>
         </section>
 
-        <section class="view" id="meetings" aria-label="ToplantÄ±lar">
+        <section class="view" id="meetings" aria-label="Toplantılar">
           <div class="meeting-layout">
             <section class="panel-block">
               <div class="section-heading">
-                <span>ToplantÄ± ajandasÄ±</span>
-                <span class="pill">SatÄ±ÅŸ ritmi</span>
+                <span>Toplantı ajandası</span>
+                <span class="pill">Satış ritmi</span>
               </div>
               <div class="meeting-list" id="meetingList"></div>
             </section>
@@ -225,14 +225,14 @@
             <section class="panel-block">
               <div class="section-heading">
                 <span>Tutanak</span>
-                <button class="ghost-button" id="createMeetingDealButton" type="button">FÄ±rsat aÃ§</button>
+                <button class="ghost-button" id="createMeetingDealButton" type="button">Fırsat aç</button>
               </div>
               <label>
                 Not
                 <textarea id="minuteText" rows="6" placeholder="Karar, risk veya takip notu"></textarea>
               </label>
               <div class="button-row minutes-actions">
-                <button class="primary-button" id="addMinuteButton" type="button">TutanaÄŸa ekle</button>
+                <button class="primary-button" id="addMinuteButton" type="button">Tutanağa ekle</button>
               </div>
               <ol class="activity-log minute-list" id="minuteList"></ol>
             </section>
@@ -245,7 +245,7 @@
               <form class="action-form" id="actionForm">
                 <label>
                   Aksiyon
-                  <input name="title" required placeholder="Teklif revizyonu hazÄ±rla">
+                  <input name="title" required placeholder="Teklif revizyonu hazırla">
                 </label>
                 <div class="compact-fields">
                   <label>
@@ -258,11 +258,11 @@
                   </label>
                 </div>
                 <label>
-                  Ã–ncelik
+                  Öncelik
                   <select name="priority">
-                    <option>YÃ¼ksek</option>
+                    <option>Yüksek</option>
                     <option>Normal</option>
-                    <option>DÃ¼ÅŸÃ¼k</option>
+                    <option>Düşük</option>
                   </select>
                 </label>
                 <button class="primary-button" type="submit">Aksiyon ekle</button>
@@ -276,7 +276,7 @@
           <div class="calendar-layout">
             <section class="panel-block">
               <div class="section-heading">
-                <span>GÃ¼nlÃ¼k satÄ±ÅŸ takvimi</span>
+                <span>Günlük satış takvimi</span>
                 <span class="pill">Gmail + Outlook</span>
               </div>
               <div class="calendar-controls">
@@ -288,12 +288,12 @@
 
             <section class="panel-block">
               <div class="section-heading">
-                <span>ToplantÄ± planla</span>
-                <button class="ghost-button" id="createDealCalendarButton" type="button">SeÃ§ili fÄ±rsata baÄŸla</button>
+                <span>Toplantı planla</span>
+                <button class="ghost-button" id="createDealCalendarButton" type="button">Seçili fırsata bağla</button>
               </div>
               <form class="calendar-form" id="calendarForm">
                 <label>
-                  BaÅŸlÄ±k
+                  Başlık
                   <input name="title" required placeholder="Nova Teknoloji demo">
                 </label>
                 <div class="compact-fields">
@@ -315,7 +315,7 @@
                   </select>
                 </label>
                 <label>
-                  KatÄ±lÄ±mcÄ±lar
+                  Katılımcılar
                   <input name="attendees" placeholder="ayse@firma.com, satis@firma.com">
                 </label>
                 <button class="primary-button" type="submit">Takvime ekle</button>
@@ -325,15 +325,15 @@
             <section class="panel-block ios-block">
               <div class="section-heading">
                 <span>iOS uyumluluk</span>
-                <span class="pill success">PWA hazÄ±r</span>
+                <span class="pill success">PWA hazır</span>
               </div>
               <ul class="mobile-checklist">
-                <li>Home Screen iÃ§in manifest ve Apple baÅŸlÄ±klarÄ±</li>
-                <li>Dokunmatik geniÅŸlikte sabit toolbar ve board</li>
-                <li>Offline kayÄ±t iÃ§in IndexedDB veri katmanÄ±</li>
-                <li>Takvim etkinliklerini ICS Ã§Ä±ktÄ±sÄ±na taÅŸÄ±yacak yapÄ±</li>
+                <li>Home Screen için manifest ve Apple başlıkları</li>
+                <li>Dokunmatik genişlikte sabit toolbar ve board</li>
+                <li>Offline kayıt için IndexedDB veri katmanı</li>
+                <li>Takvim etkinliklerini ICS çıktısına taşıyacak yapı</li>
               </ul>
-              <button class="secondary-button" id="downloadIcsButton" type="button">Ã–rnek ICS indir</button>
+              <button class="secondary-button" id="downloadIcsButton" type="button">Örnek ICS indir</button>
             </section>
           </div>
         </section>
@@ -350,7 +350,7 @@
 
             <section class="panel-block">
               <div class="section-heading">
-                <span>Aktivite akÄ±ÅŸÄ±</span>
+                <span>Aktivite akışı</span>
                 <button class="ghost-button" id="clearLogButton" type="button">Temizle</button>
               </div>
               <ol class="activity-log" id="activityLog"></ol>
@@ -364,11 +364,11 @@
               <div>
                 <span class="integration-logo google">G</span>
                 <h2>Gmail</h2>
-                <p>OAuth ile posta okuma, gÃ¶nderme ve fÄ±rsata dÃ¶nÃ¼ÅŸtÃ¼rme.</p>
+                <p>OAuth ile posta okuma, gönderme ve fırsata dönüştürme.</p>
               </div>
               <div class="integration-actions">
-                <span class="status" id="gmailStatus">BaÄŸlÄ± deÄŸil</span>
-                <button class="secondary-button" type="button" data-connect="gmail">Gmail baÄŸla</button>
+                <span class="status" id="gmailStatus">Bağlı değil</span>
+                <button class="secondary-button" type="button" data-connect="gmail">Gmail bağla</button>
               </div>
             </article>
 
@@ -376,35 +376,35 @@
               <div>
                 <span class="integration-logo outlook">O</span>
                 <h2>Outlook</h2>
-                <p>Microsoft Graph ile mail, kiÅŸi ve takvim akÄ±ÅŸÄ±.</p>
+                <p>Microsoft Graph ile mail, kişi ve takvim akışı.</p>
               </div>
               <div class="integration-actions">
-                <span class="status" id="outlookStatus">BaÄŸlÄ± deÄŸil</span>
-                <button class="secondary-button" type="button" data-connect="outlook">Outlook baÄŸla</button>
+                <span class="status" id="outlookStatus">Bağlı değil</span>
+                <button class="secondary-button" type="button" data-connect="outlook">Outlook bağla</button>
               </div>
             </article>
 
             <article class="integration-card wide">
               <div>
                 <span class="integration-logo api">API</span>
-                <h2>Veri gÃ¶nder-al</h2>
-                <p>Webhook, ERP, muhasebe, form ve Ã¶zel uygulama uÃ§larÄ±.</p>
+                <h2>Veri gönder-al</h2>
+                <p>Webhook, ERP, muhasebe, form ve özel uygulama uçları.</p>
               </div>
               <div class="rule-grid">
                 <label>
                   Tetikleyici
                   <select id="ruleTrigger">
                     <option>Yeni e-posta</option>
-                    <option>FÄ±rsat taÅŸÄ±ndÄ±</option>
-                    <option>Teklif kazanÄ±ldÄ±</option>
+                    <option>Fırsat taşındı</option>
+                    <option>Teklif kazanıldı</option>
                   </select>
                 </label>
                 <label>
-                  Ä°ÅŸlem
+                  İşlem
                   <select id="ruleAction">
-                    <option>FÄ±rsat oluÅŸtur</option>
-                    <option>Webhook'a gÃ¶nder</option>
-                    <option>Takvim etkinliÄŸi aÃ§</option>
+                    <option>Fırsat oluştur</option>
+                    <option>Webhook'a gönder</option>
+                    <option>Takvim etkinliği aç</option>
                   </select>
                 </label>
                 <button class="primary-button" id="saveRuleButton" type="button">Kural kaydet</button>
@@ -416,72 +416,72 @@
         <section class="view" id="billing" aria-label="Abonelik">
           <div class="billing-layout">
             <section class="pricing-panel">
-              <span class="pill success">Ã–nerilen</span>
+              <span class="pill success">Önerilen</span>
               <h2>Pro CRM</h2>
-              <p class="price">â‚º749 <span>/ ay</span></p>
+              <p class="price">₺749 <span>/ ay</span></p>
               <ul>
-                <li>Gmail ve Outlook baÄŸlantÄ±larÄ±</li>
+                <li>Gmail ve Outlook bağlantıları</li>
                 <li>Google Calendar, Outlook Calendar ve iOS uyumlu takvim</li>
-                <li>SÃ¼rÃ¼kle-bÄ±rak satÄ±ÅŸ pipeline</li>
-                <li>Webhook ve Ã¶zel API akÄ±ÅŸlarÄ±</li>
-                <li>TakÄ±m rolleri ve aktivite kayÄ±tlarÄ±</li>
+                <li>Sürükle-bırak satış pipeline</li>
+                <li>Webhook ve özel API akışları</li>
+                <li>Takım rolleri ve aktivite kayıtları</li>
               </ul>
-              <button class="primary-button" id="checkoutButton" type="button">Ã–deme sayfasÄ± hazÄ±rla</button>
+              <button class="primary-button" id="checkoutButton" type="button">Ödeme sayfası hazırla</button>
             </section>
 
             <section class="panel-block">
               <div class="section-heading">
-                <span>Abonelik olaylarÄ±</span>
-                <span class="pill">Stripe taslaÄŸÄ±</span>
+                <span>Abonelik olayları</span>
+                <span class="pill">Stripe taslağı</span>
               </div>
               <ol class="activity-log" id="billingLog">
-                <li>Plan oluÅŸturuldu: Pro CRM</li>
-                <li>IndexedDB yerel veri katmanÄ± eklendi</li>
-                <li>Checkout uÃ§ noktasÄ± bekleniyor</li>
+                <li>Plan oluşturuldu: Pro CRM</li>
+                <li>IndexedDB yerel veri katmanı eklendi</li>
+                <li>Checkout uç noktası bekleniyor</li>
               </ol>
             </section>
           </div>
         </section>
 
-        <section class="view" id="distribution" aria-label="DaÄŸÄ±tÄ±m">
+        <section class="view" id="distribution" aria-label="Dağıtım">
           <div class="distribution-layout">
             <section class="package-panel">
               <div class="section-heading">
-                <span>SatÄ±ÅŸ paketleri</span>
+                <span>Satış paketleri</span>
                 <span class="pill success">Hibrit model</span>
               </div>
               <div class="package-grid">
                 <article class="package-card">
                   <span class="source-tag">Cloud</span>
                   <h2>ARGEKA CRM Cloud</h2>
-                  <p>Bizim altyapÄ±mÄ±zda aylÄ±k abonelik. HÄ±zlÄ± baÅŸlamak isteyen kÃ¼Ã§Ã¼k ekipler iÃ§in.</p>
-                  <strong>â‚º749 / ay</strong>
+                  <p>Bizim altyapımızda aylık abonelik. Hızlı başlamak isteyen küçük ekipler için.</p>
+                  <strong>₺749 / ay</strong>
                 </article>
                 <article class="package-card">
                   <span class="source-tag">Self-hosted</span>
                   <h2>ARGEKA CRM Server</h2>
-                  <p>MÃ¼ÅŸteri kendi VPS veya ÅŸirket sunucusuna kurar. KVKK ve iÃ§ aÄŸ hassasiyeti olan firmalar iÃ§in.</p>
-                  <strong>â‚º24.900 / yÄ±l</strong>
+                  <p>Müşteri kendi VPS veya şirket sunucusuna kurar. KVKK ve iç ağ hassasiyeti olan firmalar için.</p>
+                  <strong>₺24.900 / yıl</strong>
                 </article>
                 <article class="package-card">
                   <span class="source-tag">Desktop</span>
                   <h2>ARGEKA CRM Desktop</h2>
-                  <p>Windows kurulum paketi. Tek kullanÄ±cÄ± veya kÃ¼Ã§Ã¼k ofis iÃ§in local veritabanÄ± ile Ã§alÄ±ÅŸÄ±r.</p>
-                  <strong>â‚º9.900 tek sefer</strong>
+                  <p>Windows kurulum paketi. Tek kullanıcı veya küçük ofis için local veritabanı ile çalışır.</p>
+                  <strong>₺9.900 tek sefer</strong>
                 </article>
               </div>
             </section>
 
             <section class="panel-block">
               <div class="section-heading">
-                <span>Kurulum seÃ§enekleri</span>
+                <span>Kurulum seçenekleri</span>
                 <span class="pill">Roadmap</span>
               </div>
               <ol class="deploy-steps">
                 <li><strong>Docker self-hosted:</strong> Nginx, API ve PostgreSQL ile tek komut kurulum.</li>
-                <li><strong>Windows installer:</strong> Tauri/Electron kabuÄŸu, SQLite veya local API.</li>
-                <li><strong>Cloud:</strong> YÃ¶netilen PostgreSQL, yedekleme, SSL, mail/takvim OAuth.</li>
-                <li><strong>Lisans:</strong> Online aktivasyon, offline lisans dosyasÄ± ve yÄ±llÄ±k bakÄ±m.</li>
+                <li><strong>Windows installer:</strong> Tauri/Electron kabuğu, SQLite veya local API.</li>
+                <li><strong>Cloud:</strong> Yönetilen PostgreSQL, yedekleme, SSL, mail/takvim OAuth.</li>
+                <li><strong>Lisans:</strong> Online aktivasyon, offline lisans dosyası ve yıllık bakım.</li>
               </ol>
             </section>
 
@@ -491,10 +491,10 @@
                 <span class="pill">Kontrol</span>
               </div>
               <ul class="mobile-checklist">
-                <li>Cloud mÃ¼ÅŸteriler aylÄ±k gelir ve merkezi operasyon saÄŸlar.</li>
-                <li>Self-hosted mÃ¼ÅŸteriler altyapÄ± maliyetini kendi Ã¼stlenir.</li>
-                <li>Desktop paket destek yÃ¼kÃ¼ dÃ¼ÅŸÃ¼k, giriÅŸ Ã¼rÃ¼nÃ¼ olarak Ã§alÄ±ÅŸÄ±r.</li>
-                <li>Enterprise kurulumlar entegrasyon ve destek geliri Ã¼retir.</li>
+                <li>Cloud müşteriler aylık gelir ve merkezi operasyon sağlar.</li>
+                <li>Self-hosted müşteriler altyapı maliyetini kendi üstlenir.</li>
+                <li>Desktop paket destek yükü düşük, giriş ürünü olarak çalışır.</li>
+                <li>Enterprise kurulumlar entegrasyon ve destek geliri üretir.</li>
               </ul>
             </section>
           </div>
@@ -505,15 +505,15 @@
     <dialog class="modal" id="dealDialog">
       <form method="dialog" id="dealForm">
         <div class="modal-header">
-          <h2>Yeni fÄ±rsat</h2>
+          <h2>Yeni fırsat</h2>
           <button class="icon-button" value="cancel" type="submit" aria-label="Kapat" title="Kapat">
-            <span aria-hidden="true">Ã—</span>
+            <span aria-hidden="true">×</span>
           </button>
         </div>
         <div class="form-grid">
           <label>
-            KiÅŸi
-            <input name="contact" required placeholder="AyÅŸe YÄ±lmaz">
+            Kişi
+            <input name="contact" required placeholder="Ayşe Yılmaz">
           </label>
           <label>
             Firma
@@ -524,7 +524,7 @@
             <input name="email" type="email" required placeholder="ayse@firma.com">
           </label>
           <label>
-            DeÄŸer
+            Değer
             <input name="value" type="number" min="0" step="1000" required placeholder="50000">
           </label>
           <label>
@@ -542,11 +542,11 @@
           </label>
           <label class="full-width">
             Not
-            <textarea name="note" rows="3" placeholder="Ä°lk temas notu"></textarea>
+            <textarea name="note" rows="3" placeholder="İlk temas notu"></textarea>
           </label>
         </div>
         <div class="modal-actions">
-          <button class="ghost-button" value="cancel" type="submit">VazgeÃ§</button>
+          <button class="ghost-button" value="cancel" type="submit">Vazgeç</button>
           <button class="primary-button" value="default" type="submit">Kaydet</button>
         </div>
       </form>
