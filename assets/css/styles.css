@@ -640,7 +640,8 @@ textarea:focus {
 .billing-layout,
 .meeting-layout,
 .calendar-layout,
-.distribution-layout {
+.distribution-layout,
+.admin-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
   gap: 18px;
@@ -659,6 +660,86 @@ textarea:focus {
 .distribution-layout {
   grid-template-columns: minmax(420px, 1.15fr) minmax(300px, 0.7fr) minmax(280px, 0.65fr);
   align-items: start;
+}
+
+.admin-layout {
+  grid-template-columns: minmax(340px, 0.9fr) minmax(340px, 0.9fr) minmax(420px, 1.1fr);
+  align-items: start;
+}
+
+.admin-layout .panel-block:last-child {
+  grid-column: 1 / -1;
+}
+
+.admin-summary,
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-summary article,
+.health-grid article {
+  display: grid;
+  gap: 6px;
+  min-height: 84px;
+  align-content: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.admin-summary span,
+.health-grid span,
+.user-row small {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.admin-summary strong,
+.health-grid strong {
+  overflow-wrap: anywhere;
+  font-size: 20px;
+}
+
+.user-list {
+  display: grid;
+  gap: 10px;
+}
+
+.user-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.user-row div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.user-row strong,
+.user-row small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.avatar {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 8px;
+  background: #d2f55b;
+  color: #14231d;
+  font-weight: 800;
 }
 
 .panel-block,
@@ -1028,8 +1109,13 @@ textarea:focus {
   .billing-layout,
   .meeting-layout,
   .calendar-layout,
-  .distribution-layout {
+  .distribution-layout,
+  .admin-layout {
     grid-template-columns: 1fr;
+  }
+
+  .admin-layout .panel-block:last-child {
+    grid-column: auto;
   }
 
   .package-grid {
@@ -1093,7 +1179,9 @@ textarea:focus {
   .integration-grid,
   .form-grid,
   .rule-grid,
-  .compact-fields {
+  .compact-fields,
+  .admin-summary,
+  .health-grid {
     grid-template-columns: 1fr;
   }
 

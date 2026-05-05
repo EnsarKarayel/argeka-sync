@@ -94,6 +94,10 @@
             <span aria-hidden="true">▣</span>
             Dağıtım
           </button>
+          <button class="nav-item" type="button" data-view-target="admin">
+            <span aria-hidden="true">⚙</span>
+            Yönetim
+          </button>
         </nav>
 
         <div class="account-card">
@@ -496,6 +500,47 @@
                 <li>Desktop paket destek yükü düşük, giriş ürünü olarak çalışır.</li>
                 <li>Enterprise kurulumlar entegrasyon ve destek geliri üretir.</li>
               </ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="admin" aria-label="Yönetim">
+          <div class="admin-layout">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Firma ve lisans</span>
+                <span class="pill success" id="adminPlanPill">Pro deneme</span>
+              </div>
+              <div class="admin-summary" id="adminSummary"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Kullanıcılar</span>
+                <button class="ghost-button" id="inviteUserButton" type="button">Davet taslağı</button>
+              </div>
+              <div class="user-list" id="adminUserList"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Kurulum sağlığı</span>
+                <button class="ghost-button" id="refreshAdminButton" type="button">Yenile</button>
+              </div>
+              <div class="health-grid" id="adminHealth"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Self-hosted bilgiler</span>
+                <span class="pill">Kurulum</span>
+              </div>
+              <ol class="deploy-steps">
+                <li><strong>Web:</strong> http://localhost:8080</li>
+                <li><strong>API:</strong> http://localhost:3000/health</li>
+                <li><strong>Veritabanı:</strong> PostgreSQL Docker volume üzerinde kalıcı çalışır.</li>
+                <li><strong>Yedek:</strong> Üretimden önce otomatik backup komutu eklenecek.</li>
+              </ol>
             </section>
           </div>
         </section>

@@ -4,7 +4,7 @@ on conflict (id) do nothing;
 
 insert into users (id, tenant_id, email, full_name, password_hash, role)
 values
-  ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', 'admin@akis-crm.local', 'Akis Admin', '$2a$10$Rws9CLj7g60yBC3Ba5eSiOfpa2p1DEwWwC8J5paKxwFj5GdsqJrLm', 'owner')
+  ('22222222-2222-4222-8222-222222222222', '11111111-1111-4111-8111-111111111111', 'admin@akis-crm.local', 'ARGEKA Admin', '$2a$10$Rws9CLj7g60yBC3Ba5eSiOfpa2p1DEwWwC8J5paKxwFj5GdsqJrLm', 'owner')
 on conflict (tenant_id, email) do nothing;
 
 insert into opportunities (tenant_id, owner_id, title, stage, value, probability, forecast, source, close_date, next_action, note)

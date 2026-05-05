@@ -11,7 +11,7 @@ function send(res, status, body) {
   res.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
     "access-control-allow-origin": "*",
-    "access-control-allow-methods": "GET,POST,OPTIONS",
+    "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
     "access-control-allow-headers": "content-type,authorization"
   });
   res.end(JSON.stringify(body));
@@ -116,6 +116,58 @@ async function me(req, res) {
   send(res, 200, {
     user: { id: session.user_id, email: session.email, fullName: session.full_name, role: session.role },
     tenant: { id: session.tenant_id, name: session.tenant_name, plan: session.plan }
+  });
+}
+
+async function adminOverview(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+
+  const [tenantResult, usersResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
+    await Promise.all([
+      pool.query(
+        `select id, name, plan, billing_status, created_at
+         from tenants
+         where id = $1`,
+        [session.tenant_id]
+      ),
+      pool.query(
+        `select id, email, full_name, role, created_at
+         from users
+         where tenant_id = $1
+         order by created_at asc`,
+        [session.tenant_id]
+      ),
+      pool.query("select count(*)::int as count from opportunities where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from meetings where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from action_items where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from oauth_connections where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from webhook_endpoints where tenant_id = $1", [session.tenant_id])
+    ]);
+
+  send(res, 200, {
+    tenant: tenantResult.rows[0],
+    users: usersResult.rows.map((user) => ({
+      id: user.id,
+      email: user.email,
+      fullName: user.full_name,
+      role: user.role,
+      createdAt: user.created_at
+    })),
+    counts: {
+      opportunities: opportunitiesResult.rows[0].count,
+      meetings: meetingsResult.rows[0].count,
+      actions: actionsResult.rows[0].count,
+      oauthConnections: oauthResult.rows[0].count,
+      webhooks: webhookResult.rows[0].count
+    },
+    install: {
+      edition: "self-hosted",
+      database: "PostgreSQL",
+      webPort: process.env.WEB_PORT || "8080",
+      apiPort: String(port),
+      backupStatus: "planned"
+    }
   });
 }
 
@@ -240,6 +292,7 @@ async function handler(req, res) {
     }
     if (req.method === "POST" && url.pathname === "/api/auth/login") return login(req, res);
     if (req.method === "GET" && url.pathname === "/api/auth/me") return me(req, res);
+    if (req.method === "GET" && url.pathname === "/api/admin/overview") return adminOverview(req, res);
     if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(req, res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
     const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);

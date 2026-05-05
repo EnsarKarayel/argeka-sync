@@ -1,4 +1,4 @@
-const CACHE_NAME = "argeka-crm-v4";
+const CACHE_NAME = "argeka-crm-v5";
 const ASSETS = [
   "./",
   "./index.html",

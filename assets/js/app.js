@@ -189,7 +189,8 @@ const state = {
   actions: [],
   minutes: [],
   calendarEvents: [],
-  activity: []
+  activity: [],
+  adminOverview: null
 };
 
 const formatMoney = new Intl.NumberFormat("tr-TR", {
@@ -216,6 +217,10 @@ const importFile = document.querySelector("#importFile");
 const loginScreen = document.querySelector("#loginScreen");
 const loginForm = document.querySelector("#loginForm");
 const loginMessage = document.querySelector("#loginMessage");
+const adminSummary = document.querySelector("#adminSummary");
+const adminUserList = document.querySelector("#adminUserList");
+const adminHealth = document.querySelector("#adminHealth");
+const adminPlanPill = document.querySelector("#adminPlanPill");
 const databaseConfig = {
   name: "akis-crm-db",
   version: 1,
@@ -335,6 +340,19 @@ async function syncOpportunitiesFromApi() {
   }
 }
 
+async function syncAdminOverview() {
+  if (!state.session?.token) {
+    state.adminOverview = null;
+    return;
+  }
+
+  try {
+    state.adminOverview = await apiRequest("/api/admin/overview");
+  } catch {
+    state.adminOverview = null;
+  }
+}
+
 async function createOpportunityOnApi(deal) {
   const payload = await apiRequest("/api/opportunities", {
     method: "POST",
@@ -448,6 +466,7 @@ function render() {
   renderCalendar();
   renderIntegrations();
   renderEmails();
+  renderAdmin();
   renderActivity();
   saveState();
 }
@@ -736,6 +755,92 @@ function renderActivity() {
   });
 }
 
+function renderAdmin() {
+  if (!adminSummary || !adminUserList || !adminHealth) return;
+
+  const overview = state.adminOverview;
+  const tenant = overview?.tenant || state.session?.tenant || {
+    name: "ARGEKA Demo",
+    plan: "pro",
+    billing_status: "trialing"
+  };
+  const counts = overview?.counts || {
+    opportunities: state.deals.length,
+    meetings: state.meetings.length,
+    actions: state.actions.length,
+    oauthConnections: Object.values(state.integrations).filter(Boolean).length,
+    webhooks: 0
+  };
+  const users = overview?.users || (state.session?.user ? [state.session.user] : []);
+  const install = overview?.install || {
+    edition: "self-hosted",
+    database: state.apiOnline ? "PostgreSQL" : "Yerel demo",
+    webPort: "8080",
+    apiPort: "3000",
+    backupStatus: "planned"
+  };
+
+  adminPlanPill.textContent = `${tenant.plan || "pro"} · ${tenant.billing_status || "trialing"}`;
+  adminSummary.innerHTML = `
+    <article>
+      <span>Firma</span>
+      <strong>${escapeHtml(tenant.name || "ARGEKA Demo")}</strong>
+    </article>
+    <article>
+      <span>Fırsat</span>
+      <strong>${Number(counts.opportunities || 0)}</strong>
+    </article>
+    <article>
+      <span>Toplantı</span>
+      <strong>${Number(counts.meetings || 0)}</strong>
+    </article>
+    <article>
+      <span>Aksiyon</span>
+      <strong>${Number(counts.actions || 0)}</strong>
+    </article>
+  `;
+
+  adminUserList.innerHTML = users.length
+    ? users.map((user) => `
+        <article class="user-row">
+          <span class="avatar">${escapeHtml((user.fullName || user.email || "A").slice(0, 1).toLocaleUpperCase("tr-TR"))}</span>
+          <div>
+            <strong>${escapeHtml(user.fullName || "Kullanıcı")}</strong>
+            <small>${escapeHtml(user.email || "-")}</small>
+          </div>
+          <span class="source-tag">${escapeHtml(user.role || "member")}</span>
+        </article>
+      `).join("")
+    : `<div class="empty-state">Kullanıcı kaydı bekleniyor</div>`;
+
+  adminHealth.innerHTML = `
+    <article>
+      <span>API</span>
+      <strong>${state.apiOnline ? "Çalışıyor" : "Kontrol gerekli"}</strong>
+    </article>
+    <article>
+      <span>Veritabanı</span>
+      <strong>${escapeHtml(install.database)}</strong>
+    </article>
+    <article>
+      <span>Dağıtım</span>
+      <strong>${escapeHtml(install.edition)}</strong>
+    </article>
+    <article>
+      <span>OAuth</span>
+      <strong>${Number(counts.oauthConnections || 0)}</strong>
+    </article>
+    <article>
+      <span>Webhook</span>
+      <strong>${Number(counts.webhooks || 0)}</strong>
+    </article>
+    <article>
+      <span>Yedek</span>
+      <strong>${install.backupStatus === "planned" ? "Planlandı" : escapeHtml(install.backupStatus)}</strong>
+    </article>
+  `;
+}
+
 async function addDeal(deal) {
   const newDeal = {
     ...deal,
@@ -803,7 +908,8 @@ function switchView(viewId) {
     inbox: "E-posta",
     integrations: "Entegrasyon",
     billing: "Abonelik",
-    distribution: "Dağıtım"
+    distribution: "Dağıtım",
+    admin: "Yönetim"
   };
   document.querySelector("#view-title").textContent = titleMap[viewId] || "ARGEKA CRM";
 }
@@ -824,6 +930,7 @@ loginForm.addEventListener("submit", async (event) => {
     saveSession(payload);
     loginMessage.textContent = "Giriş başarılı.";
     await syncOpportunitiesFromApi();
+    await syncAdminOverview();
     render();
   } catch {
     saveSession(null);
@@ -834,6 +941,18 @@ loginForm.addEventListener("submit", async (event) => {
 
 document.querySelector("#logoutButton").addEventListener("click", () => {
   saveSession(null);
+  state.adminOverview = null;
+  render();
+});
+
+document.querySelector("#refreshAdminButton").addEventListener("click", async () => {
+  await syncAdminOverview();
+  logActivity("Yönetim özeti yenilendi.");
+  render();
+});
+
+document.querySelector("#inviteUserButton").addEventListener("click", () => {
+  logActivity("Kullanıcı daveti için e-posta taslağı hazırlandı.");
   render();
 });
 
@@ -1112,7 +1231,10 @@ importFile.addEventListener("change", async () => {
 async function initApp() {
   await restoreSession();
   await loadState();
-  if (state.session?.token) await syncOpportunitiesFromApi();
+  if (state.session?.token) {
+    await syncOpportunitiesFromApi();
+    await syncAdminOverview();
+  }
   render();
 }
 
