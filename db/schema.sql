@@ -168,6 +168,17 @@ create table backup_runs (
   created_at timestamptz not null default now()
 );
 
+create table audit_logs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid references tenants(id) on delete cascade,
+  user_id uuid references users(id) on delete set null,
+  action text not null,
+  target_type text not null,
+  target_id text,
+  metadata jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+
 create index opportunities_tenant_stage_idx on opportunities (tenant_id, stage);
 create index opportunities_tenant_close_date_idx on opportunities (tenant_id, close_date);
 create index meetings_tenant_starts_at_idx on meetings (tenant_id, starts_at);
@@ -176,4 +187,5 @@ create index sessions_token_hash_idx on sessions (token_hash);
 create index sessions_user_idx on sessions (user_id);
 create index app_roles_tenant_idx on app_roles (tenant_id);
 create index backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
+create index audit_logs_tenant_created_idx on audit_logs (tenant_id, created_at desc);
 

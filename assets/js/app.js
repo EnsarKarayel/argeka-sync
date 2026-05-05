@@ -226,6 +226,7 @@ const adminUserForm = document.querySelector("#adminUserForm");
 const adminRoleSelect = document.querySelector("#adminRoleSelect");
 const licenseForm = document.querySelector("#licenseForm");
 const licenseStatusPill = document.querySelector("#licenseStatusPill");
+const adminAuditLog = document.querySelector("#adminAuditLog");
 const databaseConfig = {
   name: "akis-crm-db",
   version: 1,
@@ -822,6 +823,7 @@ function renderAdmin() {
   const roles = overview?.roles || [];
   const license = overview?.license || null;
   const backup = overview?.backup || null;
+  const audit = overview?.audit || [];
 
   adminPlanPill.textContent = `${tenant.plan || "pro"} · ${tenant.billing_status || "trialing"}`;
   if (licenseStatusPill) {
@@ -905,6 +907,17 @@ function renderAdmin() {
       <strong>${backup ? escapeHtml(new Date(backup.created_at || backup.createdAt).toLocaleString("tr-TR")) : "Bekliyor"}</strong>
     </article>
   `;
+
+  if (adminAuditLog) {
+    adminAuditLog.innerHTML = audit.length
+      ? audit.map((entry) => `
+          <li>
+            ${escapeHtml(new Date(entry.createdAt).toLocaleString("tr-TR"))}
+            - ${escapeHtml(entry.user)} · ${escapeHtml(auditLabel(entry.action))}
+          </li>
+        `).join("")
+      : "<li>Henüz işlem kaydı yok.</li>";
+  }
 }
 
 function scopeLabel(scope) {
@@ -913,6 +926,16 @@ function scopeLabel(scope) {
     team: "Ekip kayıtları",
     all: "Tüm firma"
   }[scope] || "Kendi kayıtları";
+}
+
+function auditLabel(action) {
+  return {
+    "user.created": "kullanıcı oluşturdu",
+    "license.updated": "lisans güncelledi",
+    "data.exported": "veri dışa aktardı",
+    "opportunity.created": "fırsat oluşturdu",
+    "opportunity.updated": "fırsat güncelledi"
+  }[action] || action;
 }
 
 async function addDeal(deal) {

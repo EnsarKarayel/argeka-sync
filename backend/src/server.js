@@ -99,8 +99,20 @@ async function ensureSchema() {
       created_at timestamptz not null default now()
     );
 
+    create table if not exists audit_logs (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid references tenants(id) on delete cascade,
+      user_id uuid references users(id) on delete set null,
+      action text not null,
+      target_type text not null,
+      target_id text,
+      metadata jsonb not null default '{}',
+      created_at timestamptz not null default now()
+    );
+
     create index if not exists app_roles_tenant_idx on app_roles (tenant_id);
     create index if not exists backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
+    create index if not exists audit_logs_tenant_created_idx on audit_logs (tenant_id, created_at desc);
   `);
 
   const tid = await tenantId();
@@ -145,11 +157,30 @@ function opportunityPayload(row) {
     probability: row.probability,
     forecast: row.forecast,
     source: row.source,
+    owner: row.owner_name || "Sistem",
+    ownerId: row.owner_id,
     closeDate: row.close_date,
     nextAction: row.next_action,
     note: row.note,
     createdAt: row.created_at
   };
+}
+
+function hasPermission(session, key) {
+  return isAdmin(session) || session?.permissions?.[key] === true;
+}
+
+function canSeeTenantScope(session) {
+  return ["team", "all"].includes(session?.data_scope);
+}
+
+async function auditLog(session, action, targetType, targetId = null, metadata = {}) {
+  if (!session) return;
+  await pool.query(
+    `insert into audit_logs (tenant_id, user_id, action, target_type, target_id, metadata)
+     values ($1, $2, $3, $4, $5, $6::jsonb)`,
+    [session.tenant_id, session.user_id, action, targetType, targetId, JSON.stringify(metadata)]
+  );
 }
 
 async function readJson(req) {
@@ -284,7 +315,7 @@ async function adminOverview(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
 
-  const [tenantResult, usersResult, rolesResult, licenseResult, backupResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
+  const [tenantResult, usersResult, rolesResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
     await Promise.all([
       pool.query(
         `select id, name, plan, billing_status, created_at
@@ -323,6 +354,15 @@ async function adminOverview(req, res) {
          limit 1`,
         [session.tenant_id]
       ),
+      pool.query(
+        `select a.action, a.target_type, a.target_id, a.metadata, a.created_at, u.full_name
+         from audit_logs a
+         left join users u on u.id = a.user_id
+         where a.tenant_id = $1
+         order by a.created_at desc
+         limit 10`,
+        [session.tenant_id]
+      ),
       pool.query("select count(*)::int as count from opportunities where tenant_id = $1", [session.tenant_id]),
       pool.query("select count(*)::int as count from meetings where tenant_id = $1", [session.tenant_id]),
       pool.query("select count(*)::int as count from action_items where tenant_id = $1", [session.tenant_id]),
@@ -353,6 +393,14 @@ async function adminOverview(req, res) {
     })),
     license: licenseResult.rows[0] || null,
     backup: backupResult.rows[0] || null,
+    audit: auditResult.rows.map((entry) => ({
+      action: entry.action,
+      targetType: entry.target_type,
+      targetId: entry.target_id,
+      metadata: entry.metadata || {},
+      user: entry.full_name || "Sistem",
+      createdAt: entry.created_at
+    })),
     counts: {
       opportunities: opportunitiesResult.rows[0].count,
       meetings: meetingsResult.rows[0].count,
@@ -403,6 +451,11 @@ async function createAdminUser(req, res) {
     [session.tenant_id, body.email, body.fullName, passwordHash, role.key, role.id, dataScope, hiddenColumns]
   );
   const user = result.rows[0];
+  await auditLog(session, "user.created", "user", user.id, {
+    email: user.email,
+    role: role.key,
+    dataScope
+  });
   send(res, 201, {
     data: {
       id: user.id,
@@ -453,6 +506,11 @@ async function activateLicense(req, res) {
       body.expiresAt || null
     ]
   );
+  await auditLog(session, "license.updated", "license", session.tenant_id, {
+    status,
+    edition: body.edition || "self-hosted",
+    seats: Number(body.seats || 5)
+  });
   send(res, 200, { data: result.rows[0] });
 }
 
@@ -464,6 +522,9 @@ function csvEscape(value) {
 async function exportData(req, res, format) {
   const session = await requireSession(req, res);
   if (!session) return;
+  if (!hasPermission(session, "export")) {
+    return send(res, 403, { error: "forbidden" });
+  }
 
   const [opportunities, users] = await Promise.all([
     pool.query(
@@ -483,6 +544,7 @@ async function exportData(req, res, format) {
   ]);
 
   if (format === "csv") {
+    await auditLog(session, "data.exported", "export", "csv", { format });
     const header = ["id", "title", "stage", "value", "probability", "forecast", "source", "close_date", "next_action"];
     const rows = opportunities.rows.map((row) => header.map((key) => csvEscape(row[key])).join(","));
     return sendRaw(
@@ -495,6 +557,7 @@ async function exportData(req, res, format) {
   }
 
   if (format === "sql") {
+    await auditLog(session, "data.exported", "export", "sql", { format });
     const statements = opportunities.rows.map((row) => {
       const values = ["id", "title", "stage", "value", "probability", "forecast", "source", "close_date", "next_action", "note"]
         .map((key) => row[key] === null || row[key] === undefined ? "null" : `'${String(row[key]).replaceAll("'", "''")}'`);
@@ -509,6 +572,7 @@ async function exportData(req, res, format) {
     );
   }
 
+  await auditLog(session, "data.exported", "export", "json", { format: "json" });
   return send(res, 200, {
     exportedAt: new Date().toISOString(),
     tenant: session.tenant_id,
@@ -520,29 +584,37 @@ async function exportData(req, res, format) {
 }
 
 async function listOpportunities(req, res) {
-  const session = await currentSession(req);
-  const tid = session?.tenant_id || await tenantId();
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const fullAccess = canSeeTenantScope(session);
+  const params = fullAccess ? [session.tenant_id] : [session.tenant_id, session.user_id];
+  const accessClause = fullAccess ? "" : "and o.owner_id = $2";
   const result = await pool.query(
-    `select id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at
-     from opportunities
-     where tenant_id = $1
-     order by created_at desc`,
-    [tid]
+    `select o.id, o.title, o.stage, o.value, o.probability, o.forecast, o.source, o.close_date,
+            o.next_action, o.note, o.owner_id, o.created_at, u.full_name as owner_name
+     from opportunities o
+     left join users u on u.id = o.owner_id
+     where o.tenant_id = $1 ${accessClause}
+     order by o.created_at desc`,
+    params
   );
   send(res, 200, { data: result.rows.map(opportunityPayload) });
 }
 
 async function createOpportunity(req, res) {
-  const session = await currentSession(req);
-  const tid = session?.tenant_id || await tenantId();
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
   const body = await readJson(req);
   const result = await pool.query(
     `insert into opportunities
-      (tenant_id, title, stage, value, probability, forecast, source, close_date, next_action, note)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-     returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at`,
+      (tenant_id, owner_id, title, stage, value, probability, forecast, source, close_date, next_action, note)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+     returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, owner_id, created_at`,
     [
-      tid,
+      session.tenant_id,
+      session.user_id,
       body.title || body.company || "Yeni fırsat",
       body.stage || "new",
       Number(body.value || 0),
@@ -554,18 +626,26 @@ async function createOpportunity(req, res) {
       body.note || null
     ]
   );
-  send(res, 201, { data: opportunityPayload(result.rows[0]) });
+  await auditLog(session, "opportunity.created", "opportunity", result.rows[0].id, {
+    title: result.rows[0].title,
+    value: Number(result.rows[0].value || 0)
+  });
+  send(res, 201, { data: opportunityPayload({ ...result.rows[0], owner_name: session.full_name }) });
 }
 
 async function updateOpportunity(req, res, id) {
-  const session = await currentSession(req);
-  const tid = session?.tenant_id || await tenantId();
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
   const body = await readJson(req);
+  const fullAccess = canSeeTenantScope(session);
+  const accessClause = fullAccess ? "" : "and owner_id = $3";
+  const accessParams = fullAccess ? [id, session.tenant_id] : [id, session.tenant_id, session.user_id];
   const current = await pool.query(
-    `select title, stage, value, probability, forecast, source, close_date, next_action, note
+    `select title, stage, value, probability, forecast, source, close_date, next_action, note, owner_id
      from opportunities
-     where id = $1 and tenant_id = $2`,
-    [id, tid]
+     where id = $1 and tenant_id = $2 ${accessClause}`,
+    accessParams
   );
   if (!current.rows[0]) return send(res, 404, { error: "not_found" });
   const existing = current.rows[0];
@@ -574,10 +654,10 @@ async function updateOpportunity(req, res, id) {
      set title = $3, stage = $4, value = $5, probability = $6, forecast = $7,
          source = $8, close_date = $9, next_action = $10, note = $11, updated_at = now()
      where id = $1 and tenant_id = $2
-     returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at`,
+     returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, owner_id, created_at`,
     [
       id,
-      tid,
+      session.tenant_id,
       body.title || body.company || existing.title,
       body.stage || existing.stage,
       body.value === undefined ? existing.value : Number(body.value || 0),
@@ -589,6 +669,10 @@ async function updateOpportunity(req, res, id) {
       body.note === undefined ? existing.note : body.note
     ]
   );
+  await auditLog(session, "opportunity.updated", "opportunity", id, {
+    stage: result.rows[0].stage,
+    value: Number(result.rows[0].value || 0)
+  });
   send(res, 200, { data: opportunityPayload(result.rows[0]) });
 }
 
