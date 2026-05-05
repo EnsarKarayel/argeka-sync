@@ -2,6 +2,36 @@
 
 Kurulumsuz çalışan ilk web CRM prototipi. Dosyayı tarayıcıda açarak pipeline, sürükle-bırak fırsat yönetimi, e-posta taslak akışı, veri gönder-al formu ve abonelik taslağını deneyebilirsiniz.
 
+## Tek komut Windows kurulumu
+
+Sifir bir Windows bilgisayarda PowerShell acip su komutu calistirin:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
+```
+
+Bu komut Git yoksa kurmayi dener, repo'yu `Desktop\ARGEKA-CRM` klasorune indirir, Docker Desktop'i kontrol eder ve ARGEKA CRM servislerini baslatir.
+
+Repo zaten bilgisayardaysa:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+Sonraki acilislarda:
+
+```powershell
+.\start.ps1
+```
+
+Servisleri durdurmak icin:
+
+```powershell
+.\stop.ps1
+```
+
+Docker/WSL ilk kurulumdan sonra Windows yeniden baslatma isteyebilir. Yeniden baslatma gerekirse ayni komutu tekrar calistirin.
+
 ## Calistirma
 
 `index.html` dosyasını tarayıcıda açın. Node, npm veya sunucu gerekmez. PWA service worker sadece gerçek `https` veya `localhost` ortamında devreye girer; `file://` ile açıldığında uygulama yine çalışır.

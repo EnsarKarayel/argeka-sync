@@ -4,6 +4,20 @@ Bu paket ARGEKA CRM web, API ve PostgreSQL servislerini tek Docker Compose dosya
 
 ## Kurulum
 
+Windows icin onerilen tek komut:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\install.ps1
+```
+
+Sifir bilgisayarda repo'yu da otomatik indirmek icin:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
+```
+
+Elle Docker Compose calistirmak icin:
+
 ```powershell
 docker compose -f deployment/self-hosted/docker-compose.yml up -d --build
 ```
