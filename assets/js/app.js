@@ -176,6 +176,7 @@ const sampleEmails = [
 const state = {
   deals: [],
   selectedDealId: null,
+  apiOnline: false,
   integrations: {
     gmail: false,
     outlook: false,
@@ -217,6 +218,96 @@ const databaseConfig = {
   store: "records",
   key: "state"
 };
+
+function apiUrl(path) {
+  return path;
+}
+
+async function apiRequest(path, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 4500);
+  try {
+    const response = await fetch(apiUrl(path), {
+      headers: { "content-type": "application/json", ...(options.headers || {}) },
+      signal: controller.signal,
+      ...options
+    });
+    if (!response.ok) throw new Error(`API ${response.status}`);
+    state.apiOnline = true;
+    return response.status === 204 ? null : response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function apiOpportunityToDeal(item) {
+  return {
+    id: item.id,
+    contact: item.contact || "CRM kaydı",
+    company: item.company || item.title || "Fırsat",
+    email: item.email || "kayit@akis-crm.local",
+    value: Number(item.value || 0),
+    stage: item.stage || "new",
+    source: item.source || "API",
+    owner: item.owner || "Sistem",
+    probability: Number(item.probability || 20),
+    closeDate: item.closeDate ? String(item.closeDate).slice(0, 10) : "Planlanacak",
+    forecast: item.forecast || "Pipeline",
+    sector: item.sector || "Genel",
+    territory: item.territory || "TR",
+    nextAction: item.nextAction || "İlk temas",
+    note: item.note || "",
+    updatedAt: "API"
+  };
+}
+
+function dealToApiOpportunity(deal) {
+  return {
+    title: deal.company || deal.title,
+    company: deal.company,
+    stage: deal.stage,
+    value: Number(deal.value || 0),
+    probability: Number(deal.probability || 20),
+    forecast: deal.forecast || "Pipeline",
+    source: deal.source || "Web",
+    closeDate: deal.closeDate && deal.closeDate !== "Planlanacak" ? deal.closeDate : null,
+    nextAction: deal.nextAction || null,
+    note: deal.note || null
+  };
+}
+
+async function syncOpportunitiesFromApi() {
+  try {
+    const payload = await apiRequest("/api/opportunities");
+    const apiDeals = Array.isArray(payload?.data) ? payload.data.map(apiOpportunityToDeal) : [];
+    if (apiDeals.length) {
+      state.deals = apiDeals;
+      state.selectedDealId = apiDeals.some((deal) => deal.id === state.selectedDealId)
+        ? state.selectedDealId
+        : apiDeals[0].id;
+      logActivity("Fırsatlar PostgreSQL API üzerinden yüklendi.");
+    }
+  } catch {
+    state.apiOnline = false;
+    logActivity("API bağlantısı yok, yerel veriyle devam ediliyor.");
+  }
+}
+
+async function createOpportunityOnApi(deal) {
+  const payload = await apiRequest("/api/opportunities", {
+    method: "POST",
+    body: JSON.stringify(dealToApiOpportunity(deal))
+  });
+  return payload?.data ? apiOpportunityToDeal(payload.data) : null;
+}
+
+async function updateOpportunityOnApi(deal) {
+  if (!state.apiOnline || String(deal.id).startsWith("deal-")) return;
+  await apiRequest(`/api/opportunities/${deal.id}`, {
+    method: "PATCH",
+    body: JSON.stringify(dealToApiOpportunity(deal))
+  });
+}
 
 function openDatabase() {
   if (!("indexedDB" in window)) return Promise.resolve(null);
@@ -409,6 +500,11 @@ function handleDrop(event) {
   deal.updatedAt = "Az önce";
   state.selectedDealId = deal.id;
   logActivity(`${deal.company} taşındı: ${previous} → ${next}.`);
+  updateOpportunityOnApi(deal).catch(() => {
+    state.apiOnline = false;
+    logActivity("Aşama değişimi yerelde kaldı, API senkronu sonra denenecek.");
+    render();
+  });
   render();
 }
 
@@ -597,8 +693,8 @@ function renderActivity() {
   });
 }
 
-function addDeal(deal) {
-  state.deals.unshift({
+async function addDeal(deal) {
+  const newDeal = {
     ...deal,
     id: `deal-${Date.now()}`,
     stage: deal.stage || "new",
@@ -610,10 +706,31 @@ function addDeal(deal) {
     sector: deal.sector || "Genel",
     territory: deal.territory || "TR",
     nextAction: deal.nextAction || "İlk temas"
-  });
-  state.selectedDealId = state.deals[0].id;
+  };
+  state.deals.unshift(newDeal);
+  state.selectedDealId = newDeal.id;
   logActivity(`${deal.company} için yeni fırsat açıldı.`);
   render();
+  try {
+    const apiDeal = await createOpportunityOnApi(newDeal);
+    if (apiDeal) {
+      Object.assign(newDeal, {
+        ...apiDeal,
+        contact: newDeal.contact,
+        email: newDeal.email,
+        owner: newDeal.owner,
+        sector: newDeal.sector,
+        territory: newDeal.territory
+      });
+      state.selectedDealId = newDeal.id;
+      logActivity(`${newDeal.company} PostgreSQL API'ye kaydedildi.`);
+      render();
+    }
+  } catch {
+    state.apiOnline = false;
+    logActivity(`${newDeal.company} yerelde kaydedildi, API bağlantısı bekleniyor.`);
+    render();
+  }
 }
 
 function logActivity(message) {
@@ -926,6 +1043,7 @@ importFile.addEventListener("change", async () => {
 
 async function initApp() {
   await loadState();
+  await syncOpportunitiesFromApi();
   render();
 }
 

@@ -16,6 +16,23 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function opportunityPayload(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    company: row.title,
+    stage: row.stage,
+    value: Number(row.value || 0),
+    probability: row.probability,
+    forecast: row.forecast,
+    source: row.source,
+    closeDate: row.close_date,
+    nextAction: row.next_action,
+    note: row.note,
+    createdAt: row.created_at
+  };
+}
+
 async function readJson(req) {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);
@@ -39,7 +56,7 @@ async function listOpportunities(res) {
      order by created_at desc`,
     [tid]
   );
-  send(res, 200, { data: result.rows });
+  send(res, 200, { data: result.rows.map(opportunityPayload) });
 }
 
 async function createOpportunity(req, res) {
@@ -63,7 +80,41 @@ async function createOpportunity(req, res) {
       body.note || null
     ]
   );
-  send(res, 201, { data: result.rows[0] });
+  send(res, 201, { data: opportunityPayload(result.rows[0]) });
+}
+
+async function updateOpportunity(req, res, id) {
+  const tid = await tenantId();
+  const body = await readJson(req);
+  const current = await pool.query(
+    `select title, stage, value, probability, forecast, source, close_date, next_action, note
+     from opportunities
+     where id = $1 and tenant_id = $2`,
+    [id, tid]
+  );
+  if (!current.rows[0]) return send(res, 404, { error: "not_found" });
+  const existing = current.rows[0];
+  const result = await pool.query(
+    `update opportunities
+     set title = $3, stage = $4, value = $5, probability = $6, forecast = $7,
+         source = $8, close_date = $9, next_action = $10, note = $11, updated_at = now()
+     where id = $1 and tenant_id = $2
+     returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at`,
+    [
+      id,
+      tid,
+      body.title || body.company || existing.title,
+      body.stage || existing.stage,
+      body.value === undefined ? existing.value : Number(body.value || 0),
+      body.probability === undefined ? existing.probability : Number(body.probability || 0),
+      body.forecast || existing.forecast,
+      body.source || existing.source,
+      body.closeDate === undefined ? existing.close_date : body.closeDate,
+      body.nextAction === undefined ? existing.next_action : body.nextAction,
+      body.note === undefined ? existing.note : body.note
+    ]
+  );
+  send(res, 200, { data: opportunityPayload(result.rows[0]) });
 }
 
 async function listMeetings(res) {
@@ -112,6 +163,8 @@ async function handler(req, res) {
     }
     if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
+    const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);
+    if (req.method === "PATCH" && opportunityMatch) return updateOpportunity(req, res, opportunityMatch[1]);
     if (req.method === "GET" && url.pathname === "/api/meetings") return listMeetings(res);
     if (req.method === "POST" && url.pathname === "/api/meetings") return createMeeting(req, res);
     return send(res, 404, { error: "not_found" });
