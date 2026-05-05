@@ -1,0 +1,19 @@
+{
+  "name": "Akis CRM",
+  "short_name": "Akis CRM",
+  "description": "Gmail, Outlook, takvim, pipeline ve toplantı odaklı SaaS CRM.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f4",
+  "theme_color": "#087f74",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

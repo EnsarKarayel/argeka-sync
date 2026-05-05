@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Akis CRM; Gmail, Outlook, takvim, pipeline, toplantı ve webhook akışlarını birleştiren SaaS CRM prototipi.">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#087f74">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Akis CRM">
+    <meta property="og:title" content="Akis CRM">
+    <meta property="og:description" content="Sürükle-bırak pipeline, Gmail/Outlook, takvim, toplantı ve SaaS veri katmanı.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/icons/favicon.svg">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Akis CRM">
+    <meta name="twitter:description" content="Gmail, Outlook ve takvim odaklı SaaS CRM.">
+    <title>Akis CRM | SaaS Pipeline, E-posta ve Takvim CRM</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.svg">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Akis CRM",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "offers": {
+          "@type": "Offer",
+          "price": "749",
+          "priceCurrency": "TRY"
+        },
+        "description": "Gmail, Outlook, takvim, pipeline, toplantı ve webhook akışlarını birleştiren SaaS CRM."
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Ana gezinme">
+        <div class="brand">
+          <span class="brand-mark">A</span>
+          <div>
+            <strong>Akis CRM</strong>
+            <span>Satış ve veri merkezi</span>
+          </div>
+        </div>
+
+        <nav class="nav-stack">
+          <button class="nav-item is-active" type="button" data-view-target="pipeline">
+            <span aria-hidden="true">▦</span>
+            Pipeline
+          </button>
+          <button class="nav-item" type="button" data-view-target="meetings">
+            <span aria-hidden="true">☷</span>
+            Toplantılar
+          </button>
+          <button class="nav-item" type="button" data-view-target="calendar">
+            <span aria-hidden="true">◴</span>
+            Takvim
+          </button>
+          <button class="nav-item" type="button" data-view-target="inbox">
+            <span aria-hidden="true">✉</span>
+            E-posta
+          </button>
+          <button class="nav-item" type="button" data-view-target="integrations">
+            <span aria-hidden="true">⌘</span>
+            Entegrasyon
+          </button>
+          <button class="nav-item" type="button" data-view-target="billing">
+            <span aria-hidden="true">₺</span>
+            Abonelik
+          </button>
+        </nav>
+
+        <div class="account-card">
+          <span class="pill success">Pro deneme</span>
+          <strong>Takım limiti</strong>
+          <span>5 kullanıcı, 1.000 kayıt</span>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Web tabanlı CRM prototipi</p>
+            <h1 id="view-title">Pipeline</h1>
+          </div>
+          <div class="topbar-actions">
+            <label class="search-box">
+              <span aria-hidden="true">⌕</span>
+              <input id="searchInput" type="search" placeholder="Kişi, firma, kaynak ara">
+            </label>
+            <button class="icon-button" id="importButton" type="button" aria-label="Veri içe aktar" title="Veri içe aktar">
+              <span aria-hidden="true">↥</span>
+            </button>
+            <button class="icon-button" id="exportButton" type="button" aria-label="Veri dışa aktar" title="Veri dışa aktar">
+              <span aria-hidden="true">↧</span>
+            </button>
+            <button class="primary-button" id="newDealButton" type="button">
+              <span aria-hidden="true">+</span>
+              Yeni fırsat
+            </button>
+            <input id="importFile" type="file" accept="application/json" hidden>
+          </div>
+        </header>
+
+        <section class="view is-active" id="pipeline" aria-labelledby="view-title">
+          <div class="content-grid">
+            <section class="board-panel" aria-label="Satış pipeline">
+              <div class="metric-strip">
+                <article>
+                  <span>Toplam değer</span>
+                  <strong id="totalValue">₺0</strong>
+                </article>
+                <article>
+                  <span>Açık fırsat</span>
+                  <strong id="openDeals">0</strong>
+                </article>
+                <article>
+                  <span>Bağlı kanal</span>
+                  <strong id="connectedChannels">0</strong>
+                </article>
+              </div>
+
+              <div class="pipeline-board" id="board" aria-live="polite"></div>
+
+              <div class="manager-block">
+                <div class="section-heading">
+                  <span>Fırsat yöneticisi</span>
+                  <span class="pill">Forecast</span>
+                </div>
+                <div class="table-scroll">
+                  <table class="opportunity-table">
+                    <thead>
+                      <tr>
+                        <th>Fırsat</th>
+                        <th>Aşama</th>
+                        <th>Olasılık</th>
+                        <th>Kapanış</th>
+                        <th>Forecast</th>
+                        <th>Sorumlu</th>
+                      </tr>
+                    </thead>
+                    <tbody id="opportunityTable"></tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            <aside class="side-panel" aria-label="Fırsat detayları">
+              <section class="panel-section">
+                <div class="section-heading">
+                  <span>Seçili kayıt</span>
+                  <button class="ghost-button" id="duplicateButton" type="button">Kopyala</button>
+                </div>
+                <div id="detailPanel" class="detail-panel empty-state">
+                  Bir fırsat seçin
+                </div>
+              </section>
+
+              <section class="panel-section">
+                <div class="section-heading">
+                  <span>Veri köprüsü</span>
+                  <span class="pill">Canlı taslak</span>
+                </div>
+                <form class="bridge-form" id="bridgeForm">
+                  <label>
+                    Hedef
+                    <select id="bridgeTarget">
+                      <option value="Webhook">Webhook</option>
+                      <option value="ERP">ERP</option>
+                      <option value="Google Sheets">Google Sheets</option>
+                      <option value="Ozel API">Özel API</option>
+                    </select>
+                  </label>
+                  <label>
+                    Yol
+                    <input id="bridgeEndpoint" type="url" placeholder="https://api.firma.com/crm">
+                  </label>
+                  <div class="button-row">
+                    <button class="secondary-button" id="receiveButton" type="button">Veri al</button>
+                    <button class="primary-button" type="submit">Veri gönder</button>
+                  </div>
+                </form>
+              </section>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view" id="meetings" aria-label="Toplantılar">
+          <div class="meeting-layout">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Toplantı ajandası</span>
+                <span class="pill">Satış ritmi</span>
+              </div>
+              <div class="meeting-list" id="meetingList"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Tutanak</span>
+                <button class="ghost-button" id="createMeetingDealButton" type="button">Fırsat aç</button>
+              </div>
+              <label>
+                Not
+                <textarea id="minuteText" rows="6" placeholder="Karar, risk veya takip notu"></textarea>
+              </label>
+              <div class="button-row minutes-actions">
+                <button class="primary-button" id="addMinuteButton" type="button">Tutanağa ekle</button>
+              </div>
+              <ol class="activity-log minute-list" id="minuteList"></ol>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Aksiyon maddeleri</span>
+                <span class="pill">Takip</span>
+              </div>
+              <form class="action-form" id="actionForm">
+                <label>
+                  Aksiyon
+                  <input name="title" required placeholder="Teklif revizyonu hazırla">
+                </label>
+                <div class="compact-fields">
+                  <label>
+                    Sorumlu
+                    <input name="owner" required placeholder="Ensar">
+                  </label>
+                  <label>
+                    Tarih
+                    <input name="due" type="date" required>
+                  </label>
+                </div>
+                <label>
+                  Öncelik
+                  <select name="priority">
+                    <option>Yüksek</option>
+                    <option>Normal</option>
+                    <option>Düşük</option>
+                  </select>
+                </label>
+                <button class="primary-button" type="submit">Aksiyon ekle</button>
+              </form>
+              <div class="action-list" id="actionList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="calendar" aria-label="Takvim">
+          <div class="calendar-layout">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Günlük satış takvimi</span>
+                <span class="pill">Gmail + Outlook</span>
+              </div>
+              <div class="calendar-controls">
+                <button class="secondary-button" type="button" data-calendar-connect="googleCalendar">Google Calendar izni</button>
+                <button class="secondary-button" type="button" data-calendar-connect="outlookCalendar">Outlook Calendar izni</button>
+              </div>
+              <div class="calendar-agenda" id="calendarAgenda"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Toplantı planla</span>
+                <button class="ghost-button" id="createDealCalendarButton" type="button">Seçili fırsata bağla</button>
+              </div>
+              <form class="calendar-form" id="calendarForm">
+                <label>
+                  Başlık
+                  <input name="title" required placeholder="Nova Teknoloji demo">
+                </label>
+                <div class="compact-fields">
+                  <label>
+                    Tarih
+                    <input name="date" type="date" required>
+                  </label>
+                  <label>
+                    Saat
+                    <input name="time" type="time" required>
+                  </label>
+                </div>
+                <label>
+                  Kanal
+                  <select name="provider">
+                    <option>Google Calendar</option>
+                    <option>Outlook Calendar</option>
+                    <option>iOS Calendar</option>
+                  </select>
+                </label>
+                <label>
+                  Katılımcılar
+                  <input name="attendees" placeholder="ayse@firma.com, satis@firma.com">
+                </label>
+                <button class="primary-button" type="submit">Takvime ekle</button>
+              </form>
+            </section>
+
+            <section class="panel-block ios-block">
+              <div class="section-heading">
+                <span>iOS uyumluluk</span>
+                <span class="pill success">PWA hazır</span>
+              </div>
+              <ul class="mobile-checklist">
+                <li>Home Screen için manifest ve Apple başlıkları</li>
+                <li>Dokunmatik genişlikte sabit toolbar ve board</li>
+                <li>Offline kayıt için IndexedDB veri katmanı</li>
+                <li>Takvim etkinliklerini ICS çıktısına taşıyacak yapı</li>
+              </ul>
+              <button class="secondary-button" id="downloadIcsButton" type="button">Örnek ICS indir</button>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="inbox" aria-label="E-posta">
+          <div class="two-column">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Gelen kutusu</span>
+                <button class="ghost-button" id="syncInboxButton" type="button">Senkronize et</button>
+              </div>
+              <div id="emailList" class="email-list"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Aktivite akışı</span>
+                <button class="ghost-button" id="clearLogButton" type="button">Temizle</button>
+              </div>
+              <ol class="activity-log" id="activityLog"></ol>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="integrations" aria-label="Entegrasyon">
+          <div class="integration-grid">
+            <article class="integration-card">
+              <div>
+                <span class="integration-logo google">G</span>
+                <h2>Gmail</h2>
+                <p>OAuth ile posta okuma, gönderme ve fırsata dönüştürme.</p>
+              </div>
+              <div class="integration-actions">
+                <span class="status" id="gmailStatus">Bağlı değil</span>
+                <button class="secondary-button" type="button" data-connect="gmail">Gmail bağla</button>
+              </div>
+            </article>
+
+            <article class="integration-card">
+              <div>
+                <span class="integration-logo outlook">O</span>
+                <h2>Outlook</h2>
+                <p>Microsoft Graph ile mail, kişi ve takvim akışı.</p>
+              </div>
+              <div class="integration-actions">
+                <span class="status" id="outlookStatus">Bağlı değil</span>
+                <button class="secondary-button" type="button" data-connect="outlook">Outlook bağla</button>
+              </div>
+            </article>
+
+            <article class="integration-card wide">
+              <div>
+                <span class="integration-logo api">API</span>
+                <h2>Veri gönder-al</h2>
+                <p>Webhook, ERP, muhasebe, form ve özel uygulama uçları.</p>
+              </div>
+              <div class="rule-grid">
+                <label>
+                  Tetikleyici
+                  <select id="ruleTrigger">
+                    <option>Yeni e-posta</option>
+                    <option>Fırsat taşındı</option>
+                    <option>Teklif kazanıldı</option>
+                  </select>
+                </label>
+                <label>
+                  İşlem
+                  <select id="ruleAction">
+                    <option>Fırsat oluştur</option>
+                    <option>Webhook'a gönder</option>
+                    <option>Takvim etkinliği aç</option>
+                  </select>
+                </label>
+                <button class="primary-button" id="saveRuleButton" type="button">Kural kaydet</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="billing" aria-label="Abonelik">
+          <div class="billing-layout">
+            <section class="pricing-panel">
+              <span class="pill success">Önerilen</span>
+              <h2>Pro CRM</h2>
+              <p class="price">₺749 <span>/ ay</span></p>
+              <ul>
+                <li>Gmail ve Outlook bağlantıları</li>
+                <li>Google Calendar, Outlook Calendar ve iOS uyumlu takvim</li>
+                <li>Sürükle-bırak satış pipeline</li>
+                <li>Webhook ve özel API akışları</li>
+                <li>Takım rolleri ve aktivite kayıtları</li>
+              </ul>
+              <button class="primary-button" id="checkoutButton" type="button">Ödeme sayfası hazırla</button>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Abonelik olayları</span>
+                <span class="pill">Stripe taslağı</span>
+              </div>
+              <ol class="activity-log" id="billingLog">
+                <li>Plan oluşturuldu: Pro CRM</li>
+                <li>IndexedDB yerel veri katmanı eklendi</li>
+                <li>Checkout uç noktası bekleniyor</li>
+              </ol>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="modal" id="dealDialog">
+      <form method="dialog" id="dealForm">
+        <div class="modal-header">
+          <h2>Yeni fırsat</h2>
+          <button class="icon-button" value="cancel" type="submit" aria-label="Kapat" title="Kapat">
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="form-grid">
+          <label>
+            Kişi
+            <input name="contact" required placeholder="Ayşe Yılmaz">
+          </label>
+          <label>
+            Firma
+            <input name="company" required placeholder="Nova Teknoloji">
+          </label>
+          <label>
+            E-posta
+            <input name="email" type="email" required placeholder="ayse@firma.com">
+          </label>
+          <label>
+            Değer
+            <input name="value" type="number" min="0" step="1000" required placeholder="50000">
+          </label>
+          <label>
+            Kaynak
+            <select name="source">
+              <option>Gmail</option>
+              <option>Outlook</option>
+              <option>Web formu</option>
+              <option>API</option>
+            </select>
+          </label>
+          <label>
+            Sahip
+            <input name="owner" placeholder="Ensar">
+          </label>
+          <label class="full-width">
+            Not
+            <textarea name="note" rows="3" placeholder="İlk temas notu"></textarea>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost-button" value="cancel" type="submit">Vazgeç</button>
+          <button class="primary-button" value="default" type="submit">Kaydet</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="assets/js/app.js"></script>
+    <script>
+      if ("serviceWorker" in navigator && location.protocol !== "file:") {
+        navigator.serviceWorker.register("service-worker.js");
+      }
+    </script>
+  </body>
+</html>
