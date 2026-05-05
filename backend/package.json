@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "akis-crm-api",
   "version": "0.1.0",
   "private": true,
@@ -7,6 +7,8 @@
     "start": "node src/server.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "pg": "^8.13.1"
   }
 }
+

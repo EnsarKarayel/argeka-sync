@@ -1,4 +1,4 @@
-# Akis CRM SaaS Plani
+﻿# ARGEKA CRM SaaS Plani
 
 ## Faz 1
 
@@ -31,3 +31,4 @@
 - Multi-tenant izolasyon backend tarafinda zorunlu olmali.
 - Urun sadece cloud degil; self-hosted server ve desktop paketleri de ayni kod tabanindan cikmali.
 - Ilk gelir icin self-hosted kurulum + yillik bakim daha dusuk operasyon maliyeti tasir.
+

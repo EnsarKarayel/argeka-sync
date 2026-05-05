@@ -1,4 +1,4 @@
-# Akis CRM Urun Paketleri
+﻿# ARGEKA CRM Urun Paketleri
 
 ## Cloud Pro
 
@@ -39,3 +39,4 @@ Onerilen fiyat: proje bazli.
 ## Ticari karar
 
 Ilk satis icin self-hosted ve desktop daha az altyapi maliyeti tasir. Cloud surum marka guveni ve surekli gelir icin tutulmali, fakat ilk kurumsal musteri self-hosted paketle kapatilabilir.
+

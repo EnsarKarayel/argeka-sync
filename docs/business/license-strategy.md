@@ -1,8 +1,8 @@
-# Lisans Stratejisi
+﻿# Lisans Stratejisi
 
 ## Hedef
 
-Akis CRM hem cloud hem self-hosted hem desktop calisabilmeli. Lisans sistemi bunu engellemeden gelir kontrolu saglamali.
+ARGEKA CRM hem cloud hem self-hosted hem desktop calisabilmeli. Lisans sistemi bunu engellemeden gelir kontrolu saglamali.
 
 ## Lisans tipleri
 
@@ -30,3 +30,4 @@ Offline aktivasyon:
 ## Kontrol noktasi
 
 Self-hosted urunde cok agresif kilit koyma. Kurumsal musteri guven ister. Lisans kontrolu sade, sozlesme ve destek yenileme modeli guclu olmali.
+

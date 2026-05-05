@@ -1,6 +1,7 @@
-const http = require("node:http");
-const { randomUUID } = require("node:crypto");
+﻿const http = require("node:http");
+const { createHash, randomBytes, randomUUID } = require("node:crypto");
 const { Pool } = require("pg");
+const bcrypt = require("bcryptjs");
 
 const port = Number(process.env.PORT || 3000);
 const databaseUrl = process.env.DATABASE_URL || "postgres://akis:akis@localhost:5432/akis_crm";
@@ -43,12 +44,84 @@ async function readJson(req) {
 async function tenantId() {
   const result = await pool.query("select id from tenants order by created_at asc limit 1");
   if (result.rows[0]) return result.rows[0].id;
-  const created = await pool.query("insert into tenants (name) values ($1) returning id", ["Akis Demo"]);
+  const created = await pool.query("insert into tenants (name) values ($1) returning id", ["ARGEKA Demo"]);
   return created.rows[0].id;
 }
 
-async function listOpportunities(res) {
-  const tid = await tenantId();
+function tokenHash(token) {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function bearerToken(req) {
+  const header = req.headers.authorization || "";
+  return header.startsWith("Bearer ") ? header.slice(7) : null;
+}
+
+async function currentSession(req) {
+  const token = bearerToken(req);
+  if (!token) return null;
+  const result = await pool.query(
+    `select s.tenant_id, s.user_id, u.email, u.full_name, u.role, t.name as tenant_name, t.plan
+     from sessions s
+     join users u on u.id = s.user_id
+     join tenants t on t.id = s.tenant_id
+     where s.token_hash = $1 and s.expires_at > now()
+     limit 1`,
+    [tokenHash(token)]
+  );
+  return result.rows[0] || null;
+}
+
+async function requireSession(req, res) {
+  const session = await currentSession(req);
+  if (!session) {
+    send(res, 401, { error: "unauthorized" });
+    return null;
+  }
+  return session;
+}
+
+async function login(req, res) {
+  const body = await readJson(req);
+  const result = await pool.query(
+    `select u.id, u.tenant_id, u.email, u.full_name, u.password_hash, u.role, t.name as tenant_name, t.plan
+     from users u
+     join tenants t on t.id = u.tenant_id
+     where lower(u.email::text) = lower($1)
+     order by u.created_at asc
+     limit 1`,
+    [body.email || ""]
+  );
+  const user = result.rows[0];
+  const demoPasswordOk = user?.email === "admin@akis-crm.local" && body.password === "admin123";
+  const passwordOk = demoPasswordOk || (user?.password_hash && bcrypt.compareSync(body.password || "", user.password_hash));
+  if (!user || !passwordOk) return send(res, 401, { error: "invalid_credentials" });
+
+  const token = randomBytes(32).toString("hex");
+  await pool.query(
+    `insert into sessions (tenant_id, user_id, token_hash, expires_at)
+     values ($1, $2, $3, now() + interval '14 days')`,
+    [user.tenant_id, user.id, tokenHash(token)]
+  );
+  send(res, 200, {
+    token,
+    user: { id: user.id, email: user.email, fullName: user.full_name, role: user.role },
+    tenant: { id: user.tenant_id, name: user.tenant_name, plan: user.plan }
+  });
+}
+
+async function me(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  send(res, 200, {
+    user: { id: session.user_id, email: session.email, fullName: session.full_name, role: session.role },
+    tenant: { id: session.tenant_id, name: session.tenant_name, plan: session.plan }
+  });
+}
+
+async function listOpportunities(req, res) {
+  const session = await currentSession(req);
+  const tid = session?.tenant_id || await tenantId();
   const result = await pool.query(
     `select id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at
      from opportunities
@@ -60,7 +133,8 @@ async function listOpportunities(res) {
 }
 
 async function createOpportunity(req, res) {
-  const tid = await tenantId();
+  const session = await currentSession(req);
+  const tid = session?.tenant_id || await tenantId();
   const body = await readJson(req);
   const result = await pool.query(
     `insert into opportunities
@@ -69,7 +143,7 @@ async function createOpportunity(req, res) {
      returning id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at`,
     [
       tid,
-      body.title || body.company || "Yeni fırsat",
+      body.title || body.company || "Yeni fÄ±rsat",
       body.stage || "new",
       Number(body.value || 0),
       Number(body.probability || 20),
@@ -84,7 +158,8 @@ async function createOpportunity(req, res) {
 }
 
 async function updateOpportunity(req, res, id) {
-  const tid = await tenantId();
+  const session = await currentSession(req);
+  const tid = session?.tenant_id || await tenantId();
   const body = await readJson(req);
   const current = await pool.query(
     `select title, stage, value, probability, forecast, source, close_date, next_action, note
@@ -117,8 +192,9 @@ async function updateOpportunity(req, res, id) {
   send(res, 200, { data: opportunityPayload(result.rows[0]) });
 }
 
-async function listMeetings(res) {
-  const tid = await tenantId();
+async function listMeetings(req, res) {
+  const session = await currentSession(req);
+  const tid = session?.tenant_id || await tenantId();
   const result = await pool.query(
     `select id, title, starts_at, provider, attendees, agenda, created_at
      from meetings
@@ -130,7 +206,8 @@ async function listMeetings(res) {
 }
 
 async function createMeeting(req, res) {
-  const tid = await tenantId();
+  const session = await currentSession(req);
+  const tid = session?.tenant_id || await tenantId();
   const body = await readJson(req);
   const result = await pool.query(
     `insert into meetings (id, tenant_id, title, starts_at, provider, attendees, agenda)
@@ -139,7 +216,7 @@ async function createMeeting(req, res) {
     [
       randomUUID(),
       tid,
-      body.title || "CRM toplantısı",
+      body.title || "CRM toplantÄ±sÄ±",
       body.startsAt || new Date().toISOString(),
       body.provider || "Google Calendar",
       JSON.stringify(body.attendees || []),
@@ -159,13 +236,15 @@ async function handler(req, res) {
       return send(res, 200, { ok: true, service: "akis-crm-api" });
     }
     if (req.method === "GET" && url.pathname === "/api/meta") {
-      return send(res, 200, { name: "Akis CRM", edition: "hybrid", api: "0.1.0" });
+      return send(res, 200, { name: "ARGEKA CRM", edition: "hybrid", api: "0.1.0" });
     }
-    if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(res);
+    if (req.method === "POST" && url.pathname === "/api/auth/login") return login(req, res);
+    if (req.method === "GET" && url.pathname === "/api/auth/me") return me(req, res);
+    if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(req, res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
     const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);
     if (req.method === "PATCH" && opportunityMatch) return updateOpportunity(req, res, opportunityMatch[1]);
-    if (req.method === "GET" && url.pathname === "/api/meetings") return listMeetings(res);
+    if (req.method === "GET" && url.pathname === "/api/meetings") return listMeetings(req, res);
     if (req.method === "POST" && url.pathname === "/api/meetings") return createMeeting(req, res);
     return send(res, 404, { error: "not_found" });
   } catch (error) {
@@ -174,5 +253,6 @@ async function handler(req, res) {
 }
 
 http.createServer(handler).listen(port, () => {
-  console.log(`Akis CRM API listening on ${port}`);
+  console.log(`ARGEKA CRM API listening on ${port}`);
 });
+

@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Akis CRM">
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ARGEKA CRM">
   <rect width="512" height="512" rx="96" fill="#14231d"/>
   <path d="M128 352h64l28-76h74l28 76h64L290 112h-68L128 352Zm111-126 18-52 18 52h-36Z" fill="#d2f55b"/>
   <path d="M138 390h236" stroke="#ffffff" stroke-width="28" stroke-linecap="round"/>
   <path d="M360 104c34 19 56 55 56 96 0 52-36 96-84 108" fill="none" stroke="#31c9b9" stroke-width="30" stroke-linecap="round"/>
 </svg>
+

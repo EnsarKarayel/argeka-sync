@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   color-scheme: light;
   --bg: #f6f7f4;
   --surface: #ffffff;
@@ -25,6 +25,40 @@ body {
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
+}
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: #14231d;
+}
+
+.login-screen.is-hidden {
+  display: none;
+}
+
+.login-panel {
+  display: grid;
+  width: min(420px, 100%);
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
+}
+
+.login-panel h1 {
+  font-size: 28px;
+}
+
+.login-panel p,
+.login-panel small {
+  color: var(--muted);
 }
 
 button,
@@ -1071,3 +1105,4 @@ textarea:focus {
     grid-template-columns: repeat(4, 82vw);
   }
 }
+

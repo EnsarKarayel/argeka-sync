@@ -1,6 +1,6 @@
-# Akis CRM Self-hosted
+﻿# ARGEKA CRM Self-hosted
 
-Bu paket Akis CRM web, API ve PostgreSQL servislerini tek Docker Compose dosyasi ile calistirir.
+Bu paket ARGEKA CRM web, API ve PostgreSQL servislerini tek Docker Compose dosyasi ile calistirir.
 
 ## Kurulum
 
@@ -33,3 +33,4 @@ http://localhost:3000/health
 - `akis-crm-worker`: mail/takvim/webhook kuyrugu
 - Lisans aktivasyon servisi
 - SSL ve domain otomasyonu
+
