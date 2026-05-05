@@ -22,6 +22,8 @@ Kurulumsuz çalışan ilk web CRM prototipi. Dosyayı tarayıcıda açarak pipel
 - IndexedDB tabanlı yerel veri katmanı
 - SEO meta etiketleri, favicon, manifest ve iOS Home Screen uyumluluğu
 - Ücretli Pro plan ve ödeme akışı yeri
+- Cloud, self-hosted ve desktop satış paketi tasarımı
+- Docker/Nginx self-hosted statik dağıtım taslağı
 
 ## Gercek urun icin sonraki mimari
 
@@ -34,6 +36,26 @@ Kurulumsuz çalışan ilk web CRM prototipi. Dosyayı tarayıcıda açarak pipel
 - Ödeme: Stripe Billing veya yerel sanal POS/iyzico
 - Veri köprüsü: webhook alıcıları, outbound webhook, REST API anahtarları
 - Güvenlik: tenant ayrımı, şifreli token saklama, audit log, rol bazlı yetki
+- Dağıtım: Cloud SaaS, Docker self-hosted ve Windows desktop paketleri
+- Lisans: cloud abonelik, server lisansı, desktop lisansı
+
+## Dagitim paketleri
+
+- Cloud Pro: bizim altyapımızda aylık abonelik
+- Self-hosted Server: müşterinin kendi sunucusunda yıllık lisans
+- Desktop Starter: Windows kurulum paketi, tek kullanıcı veya küçük ofis
+- Enterprise: özel entegrasyon, kurulum ve destek
+
+Self-hosted statik prototipi Docker ile çalıştırmak için:
+
+```powershell
+docker compose -f deployment/self-hosted/docker-compose.yml up -d --build
+```
+
+Ürün ve lisans detayları:
+
+- `docs/business/product-packages.md`
+- `docs/business/license-strategy.md`
 
 ## SaaS ve veritabani
 

@@ -642,7 +642,8 @@ function switchView(viewId) {
     calendar: "Takvim",
     inbox: "E-posta",
     integrations: "Entegrasyon",
-    billing: "Abonelik"
+    billing: "Abonelik",
+    distribution: "Dağıtım"
   };
   document.querySelector("#view-title").textContent = titleMap[viewId] || "Akis CRM";
 }

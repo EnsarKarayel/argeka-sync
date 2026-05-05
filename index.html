@@ -73,6 +73,10 @@
             <span aria-hidden="true">₺</span>
             Abonelik
           </button>
+          <button class="nav-item" type="button" data-view-target="distribution">
+            <span aria-hidden="true">▣</span>
+            Dağıtım
+          </button>
         </nav>
 
         <div class="account-card">
@@ -417,6 +421,63 @@
                 <li>IndexedDB yerel veri katmanı eklendi</li>
                 <li>Checkout uç noktası bekleniyor</li>
               </ol>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="distribution" aria-label="Dağıtım">
+          <div class="distribution-layout">
+            <section class="package-panel">
+              <div class="section-heading">
+                <span>Satış paketleri</span>
+                <span class="pill success">Hibrit model</span>
+              </div>
+              <div class="package-grid">
+                <article class="package-card">
+                  <span class="source-tag">Cloud</span>
+                  <h2>Akis CRM Cloud</h2>
+                  <p>Bizim altyapımızda aylık abonelik. Hızlı başlamak isteyen küçük ekipler için.</p>
+                  <strong>₺749 / ay</strong>
+                </article>
+                <article class="package-card">
+                  <span class="source-tag">Self-hosted</span>
+                  <h2>Akis CRM Server</h2>
+                  <p>Müşteri kendi VPS veya şirket sunucusuna kurar. KVKK ve iç ağ hassasiyeti olan firmalar için.</p>
+                  <strong>₺24.900 / yıl</strong>
+                </article>
+                <article class="package-card">
+                  <span class="source-tag">Desktop</span>
+                  <h2>Akis CRM Desktop</h2>
+                  <p>Windows kurulum paketi. Tek kullanıcı veya küçük ofis için local veritabanı ile çalışır.</p>
+                  <strong>₺9.900 tek sefer</strong>
+                </article>
+              </div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Kurulum seçenekleri</span>
+                <span class="pill">Roadmap</span>
+              </div>
+              <ol class="deploy-steps">
+                <li><strong>Docker self-hosted:</strong> Nginx, API ve PostgreSQL ile tek komut kurulum.</li>
+                <li><strong>Windows installer:</strong> Tauri/Electron kabuğu, SQLite veya local API.</li>
+                <li><strong>Cloud:</strong> Yönetilen PostgreSQL, yedekleme, SSL, mail/takvim OAuth.</li>
+                <li><strong>Lisans:</strong> Online aktivasyon, offline lisans dosyası ve yıllık bakım.</li>
+              </ol>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Maliyet stratejisi</span>
+                <span class="pill">Kontrol</span>
+              </div>
+              <ul class="mobile-checklist">
+                <li>Cloud müşteriler aylık gelir ve merkezi operasyon sağlar.</li>
+                <li>Self-hosted müşteriler altyapı maliyetini kendi üstlenir.</li>
+                <li>Desktop paket destek yükü düşük, giriş ürünü olarak çalışır.</li>
+                <li>Enterprise kurulumlar entegrasyon ve destek geliri üretir.</li>
+              </ul>
             </section>
           </div>
         </section>

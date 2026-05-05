@@ -29,3 +29,5 @@
 - Takvim, toplantinin yaninda degil ana modul olmali.
 - Gmail/Outlook izinleri minimum scope ile baslamali.
 - Multi-tenant izolasyon backend tarafinda zorunlu olmali.
+- Urun sadece cloud degil; self-hosted server ve desktop paketleri de ayni kod tabanindan cikmali.
+- Ilk gelir icin self-hosted kurulum + yillik bakim daha dusuk operasyon maliyeti tasir.

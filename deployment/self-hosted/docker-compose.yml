@@ -1,0 +1,14 @@
+services:
+  akis-crm-web:
+    build:
+      context: ../..
+      dockerfile: deployment/self-hosted/Dockerfile
+    container_name: akis-crm-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
