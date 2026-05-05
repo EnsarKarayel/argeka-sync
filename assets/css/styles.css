@@ -882,6 +882,25 @@ textarea:focus {
   margin-bottom: 14px;
 }
 
+.admin-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.admin-form select[multiple] {
+  height: auto;
+  min-height: 118px;
+  padding: 8px;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
 .compact-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;

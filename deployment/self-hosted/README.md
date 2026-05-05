@@ -42,9 +42,19 @@ API kontrolu:
 http://localhost:3000/health
 ```
 
+## Yedekleme ve aktarim
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\backup.ps1
+powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\argeka-crm-YYYYMMDD-HHMMSS.sql
+powershell -ExecutionPolicy Bypass -File .\transfer.ps1 -Format csv
+```
+
+Yonetim ekraninda manuel kullanici olusturma, rol/veri kapsami atama, kolon gizleme, lisans aktivasyonu ve JSON/CSV/SQL dis aktarim vardir.
+
 ## Sonraki faz
 
 - `akis-crm-worker`: mail/takvim/webhook kuyrugu
-- Lisans aktivasyon servisi
+- Lisans aktivasyon servisinin online dogrulama merkezi
 - SSL ve domain otomasyonu
 

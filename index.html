@@ -39,7 +39,7 @@
   </head>
   <body>
     <section class="login-screen" id="loginScreen" aria-label="Giriş">
-      <form class="login-panel" id="loginForm">
+      <form class="login-panel" id="loginForm" method="post" autocomplete="on">
         <span class="brand-mark">A</span>
         <h1>ARGEKA CRM</h1>
         <p>�?irket çalışma alanına giriş yapın.</p>
@@ -49,7 +49,7 @@
         </label>
         <label>
           �?ifre
-          <input name="password" type="password" value="admin123" required>
+          <input name="password" type="password" placeholder="admin123" required>
         </label>
         <button class="primary-button" type="submit">Giriş yap</button>
         <small id="loginMessage">Demo: admin@akis-crm.local / admin123</small>
@@ -161,14 +161,7 @@
                 <div class="table-scroll">
                   <table class="opportunity-table">
                     <thead>
-                      <tr>
-                        <th>Fırsat</th>
-                        <th>Aşama</th>
-                        <th>Olasılık</th>
-                        <th>Kapanış</th>
-                        <th>Forecast</th>
-                        <th>Sorumlu</th>
-                      </tr>
+                      <tr id="opportunityTableHead"></tr>
                     </thead>
                     <tbody id="opportunityTable"></tbody>
                   </table>
@@ -517,8 +510,54 @@
             <section class="panel-block">
               <div class="section-heading">
                 <span>Kullanıcılar</span>
-                <button class="ghost-button" id="inviteUserButton" type="button">Davet taslağı</button>
+                <span class="pill">Manuel</span>
               </div>
+              <form class="admin-form" id="adminUserForm">
+                <div class="compact-fields">
+                  <label>
+                    Ad soyad
+                    <input name="fullName" required placeholder="İş Geliştirme Lideri">
+                  </label>
+                  <label>
+                    E-posta
+                    <input name="email" type="email" required placeholder="lider@firma.com">
+                  </label>
+                </div>
+                <div class="compact-fields">
+                  <label>
+                    Şifre
+                    <input name="password" type="password" minlength="6" required placeholder="En az 6 karakter">
+                  </label>
+                  <label>
+                    Rol
+                    <select name="roleId" id="adminRoleSelect" required></select>
+                  </label>
+                </div>
+                <div class="compact-fields">
+                  <label>
+                    Veri kapsamı
+                    <select name="dataScope">
+                      <option value="own">Sadece kendi kayıtları</option>
+                      <option value="team">Ekip kayıtları</option>
+                      <option value="all">Tüm firma kayıtları</option>
+                    </select>
+                  </label>
+                  <label>
+                    Kapalı kolonlar
+                    <select name="hiddenColumns" multiple size="4">
+                      <option value="value">Değer</option>
+                      <option value="probability">Olasılık</option>
+                      <option value="forecast">Forecast</option>
+                      <option value="closeDate">Kapanış</option>
+                      <option value="owner">Sorumlu</option>
+                      <option value="email">E-posta</option>
+                      <option value="note">Not</option>
+                      <option value="nextAction">Sonraki adım</option>
+                    </select>
+                  </label>
+                </div>
+                <button class="primary-button" type="submit">Kullanıcı oluştur</button>
+              </form>
               <div class="user-list" id="adminUserList"></div>
             </section>
 
@@ -539,7 +578,63 @@
                 <li><strong>Web:</strong> http://localhost:8080</li>
                 <li><strong>API:</strong> http://localhost:3000/health</li>
                 <li><strong>Veritabanı:</strong> PostgreSQL Docker volume üzerinde kalıcı çalışır.</li>
-                <li><strong>Yedek:</strong> Üretimden önce otomatik backup komutu eklenecek.</li>
+                <li><strong>Yedek:</strong> `backup.ps1` ile alınır, `restore.ps1` ile geri yüklenir.</li>
+              </ol>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Lisans aktivasyonu</span>
+                <span class="pill" id="licenseStatusPill">Deneme</span>
+              </div>
+              <form class="admin-form" id="licenseForm">
+                <div class="compact-fields">
+                  <label>
+                    Müşteri adı
+                    <input name="customerName" required placeholder="Firma Ünvanı">
+                  </label>
+                  <label>
+                    Lisans anahtarı
+                    <input name="licenseKey" required placeholder="ARGEKA-2026-FIRMA-XXXXX">
+                  </label>
+                </div>
+                <div class="compact-fields">
+                  <label>
+                    Sürüm
+                    <select name="edition">
+                      <option value="self-hosted">Self-hosted</option>
+                      <option value="cloud">Cloud</option>
+                      <option value="desktop">Desktop</option>
+                      <option value="enterprise">Enterprise</option>
+                    </select>
+                  </label>
+                  <label>
+                    Kullanıcı limiti
+                    <input name="seats" type="number" min="1" value="5">
+                  </label>
+                </div>
+                <label>
+                  Bitiş tarihi
+                  <input name="expiresAt" type="date">
+                </label>
+                <button class="primary-button" type="submit">Lisansı kaydet</button>
+              </form>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Yedekleme ve aktarım</span>
+                <span class="pill">Veri güvenliği</span>
+              </div>
+              <div class="admin-actions">
+                <button class="secondary-button" id="downloadJsonExportButton" type="button">JSON dışa aktar</button>
+                <button class="secondary-button" id="downloadCsvExportButton" type="button">CSV dışa aktar</button>
+                <button class="secondary-button" id="downloadSqlExportButton" type="button">SQL dışa aktar</button>
+              </div>
+              <ol class="deploy-steps">
+                <li><strong>Backup:</strong> PowerShell üzerinden tam PostgreSQL dump alır.</li>
+                <li><strong>Restore:</strong> Seçilen `.sql` dosyasını PostgreSQL içine geri yükler.</li>
+                <li><strong>Aktarım:</strong> JSON, CSV ve taşınabilir SQL çıktısı başka DB süreçlerine temel olur.</li>
               </ol>
             </section>
           </div>

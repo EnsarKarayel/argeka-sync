@@ -206,6 +206,7 @@ const activityLog = document.querySelector("#activityLog");
 const billingLog = document.querySelector("#billingLog");
 const emailList = document.querySelector("#emailList");
 const opportunityTable = document.querySelector("#opportunityTable");
+const opportunityTableHead = document.querySelector("#opportunityTableHead");
 const meetingList = document.querySelector("#meetingList");
 const actionList = document.querySelector("#actionList");
 const minuteList = document.querySelector("#minuteList");
@@ -221,6 +222,10 @@ const adminSummary = document.querySelector("#adminSummary");
 const adminUserList = document.querySelector("#adminUserList");
 const adminHealth = document.querySelector("#adminHealth");
 const adminPlanPill = document.querySelector("#adminPlanPill");
+const adminUserForm = document.querySelector("#adminUserForm");
+const adminRoleSelect = document.querySelector("#adminRoleSelect");
+const licenseForm = document.querySelector("#licenseForm");
+const licenseStatusPill = document.querySelector("#licenseStatusPill");
 const databaseConfig = {
   name: "akis-crm-db",
   version: 1,
@@ -359,6 +364,22 @@ async function createOpportunityOnApi(deal) {
     body: JSON.stringify(dealToApiOpportunity(deal))
   });
   return payload?.data ? apiOpportunityToDeal(payload.data) : null;
+}
+
+async function createAdminUserOnApi(user) {
+  const payload = await apiRequest("/api/admin/users", {
+    method: "POST",
+    body: JSON.stringify(user)
+  });
+  return payload?.data || null;
+}
+
+async function activateLicenseOnApi(license) {
+  const payload = await apiRequest("/api/admin/license", {
+    method: "POST",
+    body: JSON.stringify(license)
+  });
+  return payload?.data || null;
 }
 
 async function updateOpportunityOnApi(deal) {
@@ -579,46 +600,65 @@ function renderDetail() {
   }
 
   detailPanel.className = "detail-panel";
+  const hidden = currentHiddenColumns();
+  const detailRows = [
+    ["contact", "Kişi", deal.contact],
+    ["email", "E-posta", deal.email],
+    ["value", "Değer", formatMoney.format(deal.value)],
+    ["probability", "Olasılık", `%${Number(deal.probability || 0)}`],
+    ["closeDate", "Kapanış", deal.closeDate || "Planlanacak"],
+    ["forecast", "Forecast", deal.forecast || "Pipeline"],
+    ["sector", "Sektör", deal.sector || "Genel"],
+    ["territory", "Bölge", deal.territory || "TR"],
+    ["source", "Kaynak", deal.source],
+    ["owner", "Sahip", deal.owner || "-"],
+    ["nextAction", "Sonraki", deal.nextAction || "-"],
+    ["note", "Not", deal.note || "-"]
+  ].filter(([key]) => !hidden.has(key));
   detailPanel.innerHTML = `
     <h2>${escapeHtml(deal.company)}</h2>
     <dl>
-      <dt>Kişi</dt><dd>${escapeHtml(deal.contact)}</dd>
-      <dt>E-posta</dt><dd>${escapeHtml(deal.email)}</dd>
-      <dt>Değer</dt><dd>${formatMoney.format(deal.value)}</dd>
-      <dt>Olasılık</dt><dd>%${Number(deal.probability || 0)}</dd>
-      <dt>Kapanış</dt><dd>${escapeHtml(deal.closeDate || "Planlanacak")}</dd>
-      <dt>Forecast</dt><dd>${escapeHtml(deal.forecast || "Pipeline")}</dd>
-      <dt>Sektör</dt><dd>${escapeHtml(deal.sector || "Genel")}</dd>
-      <dt>Bölge</dt><dd>${escapeHtml(deal.territory || "TR")}</dd>
-      <dt>Kaynak</dt><dd>${escapeHtml(deal.source)}</dd>
-      <dt>Sahip</dt><dd>${escapeHtml(deal.owner || "-")}</dd>
-      <dt>Sonraki</dt><dd>${escapeHtml(deal.nextAction || "-")}</dd>
-      <dt>Not</dt><dd>${escapeHtml(deal.note || "-")}</dd>
+      ${detailRows.map(([, label, value]) => `<dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd>`).join("")}
     </dl>
   `;
 }
 
 function renderOpportunityTable() {
+  const hidden = currentHiddenColumns();
+  const tableColumns = [
+    { key: "company", label: "Fırsat" },
+    { key: "stage", label: "Aşama" },
+    { key: "probability", label: "Olasılık" },
+    { key: "closeDate", label: "Kapanış" },
+    { key: "forecast", label: "Forecast" },
+    { key: "owner", label: "Sorumlu" }
+  ].filter((column) => !hidden.has(column.key));
+
+  opportunityTableHead.innerHTML = tableColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("");
   opportunityTable.innerHTML = "";
   state.deals.forEach((deal) => {
     const row = document.createElement("tr");
     row.dataset.tableDeal = deal.id;
     row.classList.toggle("is-selected", deal.id === state.selectedDealId);
-    row.innerHTML = `
-      <td><strong>${escapeHtml(deal.company)}</strong><br><small>${escapeHtml(deal.contact)}</small></td>
-      <td>${escapeHtml(getStageLabel(deal.stage))}</td>
-      <td>
+    const cellMap = {
+      company: `<strong>${escapeHtml(deal.company)}</strong><br><small>${escapeHtml(deal.contact)}</small>`,
+      stage: escapeHtml(getStageLabel(deal.stage)),
+      probability: `
         <span class="probability-bar">
           <span><i style="width: ${Math.min(Number(deal.probability || 0), 100)}%"></i></span>
           <b>%${Number(deal.probability || 0)}</b>
-        </span>
-      </td>
-      <td>${escapeHtml(deal.closeDate || "Planlanacak")}</td>
-      <td><span class="source-tag">${escapeHtml(deal.forecast || "Pipeline")}</span></td>
-      <td>${escapeHtml(deal.owner || "-")}</td>
-    `;
+        </span>`,
+      closeDate: escapeHtml(deal.closeDate || "Planlanacak"),
+      forecast: `<span class="source-tag">${escapeHtml(deal.forecast || "Pipeline")}</span>`,
+      owner: escapeHtml(deal.owner || "-")
+    };
+    row.innerHTML = tableColumns.map((column) => `<td>${cellMap[column.key]}</td>`).join("");
     opportunityTable.appendChild(row);
   });
+}
+
+function currentHiddenColumns() {
+  return new Set(state.session?.user?.hiddenColumns || []);
 }
 
 function getStageLabel(stage) {
@@ -779,8 +819,26 @@ function renderAdmin() {
     apiPort: "3000",
     backupStatus: "planned"
   };
+  const roles = overview?.roles || [];
+  const license = overview?.license || null;
+  const backup = overview?.backup || null;
 
   adminPlanPill.textContent = `${tenant.plan || "pro"} · ${tenant.billing_status || "trialing"}`;
+  if (licenseStatusPill) {
+    licenseStatusPill.textContent = license?.status || "trialing";
+    licenseStatusPill.classList.toggle("success", license?.status === "active");
+  }
+  if (adminRoleSelect) {
+    adminRoleSelect.innerHTML = roles.length
+      ? roles.map((role) => `<option value="${escapeHtml(role.id)}">${escapeHtml(role.name)} · ${escapeHtml(scopeLabel(role.dataScope))}</option>`).join("")
+      : `<option value="">Rol bekleniyor</option>`;
+  }
+  if (licenseForm && license) {
+    licenseForm.elements.customerName.value = license.customer_name || license.customerName || "";
+    licenseForm.elements.edition.value = license.edition || "self-hosted";
+    licenseForm.elements.seats.value = license.seats || 5;
+    licenseForm.elements.expiresAt.value = license.expires_at ? String(license.expires_at).slice(0, 10) : "";
+  }
   adminSummary.innerHTML = `
     <article>
       <span>Firma</span>
@@ -798,6 +856,14 @@ function renderAdmin() {
       <span>Aksiyon</span>
       <strong>${Number(counts.actions || 0)}</strong>
     </article>
+    <article>
+      <span>Lisans</span>
+      <strong>${escapeHtml(license?.status || "Deneme")}</strong>
+    </article>
+    <article>
+      <span>Kullanıcı limiti</span>
+      <strong>${Number(license?.seats || 5)}</strong>
+    </article>
   `;
 
   adminUserList.innerHTML = users.length
@@ -806,7 +872,7 @@ function renderAdmin() {
           <span class="avatar">${escapeHtml((user.fullName || user.email || "A").slice(0, 1).toLocaleUpperCase("tr-TR"))}</span>
           <div>
             <strong>${escapeHtml(user.fullName || "Kullanıcı")}</strong>
-            <small>${escapeHtml(user.email || "-")}</small>
+            <small>${escapeHtml(user.email || "-")} · ${escapeHtml(scopeLabel(user.dataScope))}</small>
           </div>
           <span class="source-tag">${escapeHtml(user.role || "member")}</span>
         </article>
@@ -836,9 +902,17 @@ function renderAdmin() {
     </article>
     <article>
       <span>Yedek</span>
-      <strong>${install.backupStatus === "planned" ? "Planlandı" : escapeHtml(install.backupStatus)}</strong>
+      <strong>${backup ? escapeHtml(new Date(backup.created_at || backup.createdAt).toLocaleString("tr-TR")) : "Bekliyor"}</strong>
     </article>
   `;
+}
+
+function scopeLabel(scope) {
+  return {
+    own: "Kendi kayıtları",
+    team: "Ekip kayıtları",
+    all: "Tüm firma"
+  }[scope] || "Kendi kayıtları";
 }
 
 async function addDeal(deal) {
@@ -951,10 +1025,39 @@ document.querySelector("#refreshAdminButton").addEventListener("click", async ()
   render();
 });
 
-document.querySelector("#inviteUserButton").addEventListener("click", () => {
-  logActivity("Kullanıcı daveti için e-posta taslağı hazırlandı.");
+adminUserForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(adminUserForm);
+  const hiddenColumns = formData.getAll("hiddenColumns");
+  const payload = Object.fromEntries(formData.entries());
+  payload.hiddenColumns = hiddenColumns;
+  try {
+    await createAdminUserOnApi(payload);
+    adminUserForm.reset();
+    await syncAdminOverview();
+    logActivity(`${payload.fullName} kullanıcısı manuel oluşturuldu.`);
+  } catch {
+    logActivity("Kullanıcı oluşturulamadı, rol ve e-posta bilgisini kontrol edin.");
+  }
   render();
 });
+
+licenseForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(licenseForm).entries());
+  try {
+    await activateLicenseOnApi(payload);
+    await syncAdminOverview();
+    logActivity("Lisans bilgisi kaydedildi.");
+  } catch {
+    logActivity("Lisans kaydedilemedi.");
+  }
+  render();
+});
+
+document.querySelector("#downloadJsonExportButton").addEventListener("click", () => downloadAdminExport("json"));
+document.querySelector("#downloadCsvExportButton").addEventListener("click", () => downloadAdminExport("csv"));
+document.querySelector("#downloadSqlExportButton").addEventListener("click", () => downloadAdminExport("sql"));
 
 document.querySelector("#newDealButton").addEventListener("click", () => {
   dealForm.reset();
@@ -1228,7 +1331,36 @@ importFile.addEventListener("change", async () => {
   }
 });
 
+async function downloadAdminExport(format) {
+  try {
+    const response = await fetch(apiUrl(`/api/admin/export?format=${format}`), {
+      headers: state.session?.token ? { authorization: `Bearer ${state.session.token}` } : {}
+    });
+    if (!response.ok) throw new Error("export failed");
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `argeka-crm-export.${format === "json" ? "json" : format}`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    logActivity(`${format.toLocaleUpperCase("tr-TR")} aktarım dosyası hazırlandı.`);
+  } catch {
+    logActivity("Aktarım dosyası oluşturulamadı.");
+  }
+  render();
+}
+
+function cleanSensitiveQueryParams() {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has("password") && !url.searchParams.has("email")) return;
+  url.searchParams.delete("password");
+  url.searchParams.delete("email");
+  window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+}
+
 async function initApp() {
+  cleanSensitiveQueryParams();
   await restoreSession();
   await loadState();
   if (state.session?.token) {

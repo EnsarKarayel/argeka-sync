@@ -32,6 +32,31 @@ Servisleri durdurmak icin:
 
 Docker/WSL ilk kurulumdan sonra Windows yeniden baslatma isteyebilir. Yeniden baslatma gerekirse ayni komutu tekrar calistirin.
 
+## Yönetim, yedek ve aktarım
+
+Yönetim ekranında kullanıcılar manuel oluşturulur. Kullanıcıya rol, veri kapsamı ve kapalı kolonlar atanır. Örneğin aynı `İş geliştirme` rolündeki uzman sadece kendi kayıtlarını görürken lider tüm firma kayıtlarını görebilir; lider veya uzman için `Değer`, `Forecast`, `Not` gibi kolonlar ayrı ayrı kapatılabilir.
+
+Veritabanı yedeği almak için:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\backup.ps1
+```
+
+Yedeği geri yüklemek için:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\argeka-crm-YYYYMMDD-HHMMSS.sql
+```
+
+Başka sistemlere aktarım dosyası üretmek için:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\transfer.ps1 -Format csv
+powershell -ExecutionPolicy Bypass -File .\transfer.ps1 -Format sql
+```
+
+Admin ekranından JSON, CSV ve SQL dışa aktarım da yapılabilir.
+
 ## Calistirma
 
 `index.html` dosyasını tarayıcıda açın. Node, npm veya sunucu gerekmez. PWA service worker sadece gerçek `https` veya `localhost` ortamında devreye girer; `file://` ile açıldığında uygulama yine çalışır.

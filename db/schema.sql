@@ -19,9 +19,25 @@ create table users (
   full_name text not null,
   password_hash text,
   role text not null default 'member',
+  data_scope text not null default 'own',
+  hidden_columns text[] not null default '{}',
   created_at timestamptz not null default now(),
   unique (tenant_id, email)
 );
+
+create table app_roles (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  key text not null,
+  name text not null,
+  data_scope text not null default 'own',
+  hidden_columns text[] not null default '{}',
+  permissions jsonb not null default '{}',
+  created_at timestamptz not null default now(),
+  unique (tenant_id, key)
+);
+
+alter table users add column role_id uuid references app_roles(id) on delete set null;
 
 create table sessions (
   id uuid primary key default gen_random_uuid(),
@@ -128,10 +144,36 @@ create table webhook_endpoints (
   created_at timestamptz not null default now()
 );
 
+create table license_settings (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  license_key_hash text,
+  customer_name text,
+  edition text not null default 'self-hosted',
+  status text not null default 'trialing',
+  seats integer not null default 5,
+  expires_at date,
+  activated_at timestamptz,
+  updated_at timestamptz not null default now(),
+  unique (tenant_id)
+);
+
+create table backup_runs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid references tenants(id) on delete cascade,
+  file_name text not null,
+  status text not null default 'completed',
+  kind text not null default 'backup',
+  size_bytes bigint not null default 0,
+  created_at timestamptz not null default now()
+);
+
 create index opportunities_tenant_stage_idx on opportunities (tenant_id, stage);
 create index opportunities_tenant_close_date_idx on opportunities (tenant_id, close_date);
 create index meetings_tenant_starts_at_idx on meetings (tenant_id, starts_at);
 create index action_items_tenant_due_idx on action_items (tenant_id, due_date);
 create index sessions_token_hash_idx on sessions (token_hash);
 create index sessions_user_idx on sessions (user_id);
+create index app_roles_tenant_idx on app_roles (tenant_id);
+create index backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
 

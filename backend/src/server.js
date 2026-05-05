@@ -17,6 +17,124 @@ function send(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function sendRaw(res, status, contentType, body, headers = {}) {
+  res.writeHead(status, {
+    "content-type": contentType,
+    "access-control-allow-origin": "*",
+    ...headers
+  });
+  res.end(body);
+}
+
+const defaultRoles = [
+  {
+    key: "owner",
+    name: "Sistem sahibi",
+    dataScope: "all",
+    hiddenColumns: [],
+    permissions: { admin: true, users: true, license: true, backup: true, export: true }
+  },
+  {
+    key: "business_development",
+    name: "İş geliştirme",
+    dataScope: "own",
+    hiddenColumns: ["forecast", "probability"],
+    permissions: { opportunities: true, meetings: true }
+  },
+  {
+    key: "sales_operations",
+    name: "Satış operasyon",
+    dataScope: "team",
+    hiddenColumns: ["note"],
+    permissions: { opportunities: true, meetings: true, export: true }
+  },
+  {
+    key: "finance",
+    name: "Finans",
+    dataScope: "all",
+    hiddenColumns: ["nextAction", "note"],
+    permissions: { opportunities: true, billing: true, export: true }
+  }
+];
+
+async function ensureSchema() {
+  await pool.query(`
+    create table if not exists app_roles (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      key text not null,
+      name text not null,
+      data_scope text not null default 'own',
+      hidden_columns text[] not null default '{}',
+      permissions jsonb not null default '{}',
+      created_at timestamptz not null default now(),
+      unique (tenant_id, key)
+    );
+
+    alter table users add column if not exists role_id uuid references app_roles(id) on delete set null;
+    alter table users add column if not exists data_scope text not null default 'own';
+    alter table users add column if not exists hidden_columns text[] not null default '{}';
+
+    create table if not exists license_settings (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      license_key_hash text,
+      customer_name text,
+      edition text not null default 'self-hosted',
+      status text not null default 'trialing',
+      seats integer not null default 5,
+      expires_at date,
+      activated_at timestamptz,
+      updated_at timestamptz not null default now(),
+      unique (tenant_id)
+    );
+
+    create table if not exists backup_runs (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid references tenants(id) on delete cascade,
+      file_name text not null,
+      status text not null default 'completed',
+      kind text not null default 'backup',
+      size_bytes bigint not null default 0,
+      created_at timestamptz not null default now()
+    );
+
+    create index if not exists app_roles_tenant_idx on app_roles (tenant_id);
+    create index if not exists backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
+  `);
+
+  const tid = await tenantId();
+  for (const role of defaultRoles) {
+    await pool.query(
+      `insert into app_roles (tenant_id, key, name, data_scope, hidden_columns, permissions)
+       values ($1, $2, $3, $4, $5, $6::jsonb)
+       on conflict (tenant_id, key) do update
+       set name = excluded.name,
+           data_scope = excluded.data_scope,
+           hidden_columns = excluded.hidden_columns,
+           permissions = excluded.permissions`,
+      [tid, role.key, role.name, role.dataScope, role.hiddenColumns, JSON.stringify(role.permissions)]
+    );
+  }
+
+  await pool.query(
+    `update users u
+     set role_id = r.id,
+         data_scope = case when u.role = 'owner' then 'all' else u.data_scope end
+     from app_roles r
+     where u.tenant_id = r.tenant_id
+       and r.key = case when u.role = 'owner' then 'owner' else 'business_development' end
+       and u.role_id is null`
+  );
+
+  await pool.query(
+    `insert into license_settings (tenant_id, customer_name, status, edition, seats)
+     values ($1, 'ARGEKA Demo', 'trialing', 'self-hosted', 5)
+     on conflict (tenant_id) do nothing`,
+    [tid]
+  );
+}
+
 function opportunityPayload(row) {
   return {
     id: row.id,
@@ -61,15 +179,45 @@ async function currentSession(req) {
   const token = bearerToken(req);
   if (!token) return null;
   const result = await pool.query(
-    `select s.tenant_id, s.user_id, u.email, u.full_name, u.role, t.name as tenant_name, t.plan
+    `select s.tenant_id, s.user_id, u.email, u.full_name, u.role, u.data_scope, u.hidden_columns,
+            r.key as role_key, r.name as role_name, r.permissions,
+            t.name as tenant_name, t.plan
      from sessions s
      join users u on u.id = s.user_id
      join tenants t on t.id = s.tenant_id
+     left join app_roles r on r.id = u.role_id
      where s.token_hash = $1 and s.expires_at > now()
      limit 1`,
     [tokenHash(token)]
   );
   return result.rows[0] || null;
+}
+
+function sessionUser(session) {
+  return {
+    id: session.user_id,
+    email: session.email,
+    fullName: session.full_name,
+    role: session.role_name || session.role,
+    roleKey: session.role_key || session.role,
+    dataScope: session.data_scope || "own",
+    hiddenColumns: session.hidden_columns || [],
+    permissions: session.permissions || {}
+  };
+}
+
+function isAdmin(session) {
+  return session?.role === "owner" || session?.role_key === "owner" || session?.permissions?.admin === true;
+}
+
+async function requireAdmin(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return null;
+  if (!isAdmin(session)) {
+    send(res, 403, { error: "forbidden" });
+    return null;
+  }
+  return session;
 }
 
 async function requireSession(req, res) {
@@ -84,9 +232,12 @@ async function requireSession(req, res) {
 async function login(req, res) {
   const body = await readJson(req);
   const result = await pool.query(
-    `select u.id, u.tenant_id, u.email, u.full_name, u.password_hash, u.role, t.name as tenant_name, t.plan
+    `select u.id, u.tenant_id, u.email, u.full_name, u.password_hash, u.role, u.data_scope, u.hidden_columns,
+            r.key as role_key, r.name as role_name, r.permissions,
+            t.name as tenant_name, t.plan
      from users u
      join tenants t on t.id = u.tenant_id
+     left join app_roles r on r.id = u.role_id
      where lower(u.email::text) = lower($1)
      order by u.created_at asc
      limit 1`,
@@ -105,7 +256,17 @@ async function login(req, res) {
   );
   send(res, 200, {
     token,
-    user: { id: user.id, email: user.email, fullName: user.full_name, role: user.role },
+    user: sessionUser({
+      user_id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      role_key: user.role_key,
+      role_name: user.role_name,
+      data_scope: user.data_scope,
+      hidden_columns: user.hidden_columns,
+      permissions: user.permissions
+    }),
     tenant: { id: user.tenant_id, name: user.tenant_name, plan: user.plan }
   });
 }
@@ -114,7 +275,7 @@ async function me(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
   send(res, 200, {
-    user: { id: session.user_id, email: session.email, fullName: session.full_name, role: session.role },
+    user: sessionUser(session),
     tenant: { id: session.tenant_id, name: session.tenant_name, plan: session.plan }
   });
 }
@@ -123,7 +284,7 @@ async function adminOverview(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
 
-  const [tenantResult, usersResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
+  const [tenantResult, usersResult, rolesResult, licenseResult, backupResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
     await Promise.all([
       pool.query(
         `select id, name, plan, billing_status, created_at
@@ -132,10 +293,34 @@ async function adminOverview(req, res) {
         [session.tenant_id]
       ),
       pool.query(
-        `select id, email, full_name, role, created_at
-         from users
-         where tenant_id = $1
+        `select u.id, u.email, u.full_name, u.role, u.data_scope, u.hidden_columns, u.created_at,
+                r.id as role_id, r.key as role_key, r.name as role_name
+         from users u
+         left join app_roles r on r.id = u.role_id
+         where u.tenant_id = $1
          order by created_at asc`,
+        [session.tenant_id]
+      ),
+      pool.query(
+        `select id, key, name, data_scope, hidden_columns, permissions
+         from app_roles
+         where tenant_id = $1
+         order by name asc`,
+        [session.tenant_id]
+      ),
+      pool.query(
+        `select customer_name, edition, status, seats, expires_at, activated_at, updated_at
+         from license_settings
+         where tenant_id = $1
+         limit 1`,
+        [session.tenant_id]
+      ),
+      pool.query(
+        `select file_name, status, kind, size_bytes, created_at
+         from backup_runs
+         where tenant_id = $1 or tenant_id is null
+         order by created_at desc
+         limit 1`,
         [session.tenant_id]
       ),
       pool.query("select count(*)::int as count from opportunities where tenant_id = $1", [session.tenant_id]),
@@ -151,9 +336,23 @@ async function adminOverview(req, res) {
       id: user.id,
       email: user.email,
       fullName: user.full_name,
-      role: user.role,
+      role: user.role_name || user.role,
+      roleKey: user.role_key || user.role,
+      roleId: user.role_id,
+      dataScope: user.data_scope,
+      hiddenColumns: user.hidden_columns || [],
       createdAt: user.created_at
     })),
+    roles: rolesResult.rows.map((role) => ({
+      id: role.id,
+      key: role.key,
+      name: role.name,
+      dataScope: role.data_scope,
+      hiddenColumns: role.hidden_columns || [],
+      permissions: role.permissions || {}
+    })),
+    license: licenseResult.rows[0] || null,
+    backup: backupResult.rows[0] || null,
     counts: {
       opportunities: opportunitiesResult.rows[0].count,
       meetings: meetingsResult.rows[0].count,
@@ -166,7 +365,156 @@ async function adminOverview(req, res) {
       database: "PostgreSQL",
       webPort: process.env.WEB_PORT || "8080",
       apiPort: String(port),
-      backupStatus: "planned"
+      backupStatus: backupResult.rows[0]?.status || "planned"
+    }
+  });
+}
+
+async function createAdminUser(req, res) {
+  const session = await requireAdmin(req, res);
+  if (!session) return;
+
+  const body = await readJson(req);
+  if (!body.email || !body.fullName || !body.password || !body.roleId) {
+    return send(res, 400, { error: "missing_fields" });
+  }
+  if (String(body.password).length < 6) {
+    return send(res, 400, { error: "weak_password" });
+  }
+
+  const roleResult = await pool.query(
+    `select id, key, name, data_scope, hidden_columns
+     from app_roles
+     where id = $1 and tenant_id = $2
+     limit 1`,
+    [body.roleId, session.tenant_id]
+  );
+  const role = roleResult.rows[0];
+  if (!role) return send(res, 400, { error: "invalid_role" });
+
+  const dataScope = body.dataScope || role.data_scope || "own";
+  const hiddenColumns = Array.isArray(body.hiddenColumns) ? body.hiddenColumns : role.hidden_columns || [];
+  const passwordHash = bcrypt.hashSync(body.password, 10);
+
+  const result = await pool.query(
+    `insert into users (tenant_id, email, full_name, password_hash, role, role_id, data_scope, hidden_columns)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)
+     returning id, email, full_name, role, data_scope, hidden_columns, created_at`,
+    [session.tenant_id, body.email, body.fullName, passwordHash, role.key, role.id, dataScope, hiddenColumns]
+  );
+  const user = result.rows[0];
+  send(res, 201, {
+    data: {
+      id: user.id,
+      email: user.email,
+      fullName: user.full_name,
+      role: role.name,
+      roleKey: role.key,
+      roleId: role.id,
+      dataScope: user.data_scope,
+      hiddenColumns: user.hidden_columns || [],
+      createdAt: user.created_at
+    }
+  });
+}
+
+async function activateLicense(req, res) {
+  const session = await requireAdmin(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  if (!body.licenseKey || !body.customerName) {
+    return send(res, 400, { error: "missing_fields" });
+  }
+
+  const normalizedKey = String(body.licenseKey).trim();
+  const valid = /^ARGEKA-[A-Z0-9-]{8,}$/i.test(normalizedKey);
+  const status = valid ? "active" : "review_required";
+  const result = await pool.query(
+    `insert into license_settings
+       (tenant_id, license_key_hash, customer_name, edition, status, seats, expires_at, activated_at, updated_at)
+     values ($1, $2, $3, $4, $5, $6, $7, now(), now())
+     on conflict (tenant_id) do update
+     set license_key_hash = excluded.license_key_hash,
+         customer_name = excluded.customer_name,
+         edition = excluded.edition,
+         status = excluded.status,
+         seats = excluded.seats,
+         expires_at = excluded.expires_at,
+         activated_at = excluded.activated_at,
+         updated_at = now()
+     returning customer_name, edition, status, seats, expires_at, activated_at, updated_at`,
+    [
+      session.tenant_id,
+      tokenHash(normalizedKey),
+      body.customerName,
+      body.edition || "self-hosted",
+      status,
+      Number(body.seats || 5),
+      body.expiresAt || null
+    ]
+  );
+  send(res, 200, { data: result.rows[0] });
+}
+
+function csvEscape(value) {
+  const text = String(value ?? "");
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+async function exportData(req, res, format) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+
+  const [opportunities, users] = await Promise.all([
+    pool.query(
+      `select id, title, stage, value, probability, forecast, source, close_date, next_action, note, created_at
+       from opportunities
+       where tenant_id = $1
+       order by created_at desc`,
+      [session.tenant_id]
+    ),
+    pool.query(
+      `select email, full_name, role, data_scope, hidden_columns, created_at
+       from users
+       where tenant_id = $1
+       order by created_at asc`,
+      [session.tenant_id]
+    )
+  ]);
+
+  if (format === "csv") {
+    const header = ["id", "title", "stage", "value", "probability", "forecast", "source", "close_date", "next_action"];
+    const rows = opportunities.rows.map((row) => header.map((key) => csvEscape(row[key])).join(","));
+    return sendRaw(
+      res,
+      200,
+      "text/csv; charset=utf-8",
+      [header.join(","), ...rows].join("\r\n"),
+      { "content-disposition": 'attachment; filename="argeka-opportunities.csv"' }
+    );
+  }
+
+  if (format === "sql") {
+    const statements = opportunities.rows.map((row) => {
+      const values = ["id", "title", "stage", "value", "probability", "forecast", "source", "close_date", "next_action", "note"]
+        .map((key) => row[key] === null || row[key] === undefined ? "null" : `'${String(row[key]).replaceAll("'", "''")}'`);
+      return `insert into opportunities_export (id,title,stage,value,probability,forecast,source,close_date,next_action,note) values (${values.join(",")});`;
+    });
+    return sendRaw(
+      res,
+      200,
+      "application/sql; charset=utf-8",
+      ["-- ARGEKA CRM portable SQL export", ...statements].join("\n"),
+      { "content-disposition": 'attachment; filename="argeka-export.sql"' }
+    );
+  }
+
+  return send(res, 200, {
+    exportedAt: new Date().toISOString(),
+    tenant: session.tenant_id,
+    data: {
+      opportunities: opportunities.rows,
+      users: users.rows
     }
   });
 }
@@ -293,6 +641,9 @@ async function handler(req, res) {
     if (req.method === "POST" && url.pathname === "/api/auth/login") return login(req, res);
     if (req.method === "GET" && url.pathname === "/api/auth/me") return me(req, res);
     if (req.method === "GET" && url.pathname === "/api/admin/overview") return adminOverview(req, res);
+    if (req.method === "POST" && url.pathname === "/api/admin/users") return createAdminUser(req, res);
+    if (req.method === "POST" && url.pathname === "/api/admin/license") return activateLicense(req, res);
+    if (req.method === "GET" && url.pathname === "/api/admin/export") return exportData(req, res, url.searchParams.get("format") || "json");
     if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(req, res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
     const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);
@@ -305,7 +656,14 @@ async function handler(req, res) {
   }
 }
 
-http.createServer(handler).listen(port, () => {
-  console.log(`ARGEKA CRM API listening on ${port}`);
-});
+ensureSchema()
+  .then(() => {
+    http.createServer(handler).listen(port, () => {
+      console.log(`ARGEKA CRM API listening on ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("ARGEKA CRM API startup failed", error);
+    process.exit(1);
+  });
 
