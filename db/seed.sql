@@ -37,3 +37,20 @@ values
   ('11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222', 'Atlas Lojistik karar görüşmesi', 'contacted', 126000, 45, 'Best case', 'Outlook', '2026-05-24', 'Karar vericiyle toplantı', 'Outlook mesajından otomatik fırsat açıldı.')
 on conflict do nothing;
 
+insert into accounts (id, tenant_id, name, sector, territory)
+values
+  ('55555555-5555-4555-8555-555555555551', '11111111-1111-4111-8111-111111111111', 'Nova Teknoloji', 'Teknoloji', 'TR Marmara'),
+  ('55555555-5555-4555-8555-555555555552', '11111111-1111-4111-8111-111111111111', 'Atlas Lojistik', 'Lojistik', 'TR İç Anadolu')
+on conflict (id) do nothing;
+
+insert into contacts (id, tenant_id, account_id, full_name, email, phone)
+values
+  ('66666666-6666-4666-8666-666666666661', '11111111-1111-4111-8111-111111111111', '55555555-5555-4555-8555-555555555551', 'Ayşe Yılmaz', 'ayse@novatek.example', '+90 212 000 00 01'),
+  ('66666666-6666-4666-8666-666666666662', '11111111-1111-4111-8111-111111111111', '55555555-5555-4555-8555-555555555552', 'Mehmet Arslan', 'mehmet@atlas.example', '+90 312 000 00 02')
+on conflict (id) do nothing;
+
+insert into quotes (tenant_id, account_id, contact_id, owner_id, quote_no, title, status, subtotal, discount, tax, total, valid_until, notes)
+values
+  ('11111111-1111-4111-8111-111111111111', '55555555-5555-4555-8555-555555555551', '66666666-6666-4666-8666-666666666661', '22222222-2222-4222-8222-222222222222', 'ARG-2026-0001', 'Nova Teknoloji CRM başlangıç paketi', 'sent', 84000, 0, 16800, 100800, '2026-05-31', 'Demo sonrası yıllık lisans teklifidir.')
+on conflict (tenant_id, quote_no) do nothing;
+

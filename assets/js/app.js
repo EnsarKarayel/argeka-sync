@@ -187,6 +187,12 @@ const state = {
   meetings: [],
   selectedMeetingId: null,
   actions: [],
+  accounts: [],
+  contacts: [],
+  quotes: [],
+  selectedQuoteId: null,
+  tasks: [],
+  integrationSettings: [],
   minutes: [],
   calendarEvents: [],
   activity: [],
@@ -228,6 +234,26 @@ const adminTeamSelect = document.querySelector("#adminTeamSelect");
 const licenseForm = document.querySelector("#licenseForm");
 const licenseStatusPill = document.querySelector("#licenseStatusPill");
 const adminAuditLog = document.querySelector("#adminAuditLog");
+const accountForm = document.querySelector("#accountForm");
+const accountList = document.querySelector("#accountList");
+const accountCountPill = document.querySelector("#accountCountPill");
+const contactForm = document.querySelector("#contactForm");
+const contactList = document.querySelector("#contactList");
+const contactAccountSelect = document.querySelector("#contactAccountSelect");
+const contactCountPill = document.querySelector("#contactCountPill");
+const quoteForm = document.querySelector("#quoteForm");
+const quoteList = document.querySelector("#quoteList");
+const quoteAccountSelect = document.querySelector("#quoteAccountSelect");
+const quoteContactSelect = document.querySelector("#quoteContactSelect");
+const downloadQuoteButton = document.querySelector("#downloadQuoteButton");
+const taskForm = document.querySelector("#taskForm");
+const taskList = document.querySelector("#taskList");
+const taskOpportunitySelect = document.querySelector("#taskOpportunitySelect");
+const openTaskPill = document.querySelector("#openTaskPill");
+const oauthSettingsForm = document.querySelector("#oauthSettingsForm");
+const oauthSettingsList = document.querySelector("#oauthSettingsList");
+const oauthProviderSelect = document.querySelector("#oauthProviderSelect");
+const oauthRedirectUri = document.querySelector("#oauthRedirectUri");
 const databaseConfig = {
   name: "akis-crm-db",
   version: 1,
@@ -368,6 +394,79 @@ async function createOpportunityOnApi(deal) {
   return payload?.data ? apiOpportunityToDeal(payload.data) : null;
 }
 
+async function syncBusinessDataFromApi() {
+  if (!state.session?.token) return;
+  try {
+    const [accounts, contacts, quotes, tasks, integrationSettings] = await Promise.all([
+      apiRequest("/api/accounts"),
+      apiRequest("/api/contacts"),
+      apiRequest("/api/quotes"),
+      apiRequest("/api/actions"),
+      apiRequest("/api/integration-settings")
+    ]);
+    state.accounts = Array.isArray(accounts?.data) ? accounts.data : [];
+    state.contacts = Array.isArray(contacts?.data) ? contacts.data : [];
+    state.quotes = Array.isArray(quotes?.data) ? quotes.data : [];
+    state.selectedQuoteId = state.quotes.some((quote) => quote.id === state.selectedQuoteId)
+      ? state.selectedQuoteId
+      : state.quotes[0]?.id || null;
+    state.tasks = Array.isArray(tasks?.data) ? tasks.data : [];
+    state.integrationSettings = Array.isArray(integrationSettings?.data) ? integrationSettings.data : [];
+    logActivity("Müşteri, teklif ve görev verileri PostgreSQL üzerinden yüklendi.");
+  } catch {
+    state.apiOnline = false;
+    logActivity("Ek modül verileri için API bağlantısı bekleniyor.");
+  }
+}
+
+async function createAccountOnApi(account) {
+  const payload = await apiRequest("/api/accounts", {
+    method: "POST",
+    body: JSON.stringify(account)
+  });
+  return payload?.data || null;
+}
+
+async function createContactOnApi(contact) {
+  const payload = await apiRequest("/api/contacts", {
+    method: "POST",
+    body: JSON.stringify(contact)
+  });
+  return payload?.data || null;
+}
+
+async function createQuoteOnApi(quote) {
+  const payload = await apiRequest("/api/quotes", {
+    method: "POST",
+    body: JSON.stringify(quote)
+  });
+  return payload?.data || null;
+}
+
+async function createTaskOnApi(task) {
+  const payload = await apiRequest("/api/actions", {
+    method: "POST",
+    body: JSON.stringify(task)
+  });
+  return payload?.data || null;
+}
+
+async function updateTaskOnApi(taskId, patch) {
+  const payload = await apiRequest(`/api/actions/${taskId}`, {
+    method: "PATCH",
+    body: JSON.stringify(patch)
+  });
+  return payload?.data || null;
+}
+
+async function saveIntegrationSettingOnApi(setting) {
+  const payload = await apiRequest("/api/integration-settings", {
+    method: "POST",
+    body: JSON.stringify(setting)
+  });
+  return payload?.data || null;
+}
+
 async function createAdminUserOnApi(user) {
   const payload = await apiRequest("/api/admin/users", {
     method: "POST",
@@ -441,6 +540,12 @@ async function loadState() {
     state.meetings = initialMeetings;
     state.selectedMeetingId = initialMeetings[0].id;
     state.actions = initialActions;
+    state.accounts = [];
+    state.contacts = [];
+    state.quotes = [];
+    state.selectedQuoteId = null;
+    state.tasks = [];
+    state.integrationSettings = [];
     state.minutes = initialMinutes;
     state.calendarEvents = initialCalendarEvents;
     state.activity = ["MVP çalışma alanı hazırlandı."];
@@ -460,6 +565,12 @@ async function loadState() {
     state.meetings = Array.isArray(parsed.meetings) ? parsed.meetings : initialMeetings;
     state.selectedMeetingId = parsed.selectedMeetingId || state.meetings[0]?.id || null;
     state.actions = Array.isArray(parsed.actions) ? parsed.actions : initialActions;
+    state.accounts = Array.isArray(parsed.accounts) ? parsed.accounts : [];
+    state.contacts = Array.isArray(parsed.contacts) ? parsed.contacts : [];
+    state.quotes = Array.isArray(parsed.quotes) ? parsed.quotes : [];
+    state.selectedQuoteId = parsed.selectedQuoteId || state.quotes[0]?.id || null;
+    state.tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+    state.integrationSettings = Array.isArray(parsed.integrationSettings) ? parsed.integrationSettings : [];
     state.minutes = Array.isArray(parsed.minutes) ? parsed.minutes : initialMinutes;
     state.calendarEvents = Array.isArray(parsed.calendarEvents) ? parsed.calendarEvents : initialCalendarEvents;
     state.activity = Array.isArray(parsed.activity) ? parsed.activity : [];
@@ -469,6 +580,12 @@ async function loadState() {
     state.meetings = initialMeetings;
     state.selectedMeetingId = initialMeetings[0].id;
     state.actions = initialActions;
+    state.accounts = [];
+    state.contacts = [];
+    state.quotes = [];
+    state.selectedQuoteId = null;
+    state.tasks = [];
+    state.integrationSettings = [];
     state.minutes = initialMinutes;
     state.calendarEvents = initialCalendarEvents;
     state.activity = ["Kayıtlı veri okunamadı, örnek veri yüklendi."];
@@ -485,6 +602,9 @@ function render() {
   renderDetail();
   renderMetrics();
   renderOpportunityTable();
+  renderCustomers();
+  renderQuotes();
+  renderTasks();
   renderMeetings();
   renderCalendar();
   renderIntegrations();
@@ -677,9 +797,119 @@ function renderMetrics() {
   document.querySelector("#connectedChannels").textContent = String(connected);
 }
 
+function renderCustomers() {
+  if (!accountList || !contactList) return;
+  accountCountPill.textContent = `${state.accounts.length} kayıt`;
+  contactCountPill.textContent = `${state.contacts.length} kayıt`;
+  const accountOptions = [
+    `<option value="">Firma seç</option>`,
+    ...state.accounts.map((account) => `<option value="${escapeHtml(account.id)}">${escapeHtml(account.name)}</option>`)
+  ].join("");
+  contactAccountSelect.innerHTML = accountOptions;
+  quoteAccountSelect.innerHTML = accountOptions;
+  quoteContactSelect.innerHTML = [
+    `<option value="">Kişi seç</option>`,
+    ...state.contacts.map((contact) => `<option value="${escapeHtml(contact.id)}">${escapeHtml(contact.fullName)}${contact.accountName ? ` · ${escapeHtml(contact.accountName)}` : ""}</option>`)
+  ].join("");
+
+  accountList.innerHTML = state.accounts.length
+    ? state.accounts.map((account) => `
+        <article class="record-card">
+          <header>
+            <strong>${escapeHtml(account.name)}</strong>
+            <span class="source-tag">${escapeHtml(account.territory || "Bölge yok")}</span>
+          </header>
+          <small>${escapeHtml(account.sector || "Sektör yok")} · ${Number(account.contactCount || 0)} kişi · ${Number(account.opportunityCount || 0)} fırsat</small>
+        </article>
+      `).join("")
+    : `<div class="empty-state">Henüz firma kaydı yok</div>`;
+
+  contactList.innerHTML = state.contacts.length
+    ? state.contacts.map((contact) => `
+        <article class="record-card">
+          <header>
+            <strong>${escapeHtml(contact.fullName)}</strong>
+            <span class="source-tag">${escapeHtml(contact.accountName || "Bağımsız")}</span>
+          </header>
+          <small>${escapeHtml(contact.email || "E-posta yok")} · ${escapeHtml(contact.phone || "Telefon yok")}</small>
+        </article>
+      `).join("")
+    : `<div class="empty-state">Henüz kişi kaydı yok</div>`;
+}
+
+function renderQuotes() {
+  if (!quoteList) return;
+  quoteList.innerHTML = state.quotes.length
+    ? state.quotes.map((quote) => `
+        <article class="record-card quote-card ${quote.id === state.selectedQuoteId ? "is-selected" : ""}" data-quote-id="${escapeHtml(quote.id)}">
+          <header>
+            <strong>${escapeHtml(quote.title)}</strong>
+            <span class="source-tag">${escapeHtml(quote.quoteNo || "Teklif")}</span>
+          </header>
+          <small>${escapeHtml(quote.accountName || "Firma seçilmedi")} · ${escapeHtml(statusLabel(quote.status))} · ${quote.validUntil ? escapeHtml(String(quote.validUntil).slice(0, 10)) : "Süre yok"}</small>
+          <div class="quote-total">${formatMoney.format(Number(quote.total || 0))}</div>
+        </article>
+      `).join("")
+    : `<div class="empty-state">Henüz teklif yok</div>`;
+}
+
+function renderTasks() {
+  if (!taskList) return;
+  const openTasks = state.tasks.filter((task) => !task.done);
+  openTaskPill.textContent = `${openTasks.length} açık`;
+  taskOpportunitySelect.innerHTML = [
+    `<option value="">Fırsat seçme</option>`,
+    ...state.deals.map((deal) => `<option value="${escapeHtml(deal.id)}">${escapeHtml(deal.company)}</option>`)
+  ].join("");
+  taskList.innerHTML = state.tasks.length
+    ? state.tasks.map((task) => `
+        <article class="task-card ${task.done ? "is-done" : ""}">
+          <label class="task-check">
+            <input type="checkbox" data-task-done="${escapeHtml(task.id)}" ${task.done ? "checked" : ""}>
+            <span>
+              <strong>${escapeHtml(task.title)}</strong>
+              <small>${escapeHtml(task.owner || "Sistem")} · ${escapeHtml(task.priority || "Normal")} · ${task.due ? escapeHtml(String(task.due).slice(0, 10)) : "Termin yok"}</small>
+            </span>
+          </label>
+        </article>
+      `).join("")
+    : `<div class="empty-state">Henüz görev yok</div>`;
+}
+
 function renderIntegrations() {
   setIntegrationStatus("gmail", state.integrations.gmail);
   setIntegrationStatus("outlook", state.integrations.outlook);
+  renderOAuthSettings();
+}
+
+function renderOAuthSettings() {
+  if (!oauthSettingsForm || !oauthSettingsList) return;
+  oauthRedirectUri.value = defaultRedirectUri(oauthProviderSelect.value);
+  oauthSettingsList.innerHTML = state.integrationSettings.length
+    ? state.integrationSettings.map((setting) => `
+        <article class="oauth-row">
+          <strong>${escapeHtml(setting.provider === "gmail" ? "Gmail" : "Outlook")}</strong>
+          <small>${escapeHtml(setting.status || "draft")} · ${escapeHtml(setting.redirectUri || defaultRedirectUri(setting.provider))}</small>
+          <span class="source-tag">${Number(setting.scopes?.length || 0)} scope</span>
+        </article>
+      `).join("")
+    : `<div class="empty-state">OAuth uygulama ayarı bekleniyor</div>`;
+}
+
+function defaultRedirectUri(provider) {
+  const origin = window.location.origin && window.location.origin !== "null"
+    ? window.location.origin
+    : "https://crm.argeka.com";
+  return `${origin}/oauth/${provider}/callback`;
+}
+
+function statusLabel(status) {
+  return {
+    draft: "Taslak",
+    sent: "Gönderildi",
+    accepted: "Kabul edildi",
+    rejected: "Reddedildi"
+  }[status] || status || "Taslak";
 }
 
 function setIntegrationStatus(key, connected) {
@@ -941,7 +1171,13 @@ function auditLabel(action) {
     "license.updated": "lisans güncelledi",
     "data.exported": "veri dışa aktardı",
     "opportunity.created": "fırsat oluşturdu",
-    "opportunity.updated": "fırsat güncelledi"
+    "opportunity.updated": "fırsat güncelledi",
+    "account.created": "firma oluşturdu",
+    "contact.created": "kişi oluşturdu",
+    "quote.created": "teklif oluşturdu",
+    "action.created": "görev oluşturdu",
+    "action.updated": "görev güncelledi",
+    "integration.oauth_configured": "OAuth ayarı kaydetti"
   }[action] || action;
 }
 
@@ -1006,7 +1242,10 @@ function switchView(viewId) {
     button.classList.toggle("is-active", button.dataset.viewTarget === viewId);
   });
   const titleMap = {
+    customers: "Müşteriler",
     pipeline: "Pipeline",
+    quotes: "Teklifler",
+    tasks: "Görevler",
     meetings: "Toplantılar",
     calendar: "Takvim",
     inbox: "E-posta",
@@ -1034,6 +1273,7 @@ loginForm.addEventListener("submit", async (event) => {
     saveSession(payload);
     loginMessage.textContent = "Giriş başarılı.";
     await syncOpportunitiesFromApi();
+    await syncBusinessDataFromApi();
     await syncAdminOverview();
     render();
   } catch {
@@ -1088,6 +1328,134 @@ licenseForm.addEventListener("submit", async (event) => {
 document.querySelector("#downloadJsonExportButton").addEventListener("click", () => downloadAdminExport("json"));
 document.querySelector("#downloadCsvExportButton").addEventListener("click", () => downloadAdminExport("csv"));
 document.querySelector("#downloadSqlExportButton").addEventListener("click", () => downloadAdminExport("sql"));
+
+accountForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(accountForm).entries());
+  try {
+    const account = await createAccountOnApi(payload);
+    if (account) state.accounts.unshift(account);
+    accountForm.reset();
+    logActivity(`${payload.name} firma kaydı oluşturuldu.`);
+  } catch {
+    logActivity("Firma kaydı oluşturulamadı.");
+  }
+  render();
+});
+
+contactForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(contactForm).entries());
+  try {
+    const contact = await createContactOnApi(payload);
+    if (contact) state.contacts.unshift(contact);
+    contactForm.reset();
+    logActivity(`${payload.fullName} kişi kaydı oluşturuldu.`);
+  } catch {
+    logActivity("Kişi kaydı oluşturulamadı.");
+  }
+  render();
+});
+
+quoteForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(quoteForm).entries());
+  try {
+    const quote = await createQuoteOnApi(payload);
+    if (quote) {
+      state.quotes.unshift(quote);
+      state.selectedQuoteId = quote.id;
+    }
+    quoteForm.reset();
+    logActivity(`${payload.title} için teklif oluşturuldu.`);
+  } catch {
+    logActivity("Teklif oluşturulamadı.");
+  }
+  render();
+});
+
+quoteList.addEventListener("click", (event) => {
+  const card = event.target.closest("[data-quote-id]");
+  if (!card) return;
+  state.selectedQuoteId = card.dataset.quoteId;
+  render();
+});
+
+downloadQuoteButton.addEventListener("click", () => {
+  const quote = state.quotes.find((item) => item.id === state.selectedQuoteId) || state.quotes[0];
+  if (!quote) return;
+  const content = [
+    "ARGEKA CRM TEKLIF",
+    `Teklif No: ${quote.quoteNo || quote.id}`,
+    `Firma: ${quote.accountName || "-"}`,
+    `Baslik: ${quote.title}`,
+    `Durum: ${statusLabel(quote.status)}`,
+    `Ara toplam: ${formatMoney.format(Number(quote.subtotal || 0))}`,
+    `Indirim: ${formatMoney.format(Number(quote.discount || 0))}`,
+    `Vergi: ${formatMoney.format(Number(quote.tax || 0))}`,
+    `Toplam: ${formatMoney.format(Number(quote.total || 0))}`,
+    `Gecerlilik: ${quote.validUntil ? String(quote.validUntil).slice(0, 10) : "-"}`,
+    "",
+    quote.notes || ""
+  ].join("\n");
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${quote.quoteNo || "argeka-teklif"}.txt`;
+  anchor.click();
+  URL.revokeObjectURL(url);
+  logActivity("Teklif çıktısı indirildi.");
+  render();
+});
+
+taskForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(taskForm).entries());
+  try {
+    const task = await createTaskOnApi(payload);
+    if (task) state.tasks.unshift(task);
+    taskForm.reset();
+    logActivity(`${payload.title} görevi oluşturuldu.`);
+  } catch {
+    logActivity("Görev oluşturulamadı.");
+  }
+  render();
+});
+
+taskList.addEventListener("change", async (event) => {
+  const checkbox = event.target.closest("[data-task-done]");
+  if (!checkbox) return;
+  const task = state.tasks.find((item) => item.id === checkbox.dataset.taskDone);
+  if (!task) return;
+  task.done = checkbox.checked;
+  try {
+    const updated = await updateTaskOnApi(task.id, { done: task.done });
+    if (updated) Object.assign(task, updated);
+    logActivity(`${task.title} görevi güncellendi.`);
+  } catch {
+    logActivity("Görev durumu API'ye kaydedilemedi.");
+  }
+  render();
+});
+
+oauthProviderSelect.addEventListener("change", renderOAuthSettings);
+
+oauthSettingsForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const payload = Object.fromEntries(new FormData(oauthSettingsForm).entries());
+  try {
+    const setting = await saveIntegrationSettingOnApi(payload);
+    const existingIndex = state.integrationSettings.findIndex((item) => item.provider === setting.provider);
+    if (existingIndex >= 0) state.integrationSettings.splice(existingIndex, 1, setting);
+    else state.integrationSettings.push(setting);
+    state.integrations[setting.provider] = setting.status === "connected" || setting.status === "ready";
+    logActivity(`${setting.provider === "gmail" ? "Gmail" : "Outlook"} OAuth ayarı kaydedildi.`);
+  } catch {
+    logActivity("OAuth ayarı kaydedilemedi. Yönetici yetkisi gerekebilir.");
+  }
+  render();
+});
 
 document.querySelector("#newDealButton").addEventListener("click", () => {
   dealForm.reset();
@@ -1348,6 +1716,12 @@ importFile.addEventListener("change", async () => {
     state.meetings = parsed.meetings || state.meetings;
     state.selectedMeetingId = parsed.selectedMeetingId || state.meetings[0]?.id || null;
     state.actions = parsed.actions || state.actions;
+    state.accounts = parsed.accounts || state.accounts;
+    state.contacts = parsed.contacts || state.contacts;
+    state.quotes = parsed.quotes || state.quotes;
+    state.selectedQuoteId = parsed.selectedQuoteId || state.quotes[0]?.id || null;
+    state.tasks = parsed.tasks || state.tasks;
+    state.integrationSettings = parsed.integrationSettings || state.integrationSettings;
     state.minutes = parsed.minutes || state.minutes;
     state.calendarEvents = parsed.calendarEvents || state.calendarEvents;
     state.activity = parsed.activity || [];
@@ -1395,6 +1769,7 @@ async function initApp() {
   await loadState();
   if (state.session?.token) {
     await syncOpportunitiesFromApi();
+    await syncBusinessDataFromApi();
     await syncAdminOverview();
   }
   render();

@@ -42,13 +42,13 @@
       <form class="login-panel" id="loginForm" method="post" autocomplete="on">
         <span class="brand-mark">A</span>
         <h1>ARGEKA CRM</h1>
-        <p>�?irket çalışma alanına giriş yapın.</p>
+        <p>Şirket çalışma alanına giriş yapın.</p>
         <label>
           E-posta
           <input name="email" type="email" value="admin@akis-crm.local" required>
         </label>
         <label>
-          �?ifre
+          Şifre
           <input name="password" type="password" placeholder="admin123" required>
         </label>
         <button class="primary-button" type="submit">Giriş yap</button>
@@ -66,9 +66,21 @@
         </div>
 
         <nav class="nav-stack">
+          <button class="nav-item" type="button" data-view-target="customers">
+            <span aria-hidden="true">M</span>
+            Müşteriler
+          </button>
           <button class="nav-item is-active" type="button" data-view-target="pipeline">
             <span aria-hidden="true">▦</span>
             Pipeline
+          </button>
+          <button class="nav-item" type="button" data-view-target="quotes">
+            <span aria-hidden="true">T</span>
+            Teklifler
+          </button>
+          <button class="nav-item" type="button" data-view-target="tasks">
+            <span aria-hidden="true">G</span>
+            Görevler
           </button>
           <button class="nav-item" type="button" data-view-target="meetings">
             <span aria-hidden="true">☷</span>
@@ -132,6 +144,64 @@
             <input id="importFile" type="file" accept="application/json" hidden>
           </div>
         </header>
+
+        <section class="view" id="customers" aria-label="Müşteriler">
+          <div class="customer-layout">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Firmalar</span>
+                <span class="pill" id="accountCountPill">0 kayıt</span>
+              </div>
+              <form class="record-form" id="accountForm">
+                <label>
+                  Firma adı
+                  <input name="name" required placeholder="Nova Teknoloji">
+                </label>
+                <div class="compact-fields">
+                  <label>
+                    Sektör
+                    <input name="sector" placeholder="Teknoloji">
+                  </label>
+                  <label>
+                    Bölge
+                    <input name="territory" placeholder="TR Marmara">
+                  </label>
+                </div>
+                <button class="primary-button" type="submit">Firma ekle</button>
+              </form>
+              <div class="record-list" id="accountList"></div>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Kişiler</span>
+                <span class="pill" id="contactCountPill">0 kayıt</span>
+              </div>
+              <form class="record-form" id="contactForm">
+                <label>
+                  Bağlı firma
+                  <select name="accountId" id="contactAccountSelect"></select>
+                </label>
+                <label>
+                  Ad soyad
+                  <input name="fullName" required placeholder="Ayşe Yılmaz">
+                </label>
+                <div class="compact-fields">
+                  <label>
+                    E-posta
+                    <input name="email" type="email" placeholder="ayse@firma.com">
+                  </label>
+                  <label>
+                    Telefon
+                    <input name="phone" placeholder="+90 212 000 00 00">
+                  </label>
+                </div>
+                <button class="primary-button" type="submit">Kişi ekle</button>
+              </form>
+              <div class="record-list" id="contactList"></div>
+            </section>
+          </div>
+        </section>
 
         <section class="view is-active" id="pipeline" aria-labelledby="view-title">
           <div class="content-grid">
@@ -206,6 +276,119 @@
                 </form>
               </section>
             </aside>
+          </div>
+        </section>
+
+        <section class="view" id="quotes" aria-label="Teklifler">
+          <div class="quote-layout">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Teklif hazırlama</span>
+                <span class="pill">CRM teklif</span>
+              </div>
+              <form class="record-form" id="quoteForm">
+                <div class="compact-fields">
+                  <label>
+                    Firma
+                    <select name="accountId" id="quoteAccountSelect"></select>
+                  </label>
+                  <label>
+                    Kişi
+                    <select name="contactId" id="quoteContactSelect"></select>
+                  </label>
+                </div>
+                <label>
+                  Başlık
+                  <input name="title" required placeholder="CRM başlangıç paketi">
+                </label>
+                <div class="compact-fields">
+                  <label>
+                    Ara toplam
+                    <input name="subtotal" type="number" min="0" step="100" required placeholder="84000">
+                  </label>
+                  <label>
+                    İndirim
+                    <input name="discount" type="number" min="0" step="100" value="0">
+                  </label>
+                </div>
+                <div class="compact-fields">
+                  <label>
+                    Vergi
+                    <input name="tax" type="number" min="0" step="100" value="0">
+                  </label>
+                  <label>
+                    Geçerlilik
+                    <input name="validUntil" type="date">
+                  </label>
+                </div>
+                <label>
+                  Durum
+                  <select name="status">
+                    <option value="draft">Taslak</option>
+                    <option value="sent">Gönderildi</option>
+                    <option value="accepted">Kabul edildi</option>
+                    <option value="rejected">Reddedildi</option>
+                  </select>
+                </label>
+                <label>
+                  Not
+                  <textarea name="notes" rows="3" placeholder="Teklif kapsamı ve ödeme notları"></textarea>
+                </label>
+                <button class="primary-button" type="submit">Teklif oluştur</button>
+              </form>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Teklifler</span>
+                <button class="ghost-button" id="downloadQuoteButton" type="button">Çıktı indir</button>
+              </div>
+              <div class="record-list" id="quoteList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="tasks" aria-label="Görevler">
+          <div class="task-layout">
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Görev ekle</span>
+                <span class="pill">Aktivite takibi</span>
+              </div>
+              <form class="record-form" id="taskForm">
+                <label>
+                  Görev
+                  <input name="title" required placeholder="Teklif revizyonunu hazırla">
+                </label>
+                <div class="compact-fields">
+                  <label>
+                    Öncelik
+                    <select name="priority">
+                      <option>Yüksek</option>
+                      <option selected>Normal</option>
+                      <option>Düşük</option>
+                    </select>
+                  </label>
+                  <label>
+                    Termin
+                    <input name="due" type="date">
+                  </label>
+                </div>
+                <label>
+                  Fırsat bağlantısı
+                  <select name="opportunityId" id="taskOpportunitySelect"></select>
+                </label>
+                <button class="primary-button" type="submit">Görev oluştur</button>
+              </form>
+            </section>
+
+            <section class="panel-block">
+              <div class="section-heading">
+                <span>Açık işler</span>
+                <span class="pill" id="openTaskPill">0 açık</span>
+              </div>
+              <div class="task-board" id="taskList"></div>
+            </section>
           </div>
         </section>
 
@@ -379,6 +562,51 @@
                 <span class="status" id="outlookStatus">Bağlı değil</span>
                 <button class="secondary-button" type="button" data-connect="outlook">Outlook bağla</button>
               </div>
+            </article>
+
+            <article class="integration-card wide oauth-card">
+              <div>
+                <span class="integration-logo api">OAuth</span>
+                <h2>Gmail ve Outlook uygulama ayarları</h2>
+                <p>Gerçek domain alınınca redirect URI aynı ekrandan Google Cloud ve Microsoft Entra tarafına girilecek.</p>
+              </div>
+              <form class="oauth-form" id="oauthSettingsForm">
+                <div class="compact-fields">
+                  <label>
+                    Sağlayıcı
+                    <select name="provider" id="oauthProviderSelect">
+                      <option value="gmail">Gmail</option>
+                      <option value="outlook">Outlook</option>
+                    </select>
+                  </label>
+                  <label>
+                    Durum
+                    <select name="status">
+                      <option value="draft">Taslak</option>
+                      <option value="ready">Hazır</option>
+                      <option value="connected">Bağlı</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Client ID
+                  <input name="clientId" placeholder="OAuth client/application id">
+                </label>
+                <label>
+                  Tenant / Project
+                  <input name="tenantOrProject" placeholder="Google project veya Microsoft tenant">
+                </label>
+                <label>
+                  Scopes
+                  <input name="scopes" placeholder="mail.read calendars.readwrite contacts.read">
+                </label>
+                <label>
+                  Redirect URI
+                  <input name="redirectUri" id="oauthRedirectUri" readonly>
+                </label>
+                <button class="primary-button" type="submit">OAuth ayarını kaydet</button>
+              </form>
+              <div class="oauth-list" id="oauthSettingsList"></div>
             </article>
 
             <article class="integration-card wide">

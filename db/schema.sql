@@ -130,6 +130,27 @@ create table action_items (
   created_at timestamptz not null default now()
 );
 
+create table quotes (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  account_id uuid references accounts(id) on delete set null,
+  contact_id uuid references contacts(id) on delete set null,
+  opportunity_id uuid references opportunities(id) on delete set null,
+  owner_id uuid references users(id) on delete set null,
+  quote_no text not null,
+  title text not null,
+  status text not null default 'draft',
+  subtotal numeric(14, 2) not null default 0,
+  discount numeric(14, 2) not null default 0,
+  tax numeric(14, 2) not null default 0,
+  total numeric(14, 2) not null default 0,
+  valid_until date,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (tenant_id, quote_no)
+);
+
 create table oauth_connections (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenants(id) on delete cascade,
@@ -141,6 +162,19 @@ create table oauth_connections (
   expires_at timestamptz,
   created_at timestamptz not null default now(),
   unique (tenant_id, user_id, provider)
+);
+
+create table oauth_app_settings (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  provider text not null,
+  client_id text,
+  tenant_or_project text,
+  scopes text[] not null default '{}',
+  redirect_uri text,
+  status text not null default 'draft',
+  updated_at timestamptz not null default now(),
+  unique (tenant_id, provider)
 );
 
 create table webhook_endpoints (
@@ -190,8 +224,12 @@ create table audit_logs (
 
 create index opportunities_tenant_stage_idx on opportunities (tenant_id, stage);
 create index opportunities_tenant_close_date_idx on opportunities (tenant_id, close_date);
+create index accounts_tenant_name_idx on accounts (tenant_id, name);
+create index contacts_tenant_account_idx on contacts (tenant_id, account_id);
 create index meetings_tenant_starts_at_idx on meetings (tenant_id, starts_at);
 create index action_items_tenant_due_idx on action_items (tenant_id, due_date);
+create index quotes_tenant_created_idx on quotes (tenant_id, created_at desc);
+create index oauth_app_settings_tenant_idx on oauth_app_settings (tenant_id);
 create index sessions_token_hash_idx on sessions (token_hash);
 create index sessions_user_idx on sessions (user_id);
 create index app_roles_tenant_idx on app_roles (tenant_id);

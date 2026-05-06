@@ -57,6 +57,13 @@ powershell -ExecutionPolicy Bypass -File .\transfer.ps1 -Format sql
 
 Admin ekranından JSON, CSV ve SQL dışa aktarım da yapılabilir.
 
+## Yeni CRM modülleri
+
+- Müşteriler ekranında firma ve kişi kartları PostgreSQL API ile tutulur.
+- Teklifler ekranında firma/kişi bağlantılı teklif oluşturulur, toplam hesaplanır ve teklif çıktısı indirilebilir.
+- Görevler ekranında aksiyonlar API'ye yazılır, tamamlandı durumu veritabanına işlenir.
+- Entegrasyon ekranında Gmail ve Outlook için OAuth uygulama ayarları kaydedilir. Gerçek domain alındığında redirect URI bu ekrandaki adresle Google Cloud ve Microsoft Entra tarafına girilir.
+
 ## Calistirma
 
 `index.html` dosyasını tarayıcıda açın. Node, npm veya sunucu gerekmez. PWA service worker sadece gerçek `https` veya `localhost` ortamında devreye girer; `file://` ile açıldığında uygulama yine çalışır.
@@ -128,7 +135,7 @@ Bu prototipin ana yönü:
 - SAP tarafındaki kurumsal fırsat yönetimi, forecast ve hesap disiplini
 - MeetingBooster tarafındaki toplantı tutanağı, aksiyon sahipliği ve takip mantığı
 
-İkinci fazda hesap kartı, teklif modülü, ürün/hizmet satırları, rol bazlı yetkilendirme, gerçek OAuth bağlantıları ve abonelik ödeme akışı eklenmelidir.
+Sonraki fazda ürün/hizmet satırları, teklif PDF şablonu, gerçek OAuth callback akışı, domain/SSL yayını ve abonelik ödeme akışı eklenmelidir.
 
 ## Entegrasyon notlari
 

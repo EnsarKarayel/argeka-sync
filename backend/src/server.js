@@ -119,11 +119,49 @@ async function ensureSchema() {
       created_at timestamptz not null default now()
     );
 
+    create table if not exists quotes (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      account_id uuid references accounts(id) on delete set null,
+      contact_id uuid references contacts(id) on delete set null,
+      opportunity_id uuid references opportunities(id) on delete set null,
+      owner_id uuid references users(id) on delete set null,
+      quote_no text not null,
+      title text not null,
+      status text not null default 'draft',
+      subtotal numeric(14,2) not null default 0,
+      discount numeric(14,2) not null default 0,
+      tax numeric(14,2) not null default 0,
+      total numeric(14,2) not null default 0,
+      valid_until date,
+      notes text,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now(),
+      unique (tenant_id, quote_no)
+    );
+
+    create table if not exists oauth_app_settings (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      provider text not null,
+      client_id text,
+      tenant_or_project text,
+      scopes text[] not null default '{}',
+      redirect_uri text,
+      status text not null default 'draft',
+      updated_at timestamptz not null default now(),
+      unique (tenant_id, provider)
+    );
+
     create index if not exists app_roles_tenant_idx on app_roles (tenant_id);
     create index if not exists teams_tenant_idx on teams (tenant_id);
     create index if not exists users_tenant_team_idx on users (tenant_id, team_id);
     create index if not exists backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
     create index if not exists audit_logs_tenant_created_idx on audit_logs (tenant_id, created_at desc);
+    create index if not exists accounts_tenant_name_idx on accounts (tenant_id, name);
+    create index if not exists contacts_tenant_account_idx on contacts (tenant_id, account_id);
+    create index if not exists quotes_tenant_created_idx on quotes (tenant_id, created_at desc);
+    create index if not exists oauth_app_settings_tenant_idx on oauth_app_settings (tenant_id);
   `);
 
   const tid = await tenantId();
@@ -174,6 +212,37 @@ async function ensureSchema() {
      on conflict (tenant_id) do nothing`,
     [tid]
   );
+
+  await pool.query(
+    `insert into accounts (id, tenant_id, name, sector, territory)
+     values
+       ('55555555-5555-4555-8555-555555555551', $1, 'Nova Teknoloji', 'Teknoloji', 'TR Marmara'),
+       ('55555555-5555-4555-8555-555555555552', $1, 'Atlas Lojistik', 'Lojistik', 'TR İç Anadolu')
+     on conflict (id) do nothing`,
+    [tid]
+  );
+
+  await pool.query(
+    `insert into contacts (id, tenant_id, account_id, full_name, email, phone)
+     values
+       ('66666666-6666-4666-8666-666666666661', $1, '55555555-5555-4555-8555-555555555551', 'Ayşe Yılmaz', 'ayse@novatek.example', '+90 212 000 00 01'),
+       ('66666666-6666-4666-8666-666666666662', $1, '55555555-5555-4555-8555-555555555552', 'Mehmet Arslan', 'mehmet@atlas.example', '+90 312 000 00 02')
+     on conflict (id) do nothing`,
+    [tid]
+  );
+
+  const admin = await pool.query(
+    "select id from users where tenant_id = $1 order by created_at asc limit 1",
+    [tid]
+  );
+  if (admin.rows[0]) {
+    await pool.query(
+      `insert into quotes (tenant_id, account_id, contact_id, owner_id, quote_no, title, status, subtotal, discount, tax, total, valid_until, notes)
+       values ($1, '55555555-5555-4555-8555-555555555551', '66666666-6666-4666-8666-666666666661', $2, 'ARG-2026-0001', 'Nova Teknoloji CRM başlangıç paketi', 'sent', 84000, 0, 16800, 100800, '2026-05-31', 'Demo sonrası yıllık lisans teklifidir.')
+       on conflict (tenant_id, quote_no) do nothing`,
+      [tid, admin.rows[0].id]
+    );
+  }
 }
 
 function opportunityPayload(row) {
@@ -192,6 +261,81 @@ function opportunityPayload(row) {
     nextAction: row.next_action,
     note: row.note,
     createdAt: row.created_at
+  };
+}
+
+function accountPayload(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    sector: row.sector,
+    territory: row.territory,
+    contactCount: Number(row.contact_count || 0),
+    opportunityCount: Number(row.opportunity_count || 0),
+    createdAt: row.created_at
+  };
+}
+
+function contactPayload(row) {
+  return {
+    id: row.id,
+    accountId: row.account_id,
+    accountName: row.account_name,
+    fullName: row.full_name,
+    email: row.email,
+    phone: row.phone,
+    createdAt: row.created_at
+  };
+}
+
+function quotePayload(row) {
+  return {
+    id: row.id,
+    accountId: row.account_id,
+    accountName: row.account_name,
+    contactId: row.contact_id,
+    contactName: row.contact_name,
+    opportunityId: row.opportunity_id,
+    ownerId: row.owner_id,
+    owner: row.owner_name || "Sistem",
+    quoteNo: row.quote_no,
+    title: row.title,
+    status: row.status,
+    subtotal: Number(row.subtotal || 0),
+    discount: Number(row.discount || 0),
+    tax: Number(row.tax || 0),
+    total: Number(row.total || 0),
+    validUntil: row.valid_until,
+    notes: row.notes,
+    createdAt: row.created_at
+  };
+}
+
+function actionPayload(row) {
+  return {
+    id: row.id,
+    meetingId: row.meeting_id,
+    opportunityId: row.opportunity_id,
+    ownerId: row.owner_id,
+    owner: row.owner_name || "Sistem",
+    title: row.title,
+    priority: row.priority,
+    due: row.due_date,
+    done: Boolean(row.done),
+    createdAt: row.created_at
+  };
+}
+
+function integrationSettingPayload(row) {
+  return {
+    id: row.id,
+    provider: row.provider,
+    clientId: row.client_id,
+    tenantOrProject: row.tenant_or_project,
+    scopes: row.scopes || [],
+    redirectUri: row.redirect_uri,
+    status: row.status,
+    updatedAt: row.updated_at
   };
 }
 
@@ -367,7 +511,7 @@ async function adminOverview(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
 
-  const [tenantResult, usersResult, rolesResult, teamsResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
+  const [tenantResult, usersResult, rolesResult, teamsResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult, accountsResult, contactsResult, quotesResult, oauthSettingsResult] =
     await Promise.all([
       pool.query(
         `select id, name, plan, billing_status, created_at
@@ -428,7 +572,11 @@ async function adminOverview(req, res) {
       pool.query("select count(*)::int as count from meetings where tenant_id = $1", [session.tenant_id]),
       pool.query("select count(*)::int as count from action_items where tenant_id = $1", [session.tenant_id]),
       pool.query("select count(*)::int as count from oauth_connections where tenant_id = $1", [session.tenant_id]),
-      pool.query("select count(*)::int as count from webhook_endpoints where tenant_id = $1", [session.tenant_id])
+      pool.query("select count(*)::int as count from webhook_endpoints where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from accounts where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from contacts where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from quotes where tenant_id = $1", [session.tenant_id]),
+      pool.query("select count(*)::int as count from oauth_app_settings where tenant_id = $1", [session.tenant_id])
     ]);
 
   send(res, 200, {
@@ -473,7 +621,11 @@ async function adminOverview(req, res) {
       meetings: meetingsResult.rows[0].count,
       actions: actionsResult.rows[0].count,
       oauthConnections: oauthResult.rows[0].count,
-      webhooks: webhookResult.rows[0].count
+      webhooks: webhookResult.rows[0].count,
+      accounts: accountsResult.rows[0].count,
+      contacts: contactsResult.rows[0].count,
+      quotes: quotesResult.rows[0].count,
+      oauthSettings: oauthSettingsResult.rows[0].count
     },
     install: {
       edition: "self-hosted",
@@ -664,6 +816,262 @@ async function exportData(req, res, format) {
   });
 }
 
+async function listAccounts(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const result = await pool.query(
+    `select a.id, a.name, a.sector, a.territory, a.created_at,
+            count(distinct c.id)::int as contact_count,
+            count(distinct o.id)::int as opportunity_count
+     from accounts a
+     left join contacts c on c.account_id = a.id
+     left join opportunities o on o.account_id = a.id
+     where a.tenant_id = $1
+     group by a.id
+     order by a.name asc`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(accountPayload) });
+}
+
+async function createAccount(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const body = await readJson(req);
+  if (!body.name) return send(res, 400, { error: "missing_fields" });
+  const result = await pool.query(
+    `insert into accounts (tenant_id, name, sector, territory)
+     values ($1, $2, $3, $4)
+     returning id, name, sector, territory, created_at`,
+    [session.tenant_id, body.name, body.sector || null, body.territory || null]
+  );
+  await auditLog(session, "account.created", "account", result.rows[0].id, { name: result.rows[0].name });
+  send(res, 201, { data: accountPayload(result.rows[0]) });
+}
+
+async function listContacts(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const result = await pool.query(
+    `select c.id, c.account_id, a.name as account_name, c.full_name, c.email, c.phone, c.created_at
+     from contacts c
+     left join accounts a on a.id = c.account_id
+     where c.tenant_id = $1
+     order by c.created_at desc`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(contactPayload) });
+}
+
+async function createContact(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const body = await readJson(req);
+  if (!body.fullName) return send(res, 400, { error: "missing_fields" });
+  const accountId = body.accountId || null;
+  if (accountId) {
+    const account = await pool.query("select id from accounts where id = $1 and tenant_id = $2", [accountId, session.tenant_id]);
+    if (!account.rows[0]) return send(res, 400, { error: "invalid_account" });
+  }
+  const result = await pool.query(
+    `insert into contacts (tenant_id, account_id, full_name, email, phone)
+     values ($1, $2, $3, $4, $5)
+     returning id, account_id, full_name, email, phone, created_at`,
+    [session.tenant_id, accountId, body.fullName, body.email || null, body.phone || null]
+  );
+  await auditLog(session, "contact.created", "contact", result.rows[0].id, { fullName: result.rows[0].full_name });
+  send(res, 201, { data: contactPayload(result.rows[0]) });
+}
+
+async function listQuotes(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const access = opportunityAccess(session, "q", 2);
+  const result = await pool.query(
+    `select q.id, q.account_id, a.name as account_name, q.contact_id, c.full_name as contact_name,
+            q.opportunity_id, q.owner_id, u.full_name as owner_name, q.quote_no, q.title, q.status,
+            q.subtotal, q.discount, q.tax, q.total, q.valid_until, q.notes, q.created_at
+     from quotes q
+     left join accounts a on a.id = q.account_id
+     left join contacts c on c.id = q.contact_id
+     left join users u on u.id = q.owner_id
+     where q.tenant_id = $1 ${access.clause}
+     order by q.created_at desc`,
+    [session.tenant_id, ...access.params]
+  );
+  send(res, 200, { data: result.rows.map(quotePayload) });
+}
+
+async function createQuote(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const body = await readJson(req);
+  if (!body.title) return send(res, 400, { error: "missing_fields" });
+  const subtotal = Number(body.subtotal || body.amount || 0);
+  const discount = Number(body.discount || 0);
+  const tax = Number(body.tax || 0);
+  const total = Math.max(subtotal - discount + tax, 0);
+  const quoteNo = body.quoteNo || `ARG-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+  const result = await pool.query(
+    `insert into quotes
+       (tenant_id, account_id, contact_id, opportunity_id, owner_id, quote_no, title, status, subtotal, discount, tax, total, valid_until, notes)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+     returning id, account_id, contact_id, opportunity_id, owner_id, quote_no, title, status, subtotal, discount, tax, total, valid_until, notes, created_at`,
+    [
+      session.tenant_id,
+      body.accountId || null,
+      body.contactId || null,
+      body.opportunityId || null,
+      session.user_id,
+      quoteNo,
+      body.title,
+      body.status || "draft",
+      subtotal,
+      discount,
+      tax,
+      total,
+      body.validUntil || null,
+      body.notes || null
+    ]
+  );
+  await auditLog(session, "quote.created", "quote", result.rows[0].id, {
+    quoteNo,
+    total
+  });
+  send(res, 201, { data: quotePayload({ ...result.rows[0], owner_name: session.full_name }) });
+}
+
+async function listActions(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "meetings") && !hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const access = opportunityAccess(session, "a", 2);
+  const result = await pool.query(
+    `select a.id, a.meeting_id, a.opportunity_id, a.owner_id, u.full_name as owner_name,
+            a.title, a.priority, a.due_date, a.done, a.created_at
+     from action_items a
+     left join users u on u.id = a.owner_id
+     where a.tenant_id = $1 ${access.clause}
+     order by coalesce(a.due_date, current_date + 365) asc, a.created_at desc`,
+    [session.tenant_id, ...access.params]
+  );
+  send(res, 200, { data: result.rows.map(actionPayload) });
+}
+
+async function createAction(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "meetings") && !hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const body = await readJson(req);
+  if (!body.title) return send(res, 400, { error: "missing_fields" });
+  const result = await pool.query(
+    `insert into action_items (tenant_id, meeting_id, opportunity_id, owner_id, title, priority, due_date, done)
+     values ($1,$2,$3,$4,$5,$6,$7,$8)
+     returning id, meeting_id, opportunity_id, owner_id, title, priority, due_date, done, created_at`,
+    [
+      session.tenant_id,
+      body.meetingId || null,
+      body.opportunityId || null,
+      session.user_id,
+      body.title,
+      body.priority || "Normal",
+      body.due || body.dueDate || null,
+      Boolean(body.done)
+    ]
+  );
+  await auditLog(session, "action.created", "action", result.rows[0].id, { title: result.rows[0].title });
+  send(res, 201, { data: actionPayload({ ...result.rows[0], owner_name: session.full_name }) });
+}
+
+async function updateAction(req, res, id) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  if (!hasPermission(session, "meetings") && !hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
+  const body = await readJson(req);
+  const access = opportunityAccess(session, "action_items", 3);
+  const current = await pool.query(
+    `select id from action_items where id = $1 and tenant_id = $2 ${access.clause}`,
+    [id, session.tenant_id, ...access.params]
+  );
+  if (!current.rows[0]) return send(res, 404, { error: "not_found" });
+  const result = await pool.query(
+    `update action_items
+     set done = coalesce($3, done),
+         title = coalesce($4, title),
+         priority = coalesce($5, priority),
+         due_date = coalesce($6, due_date)
+     where id = $1 and tenant_id = $2
+     returning id, meeting_id, opportunity_id, owner_id, title, priority, due_date, done, created_at`,
+    [
+      id,
+      session.tenant_id,
+      body.done === undefined ? null : Boolean(body.done),
+      body.title || null,
+      body.priority || null,
+      body.due || body.dueDate || null
+    ]
+  );
+  await auditLog(session, "action.updated", "action", id, { done: result.rows[0].done });
+  send(res, 200, { data: actionPayload(result.rows[0]) });
+}
+
+async function listIntegrationSettings(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await pool.query(
+    `select id, provider, client_id, tenant_or_project, scopes, redirect_uri, status, updated_at
+     from oauth_app_settings
+     where tenant_id = $1
+     order by provider asc`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(integrationSettingPayload) });
+}
+
+async function saveIntegrationSetting(req, res) {
+  const session = await requireAdmin(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  const provider = String(body.provider || "").toLowerCase();
+  if (!["gmail", "outlook"].includes(provider)) return send(res, 400, { error: "invalid_provider" });
+  const scopes = Array.isArray(body.scopes)
+    ? body.scopes
+    : String(body.scopes || "").split(/[,\s]+/).map((scope) => scope.trim()).filter(Boolean);
+  const redirectUri = body.redirectUri || `https://example.com/oauth/${provider}/callback`;
+  const result = await pool.query(
+    `insert into oauth_app_settings (tenant_id, provider, client_id, tenant_or_project, scopes, redirect_uri, status, updated_at)
+     values ($1,$2,$3,$4,$5,$6,$7,now())
+     on conflict (tenant_id, provider) do update
+     set client_id = excluded.client_id,
+         tenant_or_project = excluded.tenant_or_project,
+         scopes = excluded.scopes,
+         redirect_uri = excluded.redirect_uri,
+         status = excluded.status,
+         updated_at = now()
+     returning id, provider, client_id, tenant_or_project, scopes, redirect_uri, status, updated_at`,
+    [
+      session.tenant_id,
+      provider,
+      body.clientId || null,
+      body.tenantOrProject || null,
+      scopes,
+      redirectUri,
+      body.status || "draft"
+    ]
+  );
+  await auditLog(session, "integration.oauth_configured", "oauth_app_setting", provider, {
+    provider,
+    scopes: scopes.length
+  });
+  send(res, 200, { data: integrationSettingPayload(result.rows[0]) });
+}
+
 async function listOpportunities(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
@@ -807,6 +1215,18 @@ async function handler(req, res) {
     if (req.method === "POST" && url.pathname === "/api/admin/users") return createAdminUser(req, res);
     if (req.method === "POST" && url.pathname === "/api/admin/license") return activateLicense(req, res);
     if (req.method === "GET" && url.pathname === "/api/admin/export") return exportData(req, res, url.searchParams.get("format") || "json");
+    if (req.method === "GET" && url.pathname === "/api/accounts") return listAccounts(req, res);
+    if (req.method === "POST" && url.pathname === "/api/accounts") return createAccount(req, res);
+    if (req.method === "GET" && url.pathname === "/api/contacts") return listContacts(req, res);
+    if (req.method === "POST" && url.pathname === "/api/contacts") return createContact(req, res);
+    if (req.method === "GET" && url.pathname === "/api/quotes") return listQuotes(req, res);
+    if (req.method === "POST" && url.pathname === "/api/quotes") return createQuote(req, res);
+    if (req.method === "GET" && url.pathname === "/api/actions") return listActions(req, res);
+    if (req.method === "POST" && url.pathname === "/api/actions") return createAction(req, res);
+    const actionMatch = url.pathname.match(/^\/api\/actions\/([^/]+)$/);
+    if (req.method === "PATCH" && actionMatch) return updateAction(req, res, actionMatch[1]);
+    if (req.method === "GET" && url.pathname === "/api/integration-settings") return listIntegrationSettings(req, res);
+    if (req.method === "POST" && url.pathname === "/api/integration-settings") return saveIntegrationSetting(req, res);
     if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(req, res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
     const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);

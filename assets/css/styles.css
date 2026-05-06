@@ -637,6 +637,9 @@ textarea:focus {
 }
 
 .two-column,
+.customer-layout,
+.quote-layout,
+.task-layout,
 .billing-layout,
 .meeting-layout,
 .calendar-layout,
@@ -649,6 +652,108 @@ textarea:focus {
 
 .meeting-layout {
   grid-template-columns: minmax(280px, 0.95fr) minmax(320px, 1fr) minmax(300px, 0.85fr);
+  align-items: start;
+}
+
+.customer-layout,
+.quote-layout,
+.task-layout {
+  align-items: start;
+}
+
+.record-form,
+.oauth-form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.record-list,
+.task-board,
+.oauth-list {
+  display: grid;
+  gap: 10px;
+}
+
+.record-card,
+.task-card,
+.oauth-row {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.record-card header,
+.oauth-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.record-card strong,
+.record-card small,
+.task-card strong,
+.task-card small,
+.oauth-row strong,
+.oauth-row small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.record-card small,
+.task-card small,
+.oauth-row small {
+  color: var(--muted);
+}
+
+.quote-card {
+  cursor: pointer;
+}
+
+.quote-card.is-selected {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(8, 127, 116, 0.13);
+}
+
+.quote-total {
+  color: var(--teal-dark);
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.task-check {
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  color: var(--ink);
+}
+
+.task-check input {
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+}
+
+.task-check span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.task-card.is-done {
+  opacity: 0.64;
+}
+
+.task-card.is-done strong {
+  text-decoration: line-through;
+}
+
+.oauth-card {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(320px, 1fr) minmax(260px, 0.8fr);
   align-items: start;
 }
 
@@ -1125,11 +1230,15 @@ textarea:focus {
 
   .content-grid,
   .two-column,
+  .customer-layout,
+  .quote-layout,
+  .task-layout,
   .billing-layout,
   .meeting-layout,
   .calendar-layout,
   .distribution-layout,
-  .admin-layout {
+  .admin-layout,
+  .oauth-card {
     grid-template-columns: 1fr;
   }
 
