@@ -254,6 +254,10 @@ const oauthSettingsForm = document.querySelector("#oauthSettingsForm");
 const oauthSettingsList = document.querySelector("#oauthSettingsList");
 const oauthProviderSelect = document.querySelector("#oauthProviderSelect");
 const oauthRedirectUri = document.querySelector("#oauthRedirectUri");
+const oauthAuthorizeButton = document.querySelector("#oauthAuthorizeButton");
+const oauthSandboxButton = document.querySelector("#oauthSandboxButton");
+const oauthCheckPanel = document.querySelector("#oauthCheckPanel");
+const licenseCheckPanel = document.querySelector("#licenseCheckPanel");
 const databaseConfig = {
   name: "akis-crm-db",
   version: 1,
@@ -464,6 +468,27 @@ async function saveIntegrationSettingOnApi(setting) {
     method: "POST",
     body: JSON.stringify(setting)
   });
+  return payload?.data || null;
+}
+
+async function createOAuthAuthorizeOnApi(provider) {
+  const payload = await apiRequest(`/api/oauth/authorize/${provider}`, {
+    method: "POST",
+    body: JSON.stringify({})
+  });
+  return payload?.data || null;
+}
+
+async function sandboxConnectOAuthOnApi(provider) {
+  const payload = await apiRequest("/api/oauth/sandbox-connect", {
+    method: "POST",
+    body: JSON.stringify({ provider })
+  });
+  return payload?.data || null;
+}
+
+async function syncLicenseStatusFromApi() {
+  const payload = await apiRequest("/api/license/status");
   return payload?.data || null;
 }
 
@@ -894,6 +919,18 @@ function renderOAuthSettings() {
         </article>
       `).join("")
     : `<div class="empty-state">OAuth uygulama ayarı bekleniyor</div>`;
+  const attempts = state.adminOverview?.oauthAttempts || [];
+  oauthCheckPanel.innerHTML = attempts.length
+    ? `
+      <div class="oauth-result">
+        <strong>Son OAuth denemeleri</strong>
+        ${attempts.slice(0, 3).map((attempt) => `
+          <small>${escapeHtml(attempt.provider)} · ${escapeHtml(attempt.status)} · ${escapeHtml(new Date(attempt.createdAt).toLocaleString("tr-TR"))}</small>
+          ${attempt.authorizeUrl ? `<a class="secondary-button oauth-link" href="${escapeHtml(attempt.authorizeUrl)}" target="_blank" rel="noreferrer">OAuth ekranını aç</a>` : ""}
+        `).join("")}
+      </div>
+    `
+    : `<div class="oauth-result"><strong>Local OAuth hazır</strong><small>Önce ayarı kaydedip yetki linki hazırlayın.</small></div>`;
 }
 
 function defaultRedirectUri(provider) {
@@ -910,6 +947,34 @@ function statusLabel(status) {
     accepted: "Kabul edildi",
     rejected: "Reddedildi"
   }[status] || status || "Taslak";
+}
+
+function renderLicenseCheck(license, fallbackUsers = 0) {
+  if (!licenseCheckPanel) return;
+  const used = Number(license?.usedSeats ?? fallbackUsers);
+  const seats = Number(license?.seats || 5);
+  const available = Number(license?.seatsAvailable ?? Math.max(seats - used, 0));
+  const status = license?.status || "trialing";
+  const warnings = Array.isArray(license?.warnings) ? license.warnings : [];
+  licenseCheckPanel.innerHTML = `
+    <div class="license-meter">
+      <div>
+        <strong>${escapeHtml(licenseStatusLabel(status))}</strong>
+        <small>${used}/${seats} kullanıcı · ${available} boş koltuk</small>
+      </div>
+      <span class="pill ${status === "active" || status === "trialing" ? "success" : ""}">${escapeHtml(status)}</span>
+    </div>
+    ${warnings.length ? `<ul>${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>` : `<small>Lisans yeni kullanıcı ve modül kontrolleri için uygun.</small>`}
+  `;
+}
+
+function licenseStatusLabel(status) {
+  return {
+    active: "Lisans aktif",
+    trialing: "Deneme sürümü",
+    review_required: "İnceleme gerekli",
+    expired: "Süresi doldu"
+  }[status] || "Lisans durumu";
 }
 
 function setIntegrationStatus(key, connected) {
@@ -1076,8 +1141,9 @@ function renderAdmin() {
     licenseForm.elements.customerName.value = license.customer_name || license.customerName || "";
     licenseForm.elements.edition.value = license.edition || "self-hosted";
     licenseForm.elements.seats.value = license.seats || 5;
-    licenseForm.elements.expiresAt.value = license.expires_at ? String(license.expires_at).slice(0, 10) : "";
+    licenseForm.elements.expiresAt.value = license.expires_at || license.expiresAt ? String(license.expires_at || license.expiresAt).slice(0, 10) : "";
   }
+  renderLicenseCheck(license, users.length);
   adminSummary.innerHTML = `
     <article>
       <span>Firma</span>
@@ -1101,7 +1167,7 @@ function renderAdmin() {
     </article>
     <article>
       <span>Kullanıcı limiti</span>
-      <strong>${Number(license?.seats || 5)}</strong>
+      <strong>${Number(license?.usedSeats || users.length || 0)} / ${Number(license?.seats || 5)}</strong>
     </article>
   `;
 
@@ -1306,8 +1372,10 @@ adminUserForm.addEventListener("submit", async (event) => {
     adminUserForm.reset();
     await syncAdminOverview();
     logActivity(`${payload.fullName} kullanıcısı manuel oluşturuldu.`);
-  } catch {
-    logActivity("Kullanıcı oluşturulamadı, rol ve e-posta bilgisini kontrol edin.");
+  } catch (error) {
+    logActivity(error.message?.includes("402")
+      ? "Kullanıcı oluşturulamadı: lisans kullanıcı limiti veya lisans durumu uygun değil."
+      : "Kullanıcı oluşturulamadı, rol ve e-posta bilgisini kontrol edin.");
   }
   render();
 });
@@ -1318,6 +1386,8 @@ licenseForm.addEventListener("submit", async (event) => {
   try {
     await activateLicenseOnApi(payload);
     await syncAdminOverview();
+    const license = await syncLicenseStatusFromApi();
+    if (state.adminOverview) state.adminOverview.license = license;
     logActivity("Lisans bilgisi kaydedildi.");
   } catch {
     logActivity("Lisans kaydedilemedi.");
@@ -1440,6 +1510,42 @@ taskList.addEventListener("change", async (event) => {
 });
 
 oauthProviderSelect.addEventListener("change", renderOAuthSettings);
+
+oauthAuthorizeButton.addEventListener("click", async () => {
+  const provider = oauthProviderSelect.value;
+  try {
+    const attempt = await createOAuthAuthorizeOnApi(provider);
+    if (!state.adminOverview) state.adminOverview = {};
+    state.adminOverview.oauthAttempts = [attempt, ...(state.adminOverview.oauthAttempts || [])];
+    oauthCheckPanel.innerHTML = `
+      <div class="oauth-result">
+        <strong>Yetki linki hazır</strong>
+        <small>${escapeHtml(attempt.redirectUri)}</small>
+        <a class="secondary-button oauth-link" href="${escapeHtml(attempt.authorizeUrl)}" target="_blank" rel="noreferrer">OAuth ekranını aç</a>
+      </div>
+    `;
+    logActivity(`${provider === "gmail" ? "Gmail" : "Outlook"} OAuth yetki linki hazırlandı.`);
+  } catch {
+    logActivity("OAuth yetki linki üretilemedi. Client ID ve redirect URI kaydını kontrol edin.");
+  }
+  render();
+});
+
+oauthSandboxButton.addEventListener("click", async () => {
+  const provider = oauthProviderSelect.value;
+  try {
+    const setting = await sandboxConnectOAuthOnApi(provider);
+    const existingIndex = state.integrationSettings.findIndex((item) => item.provider === setting.provider);
+    if (existingIndex >= 0) state.integrationSettings.splice(existingIndex, 1, setting);
+    else state.integrationSettings.push(setting);
+    state.integrations[provider] = true;
+    await syncAdminOverview();
+    logActivity(`${provider === "gmail" ? "Gmail" : "Outlook"} sandbox bağlantısı aktif edildi.`);
+  } catch {
+    logActivity("Sandbox bağlantısı açılamadı. Önce OAuth ayarını kaydedin.");
+  }
+  render();
+});
 
 oauthSettingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();

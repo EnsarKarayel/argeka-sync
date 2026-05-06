@@ -63,6 +63,8 @@ Admin ekranından JSON, CSV ve SQL dışa aktarım da yapılabilir.
 - Teklifler ekranında firma/kişi bağlantılı teklif oluşturulur, toplam hesaplanır ve teklif çıktısı indirilebilir.
 - Görevler ekranında aksiyonlar API'ye yazılır, tamamlandı durumu veritabanına işlenir.
 - Entegrasyon ekranında Gmail ve Outlook için OAuth uygulama ayarları kaydedilir. Gerçek domain alındığında redirect URI bu ekrandaki adresle Google Cloud ve Microsoft Entra tarafına girilir.
+- Domain/SSL beklerken local OAuth yetki linki üretilebilir, `/oauth/{provider}/callback` kodu yakalar ve sandbox bağlantı gerçek token olmadan modül testini açar.
+- Lisans kontrolü kullanıcı limiti, lisans durumu ve bitiş tarihini denetler; koltuk dolduğunda yeni kullanıcı oluşturma engellenir.
 
 ## Calistirma
 

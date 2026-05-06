@@ -177,6 +177,22 @@ create table oauth_app_settings (
   unique (tenant_id, provider)
 );
 
+create table oauth_authorization_attempts (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  user_id uuid references users(id) on delete set null,
+  provider text not null,
+  state text not null unique,
+  status text not null default 'created',
+  authorize_url text,
+  redirect_uri text,
+  scopes text[] not null default '{}',
+  code_preview text,
+  error text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table webhook_endpoints (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenants(id) on delete cascade,
@@ -230,6 +246,7 @@ create index meetings_tenant_starts_at_idx on meetings (tenant_id, starts_at);
 create index action_items_tenant_due_idx on action_items (tenant_id, due_date);
 create index quotes_tenant_created_idx on quotes (tenant_id, created_at desc);
 create index oauth_app_settings_tenant_idx on oauth_app_settings (tenant_id);
+create index oauth_authorization_attempts_tenant_idx on oauth_authorization_attempts (tenant_id, created_at desc);
 create index sessions_token_hash_idx on sessions (token_hash);
 create index sessions_user_idx on sessions (user_id);
 create index app_roles_tenant_idx on app_roles (tenant_id);

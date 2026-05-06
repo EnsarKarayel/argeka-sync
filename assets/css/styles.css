@@ -675,6 +675,54 @@ textarea:focus {
   gap: 10px;
 }
 
+.oauth-check,
+.license-check {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.oauth-result,
+.license-meter {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f7faf8;
+}
+
+.oauth-result small,
+.license-check small,
+.license-check li {
+  color: var(--muted);
+}
+
+.oauth-link {
+  align-items: center;
+  display: inline-flex;
+  justify-self: start;
+  text-decoration: none;
+}
+
+.license-meter {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.license-meter div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.license-check ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+}
+
 .record-card,
 .task-card,
 .oauth-row {

@@ -604,8 +604,13 @@
                   Redirect URI
                   <input name="redirectUri" id="oauthRedirectUri" readonly>
                 </label>
-                <button class="primary-button" type="submit">OAuth ayarını kaydet</button>
+                <div class="button-row">
+                  <button class="secondary-button" id="oauthAuthorizeButton" type="button">Yetki linki hazırla</button>
+                  <button class="secondary-button" id="oauthSandboxButton" type="button">Sandbox bağla</button>
+                  <button class="primary-button" type="submit">OAuth ayarını kaydet</button>
+                </div>
               </form>
+              <div class="oauth-check" id="oauthCheckPanel"></div>
               <div class="oauth-list" id="oauthSettingsList"></div>
             </article>
 
@@ -853,6 +858,7 @@
                 </label>
                 <button class="primary-button" type="submit">Lisansı kaydet</button>
               </form>
+              <div class="license-check" id="licenseCheckPanel"></div>
             </section>
 
             <section class="panel-block">

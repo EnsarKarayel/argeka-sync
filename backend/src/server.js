@@ -153,6 +153,22 @@ async function ensureSchema() {
       unique (tenant_id, provider)
     );
 
+    create table if not exists oauth_authorization_attempts (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      user_id uuid references users(id) on delete set null,
+      provider text not null,
+      state text not null unique,
+      status text not null default 'created',
+      authorize_url text,
+      redirect_uri text,
+      scopes text[] not null default '{}',
+      code_preview text,
+      error text,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
+
     create index if not exists app_roles_tenant_idx on app_roles (tenant_id);
     create index if not exists teams_tenant_idx on teams (tenant_id);
     create index if not exists users_tenant_team_idx on users (tenant_id, team_id);
@@ -162,6 +178,7 @@ async function ensureSchema() {
     create index if not exists contacts_tenant_account_idx on contacts (tenant_id, account_id);
     create index if not exists quotes_tenant_created_idx on quotes (tenant_id, created_at desc);
     create index if not exists oauth_app_settings_tenant_idx on oauth_app_settings (tenant_id);
+    create index if not exists oauth_authorization_attempts_tenant_idx on oauth_authorization_attempts (tenant_id, created_at desc);
   `);
 
   const tid = await tenantId();
@@ -339,6 +356,49 @@ function integrationSettingPayload(row) {
   };
 }
 
+function oauthAttemptPayload(row) {
+  return {
+    id: row.id,
+    provider: row.provider,
+    state: row.state,
+    status: row.status,
+    authorizeUrl: row.authorize_url,
+    redirectUri: row.redirect_uri,
+    scopes: row.scopes || [],
+    codePreview: row.code_preview,
+    error: row.error,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function licensePayload(row, userCount = 0) {
+  const seats = Number(row?.seats || 5);
+  const expiresAt = row?.expires_at || null;
+  const expired = expiresAt ? new Date(expiresAt) < new Date(new Date().toISOString().slice(0, 10)) : false;
+  const rawStatus = row?.status || "trialing";
+  const status = expired ? "expired" : rawStatus;
+  const seatsAvailable = Math.max(seats - Number(userCount || 0), 0);
+  return {
+    customerName: row?.customer_name || "ARGEKA Demo",
+    edition: row?.edition || "self-hosted",
+    status,
+    rawStatus,
+    seats,
+    usedSeats: Number(userCount || 0),
+    seatsAvailable,
+    expiresAt,
+    activatedAt: row?.activated_at || null,
+    updatedAt: row?.updated_at || null,
+    canCreateUser: ["active", "trialing"].includes(status) && seatsAvailable > 0,
+    warnings: [
+      ...(status === "expired" ? ["Lisans süresi doldu."] : []),
+      ...(status === "review_required" ? ["Lisans anahtarı inceleme gerektiriyor."] : []),
+      ...(seatsAvailable === 0 ? ["Kullanıcı limiti doldu."] : [])
+    ]
+  };
+}
+
 function hasPermission(session, key) {
   return isAdmin(session) || session?.permissions?.[key] === true;
 }
@@ -369,6 +429,20 @@ async function auditLog(session, action, targetType, targetId = null, metadata =
      values ($1, $2, $3, $4, $5, $6::jsonb)`,
     [session.tenant_id, session.user_id, action, targetType, targetId, JSON.stringify(metadata)]
   );
+}
+
+async function licenseSnapshot(tenant) {
+  const [license, users] = await Promise.all([
+    pool.query(
+      `select customer_name, edition, status, seats, expires_at, activated_at, updated_at
+       from license_settings
+       where tenant_id = $1
+       limit 1`,
+      [tenant]
+    ),
+    pool.query("select count(*)::int as count from users where tenant_id = $1", [tenant])
+  ]);
+  return licensePayload(license.rows[0], users.rows[0]?.count || 0);
 }
 
 async function readJson(req) {
@@ -511,7 +585,7 @@ async function adminOverview(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
 
-  const [tenantResult, usersResult, rolesResult, teamsResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult, accountsResult, contactsResult, quotesResult, oauthSettingsResult] =
+  const [tenantResult, usersResult, rolesResult, teamsResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult, accountsResult, contactsResult, quotesResult, oauthSettingsResult, oauthAttemptResult] =
     await Promise.all([
       pool.query(
         `select id, name, plan, billing_status, created_at
@@ -576,8 +650,17 @@ async function adminOverview(req, res) {
       pool.query("select count(*)::int as count from accounts where tenant_id = $1", [session.tenant_id]),
       pool.query("select count(*)::int as count from contacts where tenant_id = $1", [session.tenant_id]),
       pool.query("select count(*)::int as count from quotes where tenant_id = $1", [session.tenant_id]),
-      pool.query("select count(*)::int as count from oauth_app_settings where tenant_id = $1", [session.tenant_id])
+      pool.query("select count(*)::int as count from oauth_app_settings where tenant_id = $1", [session.tenant_id]),
+      pool.query(
+        `select id, provider, state, status, authorize_url, redirect_uri, scopes, code_preview, error, created_at, updated_at
+         from oauth_authorization_attempts
+         where tenant_id = $1
+         order by created_at desc
+         limit 5`,
+        [session.tenant_id]
+      )
     ]);
+  const licenseInfo = licensePayload(licenseResult.rows[0], usersResult.rows.length);
 
   send(res, 200, {
     tenant: tenantResult.rows[0],
@@ -606,7 +689,8 @@ async function adminOverview(req, res) {
       hiddenColumns: role.hidden_columns || [],
       permissions: role.permissions || {}
     })),
-    license: licenseResult.rows[0] || null,
+    license: licenseInfo,
+    oauthAttempts: oauthAttemptResult.rows.map(oauthAttemptPayload),
     backup: backupResult.rows[0] || null,
     audit: auditResult.rows.map((entry) => ({
       action: entry.action,
@@ -647,6 +731,14 @@ async function createAdminUser(req, res) {
   }
   if (String(body.password).length < 6) {
     return send(res, 400, { error: "weak_password" });
+  }
+  const license = await licenseSnapshot(session.tenant_id);
+  if (!license.canCreateUser) {
+    return send(res, 402, {
+      error: "license_limit",
+      message: license.warnings[0] || "Lisans yeni kullanıcı oluşturmaya izin vermiyor.",
+      license
+    });
   }
 
   const roleResult = await pool.query(
@@ -745,6 +837,12 @@ async function activateLicense(req, res) {
     seats: Number(body.seats || 5)
   });
   send(res, 200, { data: result.rows[0] });
+}
+
+async function licenseStatus(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  send(res, 200, { data: await licenseSnapshot(session.tenant_id) });
 }
 
 function csvEscape(value) {
@@ -1072,6 +1170,156 @@ async function saveIntegrationSetting(req, res) {
   send(res, 200, { data: integrationSettingPayload(result.rows[0]) });
 }
 
+function oauthProviderDefaults(provider, setting = {}) {
+  if (provider === "gmail") {
+    return {
+      authorizeEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+      scopes: setting.scopes?.length ? setting.scopes : [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/contacts.readonly"
+      ],
+      extra: {
+        access_type: "offline",
+        prompt: "consent"
+      }
+    };
+  }
+  const tenant = setting.tenant_or_project || "common";
+  return {
+    authorizeEndpoint: `https://login.microsoftonline.com/${encodeURIComponent(tenant)}/oauth2/v2.0/authorize`,
+    scopes: setting.scopes?.length ? setting.scopes : [
+      "offline_access",
+      "User.Read",
+      "Mail.Read",
+      "Calendars.ReadWrite",
+      "Contacts.Read"
+    ],
+    extra: {}
+  };
+}
+
+async function createOAuthAuthorize(req, res, provider) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  provider = String(provider || "").toLowerCase();
+  if (!["gmail", "outlook"].includes(provider)) return send(res, 400, { error: "invalid_provider" });
+
+  const settingResult = await pool.query(
+    `select id, provider, client_id, tenant_or_project, scopes, redirect_uri, status, updated_at
+     from oauth_app_settings
+     where tenant_id = $1 and provider = $2
+     limit 1`,
+    [session.tenant_id, provider]
+  );
+  const setting = settingResult.rows[0];
+  if (!setting?.client_id || !setting?.redirect_uri) {
+    return send(res, 400, {
+      error: "oauth_not_configured",
+      message: "Client ID ve Redirect URI kaydedilmeden OAuth linki üretilemez."
+    });
+  }
+
+  const defaults = oauthProviderDefaults(provider, setting);
+  const state = randomBytes(18).toString("hex");
+  const params = new URLSearchParams({
+    client_id: setting.client_id,
+    redirect_uri: setting.redirect_uri,
+    response_type: "code",
+    scope: defaults.scopes.join(" "),
+    state,
+    ...defaults.extra
+  });
+  const authorizeUrl = `${defaults.authorizeEndpoint}?${params.toString()}`;
+  const result = await pool.query(
+    `insert into oauth_authorization_attempts
+       (tenant_id, user_id, provider, state, status, authorize_url, redirect_uri, scopes)
+     values ($1,$2,$3,$4,'created',$5,$6,$7)
+     returning id, provider, state, status, authorize_url, redirect_uri, scopes, code_preview, error, created_at, updated_at`,
+    [session.tenant_id, session.user_id, provider, state, authorizeUrl, setting.redirect_uri, defaults.scopes]
+  );
+  await auditLog(session, "integration.oauth_authorize_created", "oauth_authorization_attempt", result.rows[0].id, { provider });
+  send(res, 201, { data: oauthAttemptPayload(result.rows[0]) });
+}
+
+async function oauthCallback(req, res, provider, url) {
+  provider = String(provider || "").toLowerCase();
+  if (!["gmail", "outlook"].includes(provider)) return send(res, 400, { error: "invalid_provider" });
+  const state = url.searchParams.get("state") || "";
+  const code = url.searchParams.get("code") || "";
+  const error = url.searchParams.get("error") || "";
+  const status = error ? "error" : code ? "code_received" : "missing_code";
+  const codePreview = code ? `${code.slice(0, 8)}...${code.slice(-4)}` : null;
+  const result = await pool.query(
+    `update oauth_authorization_attempts
+     set status = $3,
+         code_preview = $4,
+         error = $5,
+         updated_at = now()
+     where state = $1 and provider = $2
+     returning id, tenant_id, user_id, provider, state, status, authorize_url, redirect_uri, scopes, code_preview, error, created_at, updated_at`,
+    [state, provider, status, codePreview, error || null]
+  );
+  const attempt = result.rows[0];
+  if (attempt?.tenant_id) {
+    await pool.query(
+      `update oauth_app_settings
+       set status = $3, updated_at = now()
+       where tenant_id = $1 and provider = $2`,
+      [attempt.tenant_id, provider, status === "code_received" ? "code_received" : "error"]
+    );
+  }
+  return sendRaw(
+    res,
+    200,
+    "text/html; charset=utf-8",
+    `<!doctype html><meta charset="utf-8"><title>ARGEKA CRM OAuth</title><body style="font-family:system-ui;padding:32px"><h1>OAuth sonucu</h1><p>Sağlayıcı: ${provider}</p><p>Durum: ${status}</p><p>Bu aşamada kod alındı; gerçek token exchange domain/SSL ve client secret hazır olunca açılacak.</p></body>`
+  );
+}
+
+async function sandboxConnectOAuth(req, res) {
+  const session = await requireAdmin(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  const provider = String(body.provider || "").toLowerCase();
+  if (!["gmail", "outlook"].includes(provider)) return send(res, 400, { error: "invalid_provider" });
+  const setting = await pool.query(
+    "select id from oauth_app_settings where tenant_id = $1 and provider = $2 limit 1",
+    [session.tenant_id, provider]
+  );
+  if (!setting.rows[0]) return send(res, 400, { error: "oauth_not_configured" });
+  const scopes = provider === "gmail"
+    ? ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/calendar.events"]
+    : ["offline_access", "User.Read", "Mail.Read", "Calendars.ReadWrite"];
+  await pool.query(
+    `insert into oauth_connections
+       (tenant_id, user_id, provider, scopes, access_token_ciphertext, refresh_token_ciphertext, expires_at)
+     values ($1,$2,$3,$4,$5,$6,now() + interval '1 hour')
+     on conflict (tenant_id, user_id, provider) do update
+     set scopes = excluded.scopes,
+         access_token_ciphertext = excluded.access_token_ciphertext,
+         refresh_token_ciphertext = excluded.refresh_token_ciphertext,
+         expires_at = excluded.expires_at`,
+    [
+      session.tenant_id,
+      session.user_id,
+      provider,
+      scopes,
+      `sandbox-access-${randomBytes(12).toString("hex")}`,
+      `sandbox-refresh-${randomBytes(12).toString("hex")}`
+    ]
+  );
+  const updated = await pool.query(
+    `update oauth_app_settings
+     set status = 'connected', updated_at = now()
+     where tenant_id = $1 and provider = $2
+     returning id, provider, client_id, tenant_or_project, scopes, redirect_uri, status, updated_at`,
+    [session.tenant_id, provider]
+  );
+  await auditLog(session, "integration.oauth_sandbox_connected", "oauth_connection", provider, { provider });
+  send(res, 200, { data: integrationSettingPayload(updated.rows[0]) });
+}
+
 async function listOpportunities(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
@@ -1214,6 +1462,7 @@ async function handler(req, res) {
     if (req.method === "GET" && url.pathname === "/api/admin/overview") return adminOverview(req, res);
     if (req.method === "POST" && url.pathname === "/api/admin/users") return createAdminUser(req, res);
     if (req.method === "POST" && url.pathname === "/api/admin/license") return activateLicense(req, res);
+    if (req.method === "GET" && url.pathname === "/api/license/status") return licenseStatus(req, res);
     if (req.method === "GET" && url.pathname === "/api/admin/export") return exportData(req, res, url.searchParams.get("format") || "json");
     if (req.method === "GET" && url.pathname === "/api/accounts") return listAccounts(req, res);
     if (req.method === "POST" && url.pathname === "/api/accounts") return createAccount(req, res);
@@ -1227,6 +1476,11 @@ async function handler(req, res) {
     if (req.method === "PATCH" && actionMatch) return updateAction(req, res, actionMatch[1]);
     if (req.method === "GET" && url.pathname === "/api/integration-settings") return listIntegrationSettings(req, res);
     if (req.method === "POST" && url.pathname === "/api/integration-settings") return saveIntegrationSetting(req, res);
+    const oauthAuthorizeMatch = url.pathname.match(/^\/api\/oauth\/authorize\/([^/]+)$/);
+    if (req.method === "POST" && oauthAuthorizeMatch) return createOAuthAuthorize(req, res, oauthAuthorizeMatch[1]);
+    if (req.method === "POST" && url.pathname === "/api/oauth/sandbox-connect") return sandboxConnectOAuth(req, res);
+    const oauthCallbackMatch = url.pathname.match(/^\/oauth\/([^/]+)\/callback$/);
+    if (req.method === "GET" && oauthCallbackMatch) return oauthCallback(req, res, oauthCallbackMatch[1], url);
     if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(req, res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
     const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);
