@@ -4,6 +4,11 @@ Kurulumsuz çalışan ilk web CRM prototipi. Dosyayı tarayıcıda açarak pipel
 
 ## Tek komut Windows kurulumu
 
+Hiç teknik bilmeyen bir kullanıcı için adım adım anlatım:
+
+- `docs/KURULUM.md`
+- GitHub üzerinde açmak için: https://github.com/EnsarKarayel/akis-crm/blob/main/docs/KURULUM.md
+
 Sifir bir Windows bilgisayarda PowerShell acip su komutu calistirin:
 
 ```powershell
