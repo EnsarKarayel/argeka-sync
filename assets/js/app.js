@@ -224,6 +224,7 @@ const adminHealth = document.querySelector("#adminHealth");
 const adminPlanPill = document.querySelector("#adminPlanPill");
 const adminUserForm = document.querySelector("#adminUserForm");
 const adminRoleSelect = document.querySelector("#adminRoleSelect");
+const adminTeamSelect = document.querySelector("#adminTeamSelect");
 const licenseForm = document.querySelector("#licenseForm");
 const licenseStatusPill = document.querySelector("#licenseStatusPill");
 const adminAuditLog = document.querySelector("#adminAuditLog");
@@ -821,6 +822,7 @@ function renderAdmin() {
     backupStatus: "planned"
   };
   const roles = overview?.roles || [];
+  const teams = overview?.teams || [];
   const license = overview?.license || null;
   const backup = overview?.backup || null;
   const audit = overview?.audit || [];
@@ -834,6 +836,11 @@ function renderAdmin() {
     adminRoleSelect.innerHTML = roles.length
       ? roles.map((role) => `<option value="${escapeHtml(role.id)}">${escapeHtml(role.name)} · ${escapeHtml(scopeLabel(role.dataScope))}</option>`).join("")
       : `<option value="">Rol bekleniyor</option>`;
+  }
+  if (adminTeamSelect) {
+    adminTeamSelect.innerHTML = teams.length
+      ? teams.map((team) => `<option value="${escapeHtml(team.id)}">${escapeHtml(team.name)}</option>`).join("")
+      : `<option value="">Ekip bekleniyor</option>`;
   }
   if (licenseForm && license) {
     licenseForm.elements.customerName.value = license.customer_name || license.customerName || "";
@@ -874,7 +881,7 @@ function renderAdmin() {
           <span class="avatar">${escapeHtml((user.fullName || user.email || "A").slice(0, 1).toLocaleUpperCase("tr-TR"))}</span>
           <div>
             <strong>${escapeHtml(user.fullName || "Kullanıcı")}</strong>
-            <small>${escapeHtml(user.email || "-")} · ${escapeHtml(scopeLabel(user.dataScope))}</small>
+            <small>${escapeHtml(user.email || "-")} · ${escapeHtml(user.teamName || "Ekipsiz")} · ${escapeHtml(scopeLabel(user.dataScope))}</small>
           </div>
           <span class="source-tag">${escapeHtml(user.role || "member")}</span>
         </article>

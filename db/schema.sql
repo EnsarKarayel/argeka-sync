@@ -37,7 +37,16 @@ create table app_roles (
   unique (tenant_id, key)
 );
 
+create table teams (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  name text not null,
+  created_at timestamptz not null default now(),
+  unique (tenant_id, name)
+);
+
 alter table users add column role_id uuid references app_roles(id) on delete set null;
+alter table users add column team_id uuid references teams(id) on delete set null;
 
 create table sessions (
   id uuid primary key default gen_random_uuid(),
@@ -186,6 +195,8 @@ create index action_items_tenant_due_idx on action_items (tenant_id, due_date);
 create index sessions_token_hash_idx on sessions (token_hash);
 create index sessions_user_idx on sessions (user_id);
 create index app_roles_tenant_idx on app_roles (tenant_id);
+create index teams_tenant_idx on teams (tenant_id);
+create index users_tenant_team_idx on users (tenant_id, team_id);
 create index backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
 create index audit_logs_tenant_created_idx on audit_logs (tenant_id, created_at desc);
 

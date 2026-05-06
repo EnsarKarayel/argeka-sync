@@ -71,7 +71,16 @@ async function ensureSchema() {
       unique (tenant_id, key)
     );
 
+    create table if not exists teams (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      name text not null,
+      created_at timestamptz not null default now(),
+      unique (tenant_id, name)
+    );
+
     alter table users add column if not exists role_id uuid references app_roles(id) on delete set null;
+    alter table users add column if not exists team_id uuid references teams(id) on delete set null;
     alter table users add column if not exists data_scope text not null default 'own';
     alter table users add column if not exists hidden_columns text[] not null default '{}';
 
@@ -111,11 +120,22 @@ async function ensureSchema() {
     );
 
     create index if not exists app_roles_tenant_idx on app_roles (tenant_id);
+    create index if not exists teams_tenant_idx on teams (tenant_id);
+    create index if not exists users_tenant_team_idx on users (tenant_id, team_id);
     create index if not exists backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
     create index if not exists audit_logs_tenant_created_idx on audit_logs (tenant_id, created_at desc);
   `);
 
   const tid = await tenantId();
+  for (const teamName of ["İş Geliştirme", "Satış Operasyon", "Finans"]) {
+    await pool.query(
+      `insert into teams (tenant_id, name)
+       values ($1, $2)
+       on conflict (tenant_id, name) do nothing`,
+      [tid, teamName]
+    );
+  }
+
   for (const role of defaultRoles) {
     await pool.query(
       `insert into app_roles (tenant_id, key, name, data_scope, hidden_columns, permissions)
@@ -137,6 +157,15 @@ async function ensureSchema() {
      where u.tenant_id = r.tenant_id
        and r.key = case when u.role = 'owner' then 'owner' else 'business_development' end
        and u.role_id is null`
+  );
+
+  await pool.query(
+    `update users u
+     set team_id = t.id
+     from teams t
+     where u.tenant_id = t.tenant_id
+       and t.name = 'İş Geliştirme'
+       and u.team_id is null`
   );
 
   await pool.query(
@@ -171,7 +200,22 @@ function hasPermission(session, key) {
 }
 
 function canSeeTenantScope(session) {
-  return ["team", "all"].includes(session?.data_scope);
+  return session?.data_scope === "all";
+}
+
+function opportunityAccess(session, tableAlias = "o", startIndex = 2) {
+  if (session.data_scope === "all") return { clause: "", params: [] };
+  if (session.data_scope === "team" && session.team_id) {
+    return {
+      clause: `and exists (
+        select 1 from users owner_user
+        where owner_user.id = ${tableAlias}.owner_id
+          and owner_user.team_id = $${startIndex}
+      )`,
+      params: [session.team_id]
+    };
+  }
+  return { clause: `and ${tableAlias}.owner_id = $${startIndex}`, params: [session.user_id] };
 }
 
 async function auditLog(session, action, targetType, targetId = null, metadata = {}) {
@@ -210,13 +254,15 @@ async function currentSession(req) {
   const token = bearerToken(req);
   if (!token) return null;
   const result = await pool.query(
-    `select s.tenant_id, s.user_id, u.email, u.full_name, u.role, u.data_scope, u.hidden_columns,
+    `select s.tenant_id, s.user_id, u.email, u.full_name, u.role, u.team_id, u.data_scope, u.hidden_columns,
             r.key as role_key, r.name as role_name, r.permissions,
+            tm.name as team_name,
             t.name as tenant_name, t.plan
      from sessions s
      join users u on u.id = s.user_id
      join tenants t on t.id = s.tenant_id
      left join app_roles r on r.id = u.role_id
+     left join teams tm on tm.id = u.team_id
      where s.token_hash = $1 and s.expires_at > now()
      limit 1`,
     [tokenHash(token)]
@@ -231,6 +277,8 @@ function sessionUser(session) {
     fullName: session.full_name,
     role: session.role_name || session.role,
     roleKey: session.role_key || session.role,
+    teamId: session.team_id,
+    teamName: session.team_name,
     dataScope: session.data_scope || "own",
     hiddenColumns: session.hidden_columns || [],
     permissions: session.permissions || {}
@@ -263,12 +311,14 @@ async function requireSession(req, res) {
 async function login(req, res) {
   const body = await readJson(req);
   const result = await pool.query(
-    `select u.id, u.tenant_id, u.email, u.full_name, u.password_hash, u.role, u.data_scope, u.hidden_columns,
+    `select u.id, u.tenant_id, u.email, u.full_name, u.password_hash, u.role, u.team_id, u.data_scope, u.hidden_columns,
             r.key as role_key, r.name as role_name, r.permissions,
+            tm.name as team_name,
             t.name as tenant_name, t.plan
      from users u
      join tenants t on t.id = u.tenant_id
      left join app_roles r on r.id = u.role_id
+     left join teams tm on tm.id = u.team_id
      where lower(u.email::text) = lower($1)
      order by u.created_at asc
      limit 1`,
@@ -294,6 +344,8 @@ async function login(req, res) {
       role: user.role,
       role_key: user.role_key,
       role_name: user.role_name,
+      team_id: user.team_id,
+      team_name: user.team_name,
       data_scope: user.data_scope,
       hidden_columns: user.hidden_columns,
       permissions: user.permissions
@@ -315,7 +367,7 @@ async function adminOverview(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
 
-  const [tenantResult, usersResult, rolesResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
+  const [tenantResult, usersResult, rolesResult, teamsResult, licenseResult, backupResult, auditResult, opportunitiesResult, meetingsResult, actionsResult, oauthResult, webhookResult] =
     await Promise.all([
       pool.query(
         `select id, name, plan, billing_status, created_at
@@ -325,9 +377,11 @@ async function adminOverview(req, res) {
       ),
       pool.query(
         `select u.id, u.email, u.full_name, u.role, u.data_scope, u.hidden_columns, u.created_at,
-                r.id as role_id, r.key as role_key, r.name as role_name
+                r.id as role_id, r.key as role_key, r.name as role_name,
+                tm.id as team_id, tm.name as team_name
          from users u
          left join app_roles r on r.id = u.role_id
+         left join teams tm on tm.id = u.team_id
          where u.tenant_id = $1
          order by created_at asc`,
         [session.tenant_id]
@@ -335,6 +389,13 @@ async function adminOverview(req, res) {
       pool.query(
         `select id, key, name, data_scope, hidden_columns, permissions
          from app_roles
+         where tenant_id = $1
+         order by name asc`,
+        [session.tenant_id]
+      ),
+      pool.query(
+        `select id, name
+         from teams
          where tenant_id = $1
          order by name asc`,
         [session.tenant_id]
@@ -379,9 +440,15 @@ async function adminOverview(req, res) {
       role: user.role_name || user.role,
       roleKey: user.role_key || user.role,
       roleId: user.role_id,
+      teamId: user.team_id,
+      teamName: user.team_name,
       dataScope: user.data_scope,
       hiddenColumns: user.hidden_columns || [],
       createdAt: user.created_at
+    })),
+    teams: teamsResult.rows.map((team) => ({
+      id: team.id,
+      name: team.name
     })),
     roles: rolesResult.rows.map((role) => ({
       id: role.id,
@@ -440,20 +507,32 @@ async function createAdminUser(req, res) {
   const role = roleResult.rows[0];
   if (!role) return send(res, 400, { error: "invalid_role" });
 
+  const teamResult = await pool.query(
+    `select id, name
+     from teams
+     where tenant_id = $1 and ($2::uuid is null or id = $2::uuid)
+     order by name asc
+     limit 1`,
+    [session.tenant_id, body.teamId || null]
+  );
+  const team = teamResult.rows[0];
+  if (!team) return send(res, 400, { error: "invalid_team" });
+
   const dataScope = body.dataScope || role.data_scope || "own";
   const hiddenColumns = Array.isArray(body.hiddenColumns) ? body.hiddenColumns : role.hidden_columns || [];
   const passwordHash = bcrypt.hashSync(body.password, 10);
 
   const result = await pool.query(
-    `insert into users (tenant_id, email, full_name, password_hash, role, role_id, data_scope, hidden_columns)
-     values ($1, $2, $3, $4, $5, $6, $7, $8)
+    `insert into users (tenant_id, email, full_name, password_hash, role, role_id, team_id, data_scope, hidden_columns)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      returning id, email, full_name, role, data_scope, hidden_columns, created_at`,
-    [session.tenant_id, body.email, body.fullName, passwordHash, role.key, role.id, dataScope, hiddenColumns]
+    [session.tenant_id, body.email, body.fullName, passwordHash, role.key, role.id, team.id, dataScope, hiddenColumns]
   );
   const user = result.rows[0];
   await auditLog(session, "user.created", "user", user.id, {
     email: user.email,
     role: role.key,
+    team: team.name,
     dataScope
   });
   send(res, 201, {
@@ -464,6 +543,8 @@ async function createAdminUser(req, res) {
       role: role.name,
       roleKey: role.key,
       roleId: role.id,
+      teamId: team.id,
+      teamName: team.name,
       dataScope: user.data_scope,
       hiddenColumns: user.hidden_columns || [],
       createdAt: user.created_at
@@ -587,15 +668,14 @@ async function listOpportunities(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
   if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
-  const fullAccess = canSeeTenantScope(session);
-  const params = fullAccess ? [session.tenant_id] : [session.tenant_id, session.user_id];
-  const accessClause = fullAccess ? "" : "and o.owner_id = $2";
+  const access = opportunityAccess(session, "o", 2);
+  const params = [session.tenant_id, ...access.params];
   const result = await pool.query(
     `select o.id, o.title, o.stage, o.value, o.probability, o.forecast, o.source, o.close_date,
             o.next_action, o.note, o.owner_id, o.created_at, u.full_name as owner_name
      from opportunities o
      left join users u on u.id = o.owner_id
-     where o.tenant_id = $1 ${accessClause}
+     where o.tenant_id = $1 ${access.clause}
      order by o.created_at desc`,
     params
   );
@@ -638,13 +718,12 @@ async function updateOpportunity(req, res, id) {
   if (!session) return;
   if (!hasPermission(session, "opportunities")) return send(res, 403, { error: "forbidden" });
   const body = await readJson(req);
-  const fullAccess = canSeeTenantScope(session);
-  const accessClause = fullAccess ? "" : "and owner_id = $3";
-  const accessParams = fullAccess ? [id, session.tenant_id] : [id, session.tenant_id, session.user_id];
+  const access = opportunityAccess(session, "opportunities", 3);
+  const accessParams = [id, session.tenant_id, ...access.params];
   const current = await pool.query(
     `select title, stage, value, probability, forecast, source, close_date, next_action, note, owner_id
      from opportunities
-     where id = $1 and tenant_id = $2 ${accessClause}`,
+     where id = $1 and tenant_id = $2 ${access.clause}`,
     accessParams
   );
   if (!current.rows[0]) return send(res, 404, { error: "not_found" });
