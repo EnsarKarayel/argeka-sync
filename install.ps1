@@ -143,6 +143,21 @@ function Show-Status {
   Write-Host "Demo: admin@argeka.local / admin123" -ForegroundColor Green
 }
 
+function Find-CSharpCompiler {
+  $candidates = @(
+    (Join-Path $env:WINDIR "Microsoft.NET\Framework64\v4.0.30319\csc.exe"),
+    (Join-Path $env:WINDIR "Microsoft.NET\Framework\v4.0.30319\csc.exe")
+  )
+
+  foreach ($candidate in $candidates) {
+    if (Test-Path $candidate) {
+      return $candidate
+    }
+  }
+
+  return $null
+}
+
 function Ensure-DesktopLauncher {
   $desktop = [Environment]::GetFolderPath("Desktop")
   if (-not $desktop) {
@@ -151,6 +166,7 @@ function Ensure-DesktopLauncher {
   }
 
   $launcherPath = Join-Path $desktop "ARGEKA Sync.exe"
+  $iconPath = Join-Path $RepoRoot "assets\icons\argeka-sync.ico"
   $repoLiteral = $RepoRoot.Replace('"', '""')
   $source = @"
 using System;
@@ -183,7 +199,25 @@ public static class ArgekaSyncLauncher {
       Remove-Item -LiteralPath $launcherPath -Force
     }
 
-    Add-Type -TypeDefinition $source -OutputAssembly $launcherPath -OutputType WindowsApplication -ReferencedAssemblies "System.dll"
+    $compiler = Find-CSharpCompiler
+    if ($compiler -and (Test-Path $iconPath)) {
+      $sourcePath = Join-Path $env:TEMP "ArgekaSyncLauncher.cs"
+      [IO.File]::WriteAllText($sourcePath, $source, [Text.UTF8Encoding]::new($false))
+      & $compiler @(
+        "/nologo",
+        "/target:winexe",
+        "/out:$launcherPath",
+        "/win32icon:$iconPath",
+        "/reference:System.dll",
+        $sourcePath
+      )
+
+      if ($LASTEXITCODE -ne 0) {
+        throw "C# derleyici EXE olustururken hata kodu dondurdu: $LASTEXITCODE"
+      }
+    } else {
+      Add-Type -TypeDefinition $source -OutputAssembly $launcherPath -OutputType WindowsApplication -ReferencedAssemblies "System.dll"
+    }
     Write-Host "Masaustu uygulamasi: $launcherPath" -ForegroundColor Green
   } catch {
     Write-Host "Masaustu EXE olusturulamadi: $($_.Exception.Message)" -ForegroundColor Yellow

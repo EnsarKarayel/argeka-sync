@@ -1,14 +1,14 @@
-﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="ARGEKA Sync">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="ARGEKA Sync">
   <defs>
-    <linearGradient id="g" x1="14" y1="14" x2="82" y2="82" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#10231d"/>
-      <stop offset="1" stop-color="#087f74"/>
+    <linearGradient id="g" x1="12" y1="12" x2="84" y2="84" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b211a"/>
+      <stop offset="0.56" stop-color="#0d6f64"/>
+      <stop offset="1" stop-color="#baff39"/>
     </linearGradient>
   </defs>
-  <rect x="4" y="4" width="88" height="88" rx="24" fill="url(#g)"/>
-  <path d="M28 33h27c8 0 14 6 14 14v2" fill="none" stroke="#caff4a" stroke-width="8" stroke-linecap="round"/>
-  <path d="m61 39 9 10-10 9" fill="none" stroke="#caff4a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M68 63H41c-8 0-14-6-14-14v-2" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-  <path d="m35 57-9-10 10-9" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="48" cy="48" r="8" fill="#ffffff"/>
+  <rect x="4" y="4" width="88" height="88" rx="22" fill="#10231d"/>
+  <path d="M14 70C28 34 54 15 82 21" fill="none" stroke="url(#g)" stroke-width="10" stroke-linecap="round"/>
+  <text x="48" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="30" font-weight="900" letter-spacing="-1" fill="#ffffff">AEG</text>
+  <circle cx="23" cy="70" r="5" fill="#caff4a"/>
+  <circle cx="78" cy="22" r="5" fill="#ffffff"/>
 </svg>
