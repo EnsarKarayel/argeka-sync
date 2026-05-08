@@ -31,6 +31,16 @@ function Install-WithWinget($Id, $Name) {
 
   Write-Step (T "$Name kuruluyor" "Installing $Name")
   winget install --exact --id $Id --accept-package-agreements --accept-source-agreements
+  if ($LASTEXITCODE -ne 0) {
+    throw (T "$Name kurulumu tamamlanamadi." "$Name installation did not complete.")
+  }
+}
+
+function Invoke-Git($Arguments) {
+  & git @Arguments
+  if ($LASTEXITCODE -ne 0) {
+    throw (T "Git islemi tamamlanamadi: git $($Arguments -join ' ')" "Git command failed: git $($Arguments -join ' ')")
+  }
 }
 
 if (-not (Test-Command "git")) {
@@ -46,7 +56,7 @@ if (Test-Path (Join-Path $InstallDir ".git")) {
   Write-Step (T "Kurulum dosyalari guncelleniyor" "Updating setup files")
   Push-Location $InstallDir
   try {
-    git pull
+    Invoke-Git @("pull")
   } finally {
     Pop-Location
   }
@@ -54,8 +64,12 @@ if (Test-Path (Join-Path $InstallDir ".git")) {
   Write-Step (T "Kurulum dosyalari indiriliyor" "Downloading setup files")
   if (-not (Test-Path $InstallDir)) {
     New-Item -ItemType Directory -Path $InstallDir | Out-Null
+  } elseif ((Get-ChildItem -LiteralPath $InstallDir -Force | Select-Object -First 1)) {
+    $suffix = Get-Date -Format "yyyyMMdd-HHmmss"
+    $InstallDir = "$InstallDir-$suffix"
+    Write-Host (T "Hedef klasor dolu oldugu icin yeni klasor secildi: $InstallDir" "The target folder was not empty, so a new folder was selected: $InstallDir") -ForegroundColor Yellow
   }
-  git clone $RepoUrl $InstallDir
+  Invoke-Git @("clone", $RepoUrl, $InstallDir)
 }
 
 $installer = Join-Path $InstallDir "install.ps1"
