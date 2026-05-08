@@ -1,14 +1,14 @@
-const columns = [
-  { id: "new", label: "Yeni fırsat", accent: "#087f74" },
-  { id: "contacted", label: "Görüşme", accent: "#2d5fa8" },
+﻿const columns = [
+  { id: "new", label: "Yeni fÄ±rsat", accent: "#087f74" },
+  { id: "contacted", label: "GÃ¶rÃ¼ÅŸme", accent: "#2d5fa8" },
   { id: "proposal", label: "Teklif", accent: "#b7791f" },
-  { id: "won", label: "Kazanıldı", accent: "#247a4a" }
+  { id: "won", label: "KazanÄ±ldÄ±", accent: "#247a4a" }
 ];
 
 const initialDeals = [
   {
     id: "deal-1001",
-    contact: "Ayşe Yılmaz",
+    contact: "AyÅŸe YÄ±lmaz",
     company: "Nova Teknoloji",
     email: "ayse@novatek.example",
     value: 84000,
@@ -20,9 +20,9 @@ const initialDeals = [
     forecast: "Pipeline",
     sector: "Teknoloji",
     territory: "TR Marmara",
-    nextAction: "Demo takvimi gönder",
-    note: "Demo isteği ve fiyat bilgisi bekliyor.",
-    updatedAt: "Bugün"
+    nextAction: "Demo takvimi gÃ¶nder",
+    note: "Demo isteÄŸi ve fiyat bilgisi bekliyor.",
+    updatedAt: "BugÃ¼n"
   },
   {
     id: "deal-1002",
@@ -32,19 +32,19 @@ const initialDeals = [
     value: 126000,
     stage: "contacted",
     source: "Outlook",
-    owner: "Satış",
+    owner: "SatÄ±ÅŸ",
     probability: 45,
     closeDate: "2026-05-24",
     forecast: "Best case",
     sector: "Lojistik",
-    territory: "TR İç Anadolu",
-    nextAction: "Karar vericiyle toplantı",
-    note: "Outlook mesajından otomatik fırsat açıldı.",
-    updatedAt: "Dün"
+    territory: "TR Ä°Ã§ Anadolu",
+    nextAction: "Karar vericiyle toplantÄ±",
+    note: "Outlook mesajÄ±ndan otomatik fÄ±rsat aÃ§Ä±ldÄ±.",
+    updatedAt: "DÃ¼n"
   },
   {
     id: "deal-1003",
-    contact: "Derya Koç",
+    contact: "Derya KoÃ§",
     company: "Vera Medikal",
     email: "derya@vera.example",
     value: 212000,
@@ -54,16 +54,16 @@ const initialDeals = [
     probability: 70,
     closeDate: "2026-06-03",
     forecast: "Commit",
-    sector: "Sağlık",
+    sector: "SaÄŸlÄ±k",
     territory: "TR Ege",
     nextAction: "Teklif revizyonu",
-    note: "Teklif revizyonu hazırlanacak.",
-    updatedAt: "2 gün önce"
+    note: "Teklif revizyonu hazÄ±rlanacak.",
+    updatedAt: "2 gÃ¼n Ã¶nce"
   },
   {
     id: "deal-1004",
     contact: "Can Demir",
-    company: "Mira Endüstri",
+    company: "Mira EndÃ¼stri",
     email: "can@mira.example",
     value: 76000,
     stage: "won",
@@ -72,46 +72,46 @@ const initialDeals = [
     probability: 100,
     closeDate: "2026-05-09",
     forecast: "Closed won",
-    sector: "Üretim",
+    sector: "Ãœretim",
     territory: "TR Marmara",
-    nextAction: "ERP aktarımı",
-    note: "ERP aktarımı bekleniyor.",
-    updatedAt: "3 gün önce"
+    nextAction: "ERP aktarÄ±mÄ±",
+    note: "ERP aktarÄ±mÄ± bekleniyor.",
+    updatedAt: "3 gÃ¼n Ã¶nce"
   }
 ];
 
 const initialMeetings = [
   {
     id: "meeting-1",
-    title: "Haftalık satış komitesi",
+    title: "HaftalÄ±k satÄ±ÅŸ komitesi",
     date: "2026-05-06",
     owner: "Ensar",
-    attendees: "Satış, Operasyon, Finans",
-    agenda: ["Pipeline riski", "Teklif onayları", "Tahsilat ve abonelik"]
+    attendees: "SatÄ±ÅŸ, Operasyon, Finans",
+    agenda: ["Pipeline riski", "Teklif onaylarÄ±", "Tahsilat ve abonelik"]
   },
   {
     id: "meeting-2",
-    title: "Nova Teknoloji demo hazırlığı",
+    title: "Nova Teknoloji demo hazÄ±rlÄ±ÄŸÄ±",
     date: "2026-05-07",
-    owner: "Satış",
-    attendees: "Ayşe Yılmaz, Teknik ekip",
-    agenda: ["İhtiyaç listesi", "Gmail akışı", "Webhook senaryosu"]
+    owner: "SatÄ±ÅŸ",
+    attendees: "AyÅŸe YÄ±lmaz, Teknik ekip",
+    agenda: ["Ä°htiyaÃ§ listesi", "Gmail akÄ±ÅŸÄ±", "Webhook senaryosu"]
   }
 ];
 
 const initialActions = [
   {
     id: "action-1",
-    title: "Nova demo ajandasını paylaş",
+    title: "Nova demo ajandasÄ±nÄ± paylaÅŸ",
     owner: "Ensar",
     due: "2026-05-05",
-    priority: "Yüksek",
+    priority: "YÃ¼ksek",
     meetingId: "meeting-2",
     done: false
   },
   {
     id: "action-2",
-    title: "Teklif şablonunu güncelle",
+    title: "Teklif ÅŸablonunu gÃ¼ncelle",
     owner: "Finans",
     due: "2026-05-08",
     priority: "Normal",
@@ -124,7 +124,7 @@ const initialMinutes = [
   {
     id: "minute-1",
     meetingId: "meeting-1",
-    text: "Kapanış ihtimali yüksek fırsatlar için forecast haftalık izlenecek."
+    text: "KapanÄ±ÅŸ ihtimali yÃ¼ksek fÄ±rsatlar iÃ§in forecast haftalÄ±k izlenecek."
   }
 ];
 
@@ -140,7 +140,7 @@ const initialCalendarEvents = [
   },
   {
     id: "event-2",
-    title: "Atlas karar verici görüşmesi",
+    title: "Atlas karar verici gÃ¶rÃ¼ÅŸmesi",
     date: "2026-05-08",
     time: "14:00",
     provider: "Outlook Calendar",
@@ -153,23 +153,23 @@ const sampleEmails = [
   {
     id: "mail-1",
     from: "elif@riva.example",
-    subject: "CRM entegrasyonu için görüşelim",
+    subject: "CRM entegrasyonu iÃ§in gÃ¶rÃ¼ÅŸelim",
     channel: "Gmail",
-    preview: "Teklif ve demo takvimi için dönüş bekliyoruz."
+    preview: "Teklif ve demo takvimi iÃ§in dÃ¶nÃ¼ÅŸ bekliyoruz."
   },
   {
     id: "mail-2",
     from: "finans@kuzey.example",
-    subject: "Teklif onayı",
+    subject: "Teklif onayÄ±",
     channel: "Outlook",
-    preview: "Gönderdiğiniz paketi aylık abonelikle başlatmak istiyoruz."
+    preview: "GÃ¶nderdiÄŸiniz paketi aylÄ±k abonelikle baÅŸlatmak istiyoruz."
   },
   {
     id: "mail-3",
     from: "it@delta.example",
-    subject: "Webhook bağlantısı",
+    subject: "Webhook baÄŸlantÄ±sÄ±",
     channel: "API",
-    preview: "Yeni fırsatları ERP tarafına aktarmamız gerekiyor."
+    preview: "Yeni fÄ±rsatlarÄ± ERP tarafÄ±na aktarmamÄ±z gerekiyor."
   }
 ];
 
@@ -259,7 +259,7 @@ const oauthSandboxButton = document.querySelector("#oauthSandboxButton");
 const oauthCheckPanel = document.querySelector("#oauthCheckPanel");
 const licenseCheckPanel = document.querySelector("#licenseCheckPanel");
 const databaseConfig = {
-  name: "akis-crm-db",
+  name: "argeka-sync-db",
   version: 1,
   store: "records",
   key: "state"
@@ -292,7 +292,7 @@ async function apiRequest(path, options = {}) {
 
 function loadSession() {
   try {
-    state.session = JSON.parse(localStorage.getItem("akis-crm-session") || "null");
+    state.session = JSON.parse(localStorage.getItem("argeka-sync-session") || "null");
   } catch {
     state.session = null;
   }
@@ -300,8 +300,8 @@ function loadSession() {
 
 function saveSession(session) {
   state.session = session;
-  if (session) localStorage.setItem("akis-crm-session", JSON.stringify(session));
-  else localStorage.removeItem("akis-crm-session");
+  if (session) localStorage.setItem("argeka-sync-session", JSON.stringify(session));
+  else localStorage.removeItem("argeka-sync-session");
 }
 
 function renderSession() {
@@ -309,7 +309,7 @@ function renderSession() {
   loginScreen.classList.toggle("is-hidden", authenticated);
   document.querySelector("#accountName").textContent = state.session?.tenant?.name || "ARGEKA Demo";
   document.querySelector("#accountMeta").textContent = state.session?.user
-    ? `${state.session.user.fullName} · ${state.session.user.role}`
+    ? `${state.session.user.fullName} Â· ${state.session.user.role}`
     : "Oturum bekleniyor";
 }
 
@@ -327,9 +327,9 @@ async function restoreSession() {
 function apiOpportunityToDeal(item) {
   return {
     id: item.id,
-    contact: item.contact || "CRM kaydı",
-    company: item.company || item.title || "Fırsat",
-    email: item.email || "kayit@akis-crm.local",
+    contact: item.contact || "CRM kaydÄ±",
+    company: item.company || item.title || "FÄ±rsat",
+    email: item.email || "kayit@argeka.local",
     value: Number(item.value || 0),
     stage: item.stage || "new",
     source: item.source || "API",
@@ -339,7 +339,7 @@ function apiOpportunityToDeal(item) {
     forecast: item.forecast || "Pipeline",
     sector: item.sector || "Genel",
     territory: item.territory || "TR",
-    nextAction: item.nextAction || "İlk temas",
+    nextAction: item.nextAction || "Ä°lk temas",
     note: item.note || "",
     updatedAt: "API"
   };
@@ -369,11 +369,11 @@ async function syncOpportunitiesFromApi() {
       state.selectedDealId = apiDeals.some((deal) => deal.id === state.selectedDealId)
         ? state.selectedDealId
         : apiDeals[0].id;
-      logActivity("Fırsatlar PostgreSQL API üzerinden yüklendi.");
+      logActivity("FÄ±rsatlar PostgreSQL API Ã¼zerinden yÃ¼klendi.");
     }
   } catch {
     state.apiOnline = false;
-    logActivity("API bağlantısı yok, yerel veriyle devam ediliyor.");
+    logActivity("API baÄŸlantÄ±sÄ± yok, yerel veriyle devam ediliyor.");
   }
 }
 
@@ -416,10 +416,10 @@ async function syncBusinessDataFromApi() {
       : state.quotes[0]?.id || null;
     state.tasks = Array.isArray(tasks?.data) ? tasks.data : [];
     state.integrationSettings = Array.isArray(integrationSettings?.data) ? integrationSettings.data : [];
-    logActivity("Müşteri, teklif ve görev verileri PostgreSQL üzerinden yüklendi.");
+    logActivity("MÃ¼ÅŸteri, teklif ve gÃ¶rev verileri PostgreSQL Ã¼zerinden yÃ¼klendi.");
   } catch {
     state.apiOnline = false;
-    logActivity("Ek modül verileri için API bağlantısı bekleniyor.");
+    logActivity("Ek modÃ¼l verileri iÃ§in API baÄŸlantÄ±sÄ± bekleniyor.");
   }
 }
 
@@ -535,7 +535,7 @@ function openDatabase() {
 async function readPersistedState() {
   const db = await openDatabase();
   if (!db) {
-    const saved = localStorage.getItem("akis-crm-state");
+    const saved = localStorage.getItem("argeka-sync-state");
     return saved ? JSON.parse(saved) : null;
   }
 
@@ -550,7 +550,7 @@ async function readPersistedState() {
 
 async function writePersistedState(value) {
   const db = await openDatabase();
-  localStorage.setItem("akis-crm-state", JSON.stringify(value));
+  localStorage.setItem("argeka-sync-state", JSON.stringify(value));
   if (!db) return;
 
   const tx = db.transaction(databaseConfig.store, "readwrite");
@@ -573,7 +573,7 @@ async function loadState() {
     state.integrationSettings = [];
     state.minutes = initialMinutes;
     state.calendarEvents = initialCalendarEvents;
-    state.activity = ["MVP çalışma alanı hazırlandı."];
+    state.activity = ["MVP Ã§alÄ±ÅŸma alanÄ± hazÄ±rlandÄ±."];
     return;
   }
 
@@ -613,7 +613,7 @@ async function loadState() {
     state.integrationSettings = [];
     state.minutes = initialMinutes;
     state.calendarEvents = initialCalendarEvents;
-    state.activity = ["Kayıtlı veri okunamadı, örnek veri yüklendi."];
+    state.activity = ["KayÄ±tlÄ± veri okunamadÄ±, Ã¶rnek veri yÃ¼klendi."];
   }
 }
 
@@ -727,12 +727,12 @@ function handleDrop(event) {
   const previous = columns.find((column) => column.id === deal.stage)?.label || deal.stage;
   const next = columns.find((column) => column.id === stage)?.label || stage;
   deal.stage = stage;
-  deal.updatedAt = "Az önce";
+  deal.updatedAt = "Az Ã¶nce";
   state.selectedDealId = deal.id;
-  logActivity(`${deal.company} taşındı: ${previous} → ${next}.`);
+  logActivity(`${deal.company} taÅŸÄ±ndÄ±: ${previous} â†’ ${next}.`);
   updateOpportunityOnApi(deal).catch(() => {
     state.apiOnline = false;
-    logActivity("Aşama değişimi yerelde kaldı, API senkronu sonra denenecek.");
+    logActivity("AÅŸama deÄŸiÅŸimi yerelde kaldÄ±, API senkronu sonra denenecek.");
     render();
   });
   render();
@@ -742,21 +742,21 @@ function renderDetail() {
   const deal = state.deals.find((item) => item.id === state.selectedDealId);
   if (!deal) {
     detailPanel.className = "detail-panel empty-state";
-    detailPanel.textContent = "Bir fırsat seçin";
+    detailPanel.textContent = "Bir fÄ±rsat seÃ§in";
     return;
   }
 
   detailPanel.className = "detail-panel";
   const hidden = currentHiddenColumns();
   const detailRows = [
-    ["contact", "Kişi", deal.contact],
+    ["contact", "KiÅŸi", deal.contact],
     ["email", "E-posta", deal.email],
-    ["value", "Değer", formatMoney.format(deal.value)],
-    ["probability", "Olasılık", `%${Number(deal.probability || 0)}`],
-    ["closeDate", "Kapanış", deal.closeDate || "Planlanacak"],
+    ["value", "DeÄŸer", formatMoney.format(deal.value)],
+    ["probability", "OlasÄ±lÄ±k", `%${Number(deal.probability || 0)}`],
+    ["closeDate", "KapanÄ±ÅŸ", deal.closeDate || "Planlanacak"],
     ["forecast", "Forecast", deal.forecast || "Pipeline"],
-    ["sector", "Sektör", deal.sector || "Genel"],
-    ["territory", "Bölge", deal.territory || "TR"],
+    ["sector", "SektÃ¶r", deal.sector || "Genel"],
+    ["territory", "BÃ¶lge", deal.territory || "TR"],
     ["source", "Kaynak", deal.source],
     ["owner", "Sahip", deal.owner || "-"],
     ["nextAction", "Sonraki", deal.nextAction || "-"],
@@ -773,10 +773,10 @@ function renderDetail() {
 function renderOpportunityTable() {
   const hidden = currentHiddenColumns();
   const tableColumns = [
-    { key: "company", label: "Fırsat" },
-    { key: "stage", label: "Aşama" },
-    { key: "probability", label: "Olasılık" },
-    { key: "closeDate", label: "Kapanış" },
+    { key: "company", label: "FÄ±rsat" },
+    { key: "stage", label: "AÅŸama" },
+    { key: "probability", label: "OlasÄ±lÄ±k" },
+    { key: "closeDate", label: "KapanÄ±ÅŸ" },
     { key: "forecast", label: "Forecast" },
     { key: "owner", label: "Sorumlu" }
   ].filter((column) => !hidden.has(column.key));
@@ -824,17 +824,17 @@ function renderMetrics() {
 
 function renderCustomers() {
   if (!accountList || !contactList) return;
-  accountCountPill.textContent = `${state.accounts.length} kayıt`;
-  contactCountPill.textContent = `${state.contacts.length} kayıt`;
+  accountCountPill.textContent = `${state.accounts.length} kayÄ±t`;
+  contactCountPill.textContent = `${state.contacts.length} kayÄ±t`;
   const accountOptions = [
-    `<option value="">Firma seç</option>`,
+    `<option value="">Firma seÃ§</option>`,
     ...state.accounts.map((account) => `<option value="${escapeHtml(account.id)}">${escapeHtml(account.name)}</option>`)
   ].join("");
   contactAccountSelect.innerHTML = accountOptions;
   quoteAccountSelect.innerHTML = accountOptions;
   quoteContactSelect.innerHTML = [
-    `<option value="">Kişi seç</option>`,
-    ...state.contacts.map((contact) => `<option value="${escapeHtml(contact.id)}">${escapeHtml(contact.fullName)}${contact.accountName ? ` · ${escapeHtml(contact.accountName)}` : ""}</option>`)
+    `<option value="">KiÅŸi seÃ§</option>`,
+    ...state.contacts.map((contact) => `<option value="${escapeHtml(contact.id)}">${escapeHtml(contact.fullName)}${contact.accountName ? ` Â· ${escapeHtml(contact.accountName)}` : ""}</option>`)
   ].join("");
 
   accountList.innerHTML = state.accounts.length
@@ -842,24 +842,24 @@ function renderCustomers() {
         <article class="record-card">
           <header>
             <strong>${escapeHtml(account.name)}</strong>
-            <span class="source-tag">${escapeHtml(account.territory || "Bölge yok")}</span>
+            <span class="source-tag">${escapeHtml(account.territory || "BÃ¶lge yok")}</span>
           </header>
-          <small>${escapeHtml(account.sector || "Sektör yok")} · ${Number(account.contactCount || 0)} kişi · ${Number(account.opportunityCount || 0)} fırsat</small>
+          <small>${escapeHtml(account.sector || "SektÃ¶r yok")} Â· ${Number(account.contactCount || 0)} kiÅŸi Â· ${Number(account.opportunityCount || 0)} fÄ±rsat</small>
         </article>
       `).join("")
-    : `<div class="empty-state">Henüz firma kaydı yok</div>`;
+    : `<div class="empty-state">HenÃ¼z firma kaydÄ± yok</div>`;
 
   contactList.innerHTML = state.contacts.length
     ? state.contacts.map((contact) => `
         <article class="record-card">
           <header>
             <strong>${escapeHtml(contact.fullName)}</strong>
-            <span class="source-tag">${escapeHtml(contact.accountName || "Bağımsız")}</span>
+            <span class="source-tag">${escapeHtml(contact.accountName || "BaÄŸÄ±msÄ±z")}</span>
           </header>
-          <small>${escapeHtml(contact.email || "E-posta yok")} · ${escapeHtml(contact.phone || "Telefon yok")}</small>
+          <small>${escapeHtml(contact.email || "E-posta yok")} Â· ${escapeHtml(contact.phone || "Telefon yok")}</small>
         </article>
       `).join("")
-    : `<div class="empty-state">Henüz kişi kaydı yok</div>`;
+    : `<div class="empty-state">HenÃ¼z kiÅŸi kaydÄ± yok</div>`;
 }
 
 function renderQuotes() {
@@ -871,19 +871,19 @@ function renderQuotes() {
             <strong>${escapeHtml(quote.title)}</strong>
             <span class="source-tag">${escapeHtml(quote.quoteNo || "Teklif")}</span>
           </header>
-          <small>${escapeHtml(quote.accountName || "Firma seçilmedi")} · ${escapeHtml(statusLabel(quote.status))} · ${quote.validUntil ? escapeHtml(String(quote.validUntil).slice(0, 10)) : "Süre yok"}</small>
+          <small>${escapeHtml(quote.accountName || "Firma seÃ§ilmedi")} Â· ${escapeHtml(statusLabel(quote.status))} Â· ${quote.validUntil ? escapeHtml(String(quote.validUntil).slice(0, 10)) : "SÃ¼re yok"}</small>
           <div class="quote-total">${formatMoney.format(Number(quote.total || 0))}</div>
         </article>
       `).join("")
-    : `<div class="empty-state">Henüz teklif yok</div>`;
+    : `<div class="empty-state">HenÃ¼z teklif yok</div>`;
 }
 
 function renderTasks() {
   if (!taskList) return;
   const openTasks = state.tasks.filter((task) => !task.done);
-  openTaskPill.textContent = `${openTasks.length} açık`;
+  openTaskPill.textContent = `${openTasks.length} aÃ§Ä±k`;
   taskOpportunitySelect.innerHTML = [
-    `<option value="">Fırsat seçme</option>`,
+    `<option value="">FÄ±rsat seÃ§me</option>`,
     ...state.deals.map((deal) => `<option value="${escapeHtml(deal.id)}">${escapeHtml(deal.company)}</option>`)
   ].join("");
   taskList.innerHTML = state.tasks.length
@@ -893,12 +893,12 @@ function renderTasks() {
             <input type="checkbox" data-task-done="${escapeHtml(task.id)}" ${task.done ? "checked" : ""}>
             <span>
               <strong>${escapeHtml(task.title)}</strong>
-              <small>${escapeHtml(task.owner || "Sistem")} · ${escapeHtml(task.priority || "Normal")} · ${task.due ? escapeHtml(String(task.due).slice(0, 10)) : "Termin yok"}</small>
+              <small>${escapeHtml(task.owner || "Sistem")} Â· ${escapeHtml(task.priority || "Normal")} Â· ${task.due ? escapeHtml(String(task.due).slice(0, 10)) : "Termin yok"}</small>
             </span>
           </label>
         </article>
       `).join("")
-    : `<div class="empty-state">Henüz görev yok</div>`;
+    : `<div class="empty-state">HenÃ¼z gÃ¶rev yok</div>`;
 }
 
 function renderIntegrations() {
@@ -914,23 +914,23 @@ function renderOAuthSettings() {
     ? state.integrationSettings.map((setting) => `
         <article class="oauth-row">
           <strong>${escapeHtml(setting.provider === "gmail" ? "Gmail" : "Outlook")}</strong>
-          <small>${escapeHtml(setting.status || "draft")} · ${escapeHtml(setting.redirectUri || defaultRedirectUri(setting.provider))}</small>
+          <small>${escapeHtml(setting.status || "draft")} Â· ${escapeHtml(setting.redirectUri || defaultRedirectUri(setting.provider))}</small>
           <span class="source-tag">${Number(setting.scopes?.length || 0)} scope</span>
         </article>
       `).join("")
-    : `<div class="empty-state">OAuth uygulama ayarı bekleniyor</div>`;
+    : `<div class="empty-state">OAuth uygulama ayarÄ± bekleniyor</div>`;
   const attempts = state.adminOverview?.oauthAttempts || [];
   oauthCheckPanel.innerHTML = attempts.length
     ? `
       <div class="oauth-result">
         <strong>Son OAuth denemeleri</strong>
         ${attempts.slice(0, 3).map((attempt) => `
-          <small>${escapeHtml(attempt.provider)} · ${escapeHtml(attempt.status)} · ${escapeHtml(new Date(attempt.createdAt).toLocaleString("tr-TR"))}</small>
-          ${attempt.authorizeUrl ? `<a class="secondary-button oauth-link" href="${escapeHtml(attempt.authorizeUrl)}" target="_blank" rel="noreferrer">OAuth ekranını aç</a>` : ""}
+          <small>${escapeHtml(attempt.provider)} Â· ${escapeHtml(attempt.status)} Â· ${escapeHtml(new Date(attempt.createdAt).toLocaleString("tr-TR"))}</small>
+          ${attempt.authorizeUrl ? `<a class="secondary-button oauth-link" href="${escapeHtml(attempt.authorizeUrl)}" target="_blank" rel="noreferrer">OAuth ekranÄ±nÄ± aÃ§</a>` : ""}
         `).join("")}
       </div>
     `
-    : `<div class="oauth-result"><strong>Local OAuth hazır</strong><small>Önce ayarı kaydedip yetki linki hazırlayın.</small></div>`;
+    : `<div class="oauth-result"><strong>Local OAuth hazÄ±r</strong><small>Ã–nce ayarÄ± kaydedip yetki linki hazÄ±rlayÄ±n.</small></div>`;
 }
 
 function defaultRedirectUri(provider) {
@@ -943,7 +943,7 @@ function defaultRedirectUri(provider) {
 function statusLabel(status) {
   return {
     draft: "Taslak",
-    sent: "Gönderildi",
+    sent: "GÃ¶nderildi",
     accepted: "Kabul edildi",
     rejected: "Reddedildi"
   }[status] || status || "Taslak";
@@ -960,29 +960,29 @@ function renderLicenseCheck(license, fallbackUsers = 0) {
     <div class="license-meter">
       <div>
         <strong>${escapeHtml(licenseStatusLabel(status))}</strong>
-        <small>${used}/${seats} kullanıcı · ${available} boş koltuk</small>
+        <small>${used}/${seats} kullanÄ±cÄ± Â· ${available} boÅŸ koltuk</small>
       </div>
       <span class="pill ${status === "active" || status === "trialing" ? "success" : ""}">${escapeHtml(status)}</span>
     </div>
-    ${warnings.length ? `<ul>${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>` : `<small>Lisans yeni kullanıcı ve modül kontrolleri için uygun.</small>`}
+    ${warnings.length ? `<ul>${warnings.map((warning) => `<li>${escapeHtml(warning)}</li>`).join("")}</ul>` : `<small>Lisans yeni kullanÄ±cÄ± ve modÃ¼l kontrolleri iÃ§in uygun.</small>`}
   `;
 }
 
 function licenseStatusLabel(status) {
   return {
     active: "Lisans aktif",
-    trialing: "Deneme sürümü",
-    review_required: "İnceleme gerekli",
-    expired: "Süresi doldu"
+    trialing: "Deneme sÃ¼rÃ¼mÃ¼",
+    review_required: "Ä°nceleme gerekli",
+    expired: "SÃ¼resi doldu"
   }[status] || "Lisans durumu";
 }
 
 function setIntegrationStatus(key, connected) {
   const status = document.querySelector(`#${key}Status`);
   const button = document.querySelector(`[data-connect="${key}"]`);
-  status.textContent = connected ? "Bağlı" : "Bağlı değil";
+  status.textContent = connected ? "BaÄŸlÄ±" : "BaÄŸlÄ± deÄŸil";
   status.classList.toggle("is-connected", connected);
-  button.textContent = connected ? "Bağlantıyı yenile" : `${key === "gmail" ? "Gmail" : "Outlook"} bağla`;
+  button.textContent = connected ? "BaÄŸlantÄ±yÄ± yenile" : `${key === "gmail" ? "Gmail" : "Outlook"} baÄŸla`;
 }
 
 function renderEmails() {
@@ -997,7 +997,7 @@ function renderEmails() {
       </header>
       <small>${escapeHtml(email.from)}</small>
       <p>${escapeHtml(email.preview)}</p>
-      <button class="secondary-button" type="button" data-email-id="${email.id}">Fırsata dönüştür</button>
+      <button class="secondary-button" type="button" data-email-id="${email.id}">FÄ±rsata dÃ¶nÃ¼ÅŸtÃ¼r</button>
     `;
     emailList.appendChild(item);
   });
@@ -1046,7 +1046,7 @@ function renderMeetings() {
           <strong>${escapeHtml(action.title)}</strong>
           <span class="source-tag">${escapeHtml(action.priority)}</span>
         </header>
-        <small>${escapeHtml(action.owner)} · ${escapeHtml(action.due)}</small>
+        <small>${escapeHtml(action.owner)} Â· ${escapeHtml(action.due)}</small>
       `;
       actionList.appendChild(card);
     });
@@ -1057,8 +1057,8 @@ function renderCalendar() {
   document.querySelectorAll("[data-calendar-connect]").forEach((button) => {
     const key = button.dataset.calendarConnect;
     button.textContent = state.integrations[key]
-      ? `${button.textContent.replace(" izni", "").replace(" bağlı", "")} bağlı`
-      : button.textContent.replace(" bağlı", " izni");
+      ? `${button.textContent.replace(" izni", "").replace(" baÄŸlÄ±", "")} baÄŸlÄ±`
+      : button.textContent.replace(" baÄŸlÄ±", " izni");
   });
 
   state.calendarEvents
@@ -1075,8 +1075,8 @@ function renderCalendar() {
         </time>
         <div>
           <strong>${escapeHtml(event.title)}</strong>
-          <small>${escapeHtml(event.provider)} · ${escapeHtml(event.attendees || "Katılımcı yok")}</small>
-          <span>${escapeHtml(deal ? deal.company : "CRM etkinliği")}</span>
+          <small>${escapeHtml(event.provider)} Â· ${escapeHtml(event.attendees || "KatÄ±lÄ±mcÄ± yok")}</small>
+          <span>${escapeHtml(deal ? deal.company : "CRM etkinliÄŸi")}</span>
         </div>
       `;
       calendarAgenda.appendChild(item);
@@ -1122,14 +1122,14 @@ function renderAdmin() {
   const backup = overview?.backup || null;
   const audit = overview?.audit || [];
 
-  adminPlanPill.textContent = `${tenant.plan || "pro"} · ${tenant.billing_status || "trialing"}`;
+  adminPlanPill.textContent = `${tenant.plan || "pro"} Â· ${tenant.billing_status || "trialing"}`;
   if (licenseStatusPill) {
     licenseStatusPill.textContent = license?.status || "trialing";
     licenseStatusPill.classList.toggle("success", license?.status === "active");
   }
   if (adminRoleSelect) {
     adminRoleSelect.innerHTML = roles.length
-      ? roles.map((role) => `<option value="${escapeHtml(role.id)}">${escapeHtml(role.name)} · ${escapeHtml(scopeLabel(role.dataScope))}</option>`).join("")
+      ? roles.map((role) => `<option value="${escapeHtml(role.id)}">${escapeHtml(role.name)} Â· ${escapeHtml(scopeLabel(role.dataScope))}</option>`).join("")
       : `<option value="">Rol bekleniyor</option>`;
   }
   if (adminTeamSelect) {
@@ -1150,11 +1150,11 @@ function renderAdmin() {
       <strong>${escapeHtml(tenant.name || "ARGEKA Demo")}</strong>
     </article>
     <article>
-      <span>Fırsat</span>
+      <span>FÄ±rsat</span>
       <strong>${Number(counts.opportunities || 0)}</strong>
     </article>
     <article>
-      <span>Toplantı</span>
+      <span>ToplantÄ±</span>
       <strong>${Number(counts.meetings || 0)}</strong>
     </article>
     <article>
@@ -1166,7 +1166,7 @@ function renderAdmin() {
       <strong>${escapeHtml(license?.status || "Deneme")}</strong>
     </article>
     <article>
-      <span>Kullanıcı limiti</span>
+      <span>KullanÄ±cÄ± limiti</span>
       <strong>${Number(license?.usedSeats || users.length || 0)} / ${Number(license?.seats || 5)}</strong>
     </article>
   `;
@@ -1176,25 +1176,25 @@ function renderAdmin() {
         <article class="user-row">
           <span class="avatar">${escapeHtml((user.fullName || user.email || "A").slice(0, 1).toLocaleUpperCase("tr-TR"))}</span>
           <div>
-            <strong>${escapeHtml(user.fullName || "Kullanıcı")}</strong>
-            <small>${escapeHtml(user.email || "-")} · ${escapeHtml(user.teamName || "Ekipsiz")} · ${escapeHtml(scopeLabel(user.dataScope))}</small>
+            <strong>${escapeHtml(user.fullName || "KullanÄ±cÄ±")}</strong>
+            <small>${escapeHtml(user.email || "-")} Â· ${escapeHtml(user.teamName || "Ekipsiz")} Â· ${escapeHtml(scopeLabel(user.dataScope))}</small>
           </div>
           <span class="source-tag">${escapeHtml(user.role || "member")}</span>
         </article>
       `).join("")
-    : `<div class="empty-state">Kullanıcı kaydı bekleniyor</div>`;
+    : `<div class="empty-state">KullanÄ±cÄ± kaydÄ± bekleniyor</div>`;
 
   adminHealth.innerHTML = `
     <article>
       <span>API</span>
-      <strong>${state.apiOnline ? "Çalışıyor" : "Kontrol gerekli"}</strong>
+      <strong>${state.apiOnline ? "Ã‡alÄ±ÅŸÄ±yor" : "Kontrol gerekli"}</strong>
     </article>
     <article>
-      <span>Veritabanı</span>
+      <span>VeritabanÄ±</span>
       <strong>${escapeHtml(install.database)}</strong>
     </article>
     <article>
-      <span>Dağıtım</span>
+      <span>DaÄŸÄ±tÄ±m</span>
       <strong>${escapeHtml(install.edition)}</strong>
     </article>
     <article>
@@ -1216,34 +1216,34 @@ function renderAdmin() {
       ? audit.map((entry) => `
           <li>
             ${escapeHtml(new Date(entry.createdAt).toLocaleString("tr-TR"))}
-            - ${escapeHtml(entry.user)} · ${escapeHtml(auditLabel(entry.action))}
+            - ${escapeHtml(entry.user)} Â· ${escapeHtml(auditLabel(entry.action))}
           </li>
         `).join("")
-      : "<li>Henüz işlem kaydı yok.</li>";
+      : "<li>HenÃ¼z iÅŸlem kaydÄ± yok.</li>";
   }
 }
 
 function scopeLabel(scope) {
   return {
-    own: "Kendi kayıtları",
-    team: "Ekip kayıtları",
-    all: "Tüm firma"
-  }[scope] || "Kendi kayıtları";
+    own: "Kendi kayÄ±tlarÄ±",
+    team: "Ekip kayÄ±tlarÄ±",
+    all: "TÃ¼m firma"
+  }[scope] || "Kendi kayÄ±tlarÄ±";
 }
 
 function auditLabel(action) {
   return {
-    "user.created": "kullanıcı oluşturdu",
-    "license.updated": "lisans güncelledi",
-    "data.exported": "veri dışa aktardı",
-    "opportunity.created": "fırsat oluşturdu",
-    "opportunity.updated": "fırsat güncelledi",
-    "account.created": "firma oluşturdu",
-    "contact.created": "kişi oluşturdu",
-    "quote.created": "teklif oluşturdu",
-    "action.created": "görev oluşturdu",
-    "action.updated": "görev güncelledi",
-    "integration.oauth_configured": "OAuth ayarı kaydetti"
+    "user.created": "kullanÄ±cÄ± oluÅŸturdu",
+    "license.updated": "lisans gÃ¼ncelledi",
+    "data.exported": "veri dÄ±ÅŸa aktardÄ±",
+    "opportunity.created": "fÄ±rsat oluÅŸturdu",
+    "opportunity.updated": "fÄ±rsat gÃ¼ncelledi",
+    "account.created": "firma oluÅŸturdu",
+    "contact.created": "kiÅŸi oluÅŸturdu",
+    "quote.created": "teklif oluÅŸturdu",
+    "action.created": "gÃ¶rev oluÅŸturdu",
+    "action.updated": "gÃ¶rev gÃ¼ncelledi",
+    "integration.oauth_configured": "OAuth ayarÄ± kaydetti"
   }[action] || action;
 }
 
@@ -1252,18 +1252,18 @@ async function addDeal(deal) {
     ...deal,
     id: `deal-${Date.now()}`,
     stage: deal.stage || "new",
-    updatedAt: "Az önce",
+    updatedAt: "Az Ã¶nce",
     value: Number(deal.value || 0),
     probability: Number(deal.probability || 20),
     closeDate: deal.closeDate || "Planlanacak",
     forecast: deal.forecast || "Pipeline",
     sector: deal.sector || "Genel",
     territory: deal.territory || "TR",
-    nextAction: deal.nextAction || "İlk temas"
+    nextAction: deal.nextAction || "Ä°lk temas"
   };
   state.deals.unshift(newDeal);
   state.selectedDealId = newDeal.id;
-  logActivity(`${deal.company} için yeni fırsat açıldı.`);
+  logActivity(`${deal.company} iÃ§in yeni fÄ±rsat aÃ§Ä±ldÄ±.`);
   render();
   try {
     const apiDeal = await createOpportunityOnApi(newDeal);
@@ -1282,7 +1282,7 @@ async function addDeal(deal) {
     }
   } catch {
     state.apiOnline = false;
-    logActivity(`${newDeal.company} yerelde kaydedildi, API bağlantısı bekleniyor.`);
+    logActivity(`${newDeal.company} yerelde kaydedildi, API baÄŸlantÄ±sÄ± bekleniyor.`);
     render();
   }
 }
@@ -1308,19 +1308,19 @@ function switchView(viewId) {
     button.classList.toggle("is-active", button.dataset.viewTarget === viewId);
   });
   const titleMap = {
-    customers: "Müşteriler",
+    customers: "MÃ¼ÅŸteriler",
     pipeline: "Pipeline",
     quotes: "Teklifler",
-    tasks: "Görevler",
-    meetings: "Toplantılar",
+    tasks: "GÃ¶revler",
+    meetings: "ToplantÄ±lar",
     calendar: "Takvim",
     inbox: "E-posta",
     integrations: "Entegrasyon",
     billing: "Abonelik",
-    distribution: "Dağıtım",
-    admin: "Yönetim"
+    distribution: "DaÄŸÄ±tÄ±m",
+    admin: "YÃ¶netim"
   };
-  document.querySelector("#view-title").textContent = titleMap[viewId] || "ARGEKA CRM";
+  document.querySelector("#view-title").textContent = titleMap[viewId] || "ARGEKA Sync";
 }
 
 document.querySelectorAll(".nav-item").forEach((button) => {
@@ -1329,7 +1329,7 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  loginMessage.textContent = "Giriş yapılıyor...";
+  loginMessage.textContent = "GiriÅŸ yapÄ±lÄ±yor...";
   const formData = new FormData(loginForm);
   try {
     const payload = await apiRequest("/api/auth/login", {
@@ -1337,14 +1337,14 @@ loginForm.addEventListener("submit", async (event) => {
       body: JSON.stringify(Object.fromEntries(formData.entries()))
     });
     saveSession(payload);
-    loginMessage.textContent = "Giriş başarılı.";
+    loginMessage.textContent = "GiriÅŸ baÅŸarÄ±lÄ±.";
     await syncOpportunitiesFromApi();
     await syncBusinessDataFromApi();
     await syncAdminOverview();
     render();
   } catch {
     saveSession(null);
-    loginMessage.textContent = "Giriş başarısız.";
+    loginMessage.textContent = "GiriÅŸ baÅŸarÄ±sÄ±z.";
     render();
   }
 });
@@ -1357,7 +1357,7 @@ document.querySelector("#logoutButton").addEventListener("click", () => {
 
 document.querySelector("#refreshAdminButton").addEventListener("click", async () => {
   await syncAdminOverview();
-  logActivity("Yönetim özeti yenilendi.");
+  logActivity("YÃ¶netim Ã¶zeti yenilendi.");
   render();
 });
 
@@ -1371,11 +1371,11 @@ adminUserForm.addEventListener("submit", async (event) => {
     await createAdminUserOnApi(payload);
     adminUserForm.reset();
     await syncAdminOverview();
-    logActivity(`${payload.fullName} kullanıcısı manuel oluşturuldu.`);
+    logActivity(`${payload.fullName} kullanÄ±cÄ±sÄ± manuel oluÅŸturuldu.`);
   } catch (error) {
     logActivity(error.message?.includes("402")
-      ? "Kullanıcı oluşturulamadı: lisans kullanıcı limiti veya lisans durumu uygun değil."
-      : "Kullanıcı oluşturulamadı, rol ve e-posta bilgisini kontrol edin.");
+      ? "KullanÄ±cÄ± oluÅŸturulamadÄ±: lisans kullanÄ±cÄ± limiti veya lisans durumu uygun deÄŸil."
+      : "KullanÄ±cÄ± oluÅŸturulamadÄ±, rol ve e-posta bilgisini kontrol edin.");
   }
   render();
 });
@@ -1406,9 +1406,9 @@ accountForm.addEventListener("submit", async (event) => {
     const account = await createAccountOnApi(payload);
     if (account) state.accounts.unshift(account);
     accountForm.reset();
-    logActivity(`${payload.name} firma kaydı oluşturuldu.`);
+    logActivity(`${payload.name} firma kaydÄ± oluÅŸturuldu.`);
   } catch {
-    logActivity("Firma kaydı oluşturulamadı.");
+    logActivity("Firma kaydÄ± oluÅŸturulamadÄ±.");
   }
   render();
 });
@@ -1420,9 +1420,9 @@ contactForm.addEventListener("submit", async (event) => {
     const contact = await createContactOnApi(payload);
     if (contact) state.contacts.unshift(contact);
     contactForm.reset();
-    logActivity(`${payload.fullName} kişi kaydı oluşturuldu.`);
+    logActivity(`${payload.fullName} kiÅŸi kaydÄ± oluÅŸturuldu.`);
   } catch {
-    logActivity("Kişi kaydı oluşturulamadı.");
+    logActivity("KiÅŸi kaydÄ± oluÅŸturulamadÄ±.");
   }
   render();
 });
@@ -1437,9 +1437,9 @@ quoteForm.addEventListener("submit", async (event) => {
       state.selectedQuoteId = quote.id;
     }
     quoteForm.reset();
-    logActivity(`${payload.title} için teklif oluşturuldu.`);
+    logActivity(`${payload.title} iÃ§in teklif oluÅŸturuldu.`);
   } catch {
-    logActivity("Teklif oluşturulamadı.");
+    logActivity("Teklif oluÅŸturulamadÄ±.");
   }
   render();
 });
@@ -1455,7 +1455,7 @@ downloadQuoteButton.addEventListener("click", () => {
   const quote = state.quotes.find((item) => item.id === state.selectedQuoteId) || state.quotes[0];
   if (!quote) return;
   const content = [
-    "ARGEKA CRM TEKLIF",
+    "ARGEKA Sync TEKLIF",
     `Teklif No: ${quote.quoteNo || quote.id}`,
     `Firma: ${quote.accountName || "-"}`,
     `Baslik: ${quote.title}`,
@@ -1475,7 +1475,7 @@ downloadQuoteButton.addEventListener("click", () => {
   anchor.download = `${quote.quoteNo || "argeka-teklif"}.txt`;
   anchor.click();
   URL.revokeObjectURL(url);
-  logActivity("Teklif çıktısı indirildi.");
+  logActivity("Teklif Ã§Ä±ktÄ±sÄ± indirildi.");
   render();
 });
 
@@ -1486,9 +1486,9 @@ taskForm.addEventListener("submit", async (event) => {
     const task = await createTaskOnApi(payload);
     if (task) state.tasks.unshift(task);
     taskForm.reset();
-    logActivity(`${payload.title} görevi oluşturuldu.`);
+    logActivity(`${payload.title} gÃ¶revi oluÅŸturuldu.`);
   } catch {
-    logActivity("Görev oluşturulamadı.");
+    logActivity("GÃ¶rev oluÅŸturulamadÄ±.");
   }
   render();
 });
@@ -1502,9 +1502,9 @@ taskList.addEventListener("change", async (event) => {
   try {
     const updated = await updateTaskOnApi(task.id, { done: task.done });
     if (updated) Object.assign(task, updated);
-    logActivity(`${task.title} görevi güncellendi.`);
+    logActivity(`${task.title} gÃ¶revi gÃ¼ncellendi.`);
   } catch {
-    logActivity("Görev durumu API'ye kaydedilemedi.");
+    logActivity("GÃ¶rev durumu API'ye kaydedilemedi.");
   }
   render();
 });
@@ -1519,14 +1519,14 @@ oauthAuthorizeButton.addEventListener("click", async () => {
     state.adminOverview.oauthAttempts = [attempt, ...(state.adminOverview.oauthAttempts || [])];
     oauthCheckPanel.innerHTML = `
       <div class="oauth-result">
-        <strong>Yetki linki hazır</strong>
+        <strong>Yetki linki hazÄ±r</strong>
         <small>${escapeHtml(attempt.redirectUri)}</small>
-        <a class="secondary-button oauth-link" href="${escapeHtml(attempt.authorizeUrl)}" target="_blank" rel="noreferrer">OAuth ekranını aç</a>
+        <a class="secondary-button oauth-link" href="${escapeHtml(attempt.authorizeUrl)}" target="_blank" rel="noreferrer">OAuth ekranÄ±nÄ± aÃ§</a>
       </div>
     `;
-    logActivity(`${provider === "gmail" ? "Gmail" : "Outlook"} OAuth yetki linki hazırlandı.`);
+    logActivity(`${provider === "gmail" ? "Gmail" : "Outlook"} OAuth yetki linki hazÄ±rlandÄ±.`);
   } catch {
-    logActivity("OAuth yetki linki üretilemedi. Client ID ve redirect URI kaydını kontrol edin.");
+    logActivity("OAuth yetki linki Ã¼retilemedi. Client ID ve redirect URI kaydÄ±nÄ± kontrol edin.");
   }
   render();
 });
@@ -1540,9 +1540,9 @@ oauthSandboxButton.addEventListener("click", async () => {
     else state.integrationSettings.push(setting);
     state.integrations[provider] = true;
     await syncAdminOverview();
-    logActivity(`${provider === "gmail" ? "Gmail" : "Outlook"} sandbox bağlantısı aktif edildi.`);
+    logActivity(`${provider === "gmail" ? "Gmail" : "Outlook"} sandbox baÄŸlantÄ±sÄ± aktif edildi.`);
   } catch {
-    logActivity("Sandbox bağlantısı açılamadı. Önce OAuth ayarını kaydedin.");
+    logActivity("Sandbox baÄŸlantÄ±sÄ± aÃ§Ä±lamadÄ±. Ã–nce OAuth ayarÄ±nÄ± kaydedin.");
   }
   render();
 });
@@ -1556,9 +1556,9 @@ oauthSettingsForm.addEventListener("submit", async (event) => {
     if (existingIndex >= 0) state.integrationSettings.splice(existingIndex, 1, setting);
     else state.integrationSettings.push(setting);
     state.integrations[setting.provider] = setting.status === "connected" || setting.status === "ready";
-    logActivity(`${setting.provider === "gmail" ? "Gmail" : "Outlook"} OAuth ayarı kaydedildi.`);
+    logActivity(`${setting.provider === "gmail" ? "Gmail" : "Outlook"} OAuth ayarÄ± kaydedildi.`);
   } catch {
-    logActivity("OAuth ayarı kaydedilemedi. Yönetici yetkisi gerekebilir.");
+    logActivity("OAuth ayarÄ± kaydedilemedi. YÃ¶netici yetkisi gerekebilir.");
   }
   render();
 });
@@ -1591,7 +1591,7 @@ document.querySelector("#duplicateButton").addEventListener("click", () => {
   addDeal({
     ...deal,
     company: `${deal.company} kopya`,
-    note: `${deal.note || ""} Kopyalanan kayıt.`
+    note: `${deal.note || ""} Kopyalanan kayÄ±t.`
   });
 });
 
@@ -1599,25 +1599,25 @@ document.querySelector("#bridgeForm").addEventListener("submit", (event) => {
   event.preventDefault();
   const deal = state.deals.find((item) => item.id === state.selectedDealId);
   if (!deal) {
-    logActivity("Gönderim için fırsat seçilmedi.");
+    logActivity("GÃ¶nderim iÃ§in fÄ±rsat seÃ§ilmedi.");
     render();
     return;
   }
   const target = document.querySelector("#bridgeTarget").value;
-  const endpoint = document.querySelector("#bridgeEndpoint").value || "taslak uç nokta";
-  logActivity(`${deal.company} verisi ${target} hedefine gönderildi: ${endpoint}.`);
+  const endpoint = document.querySelector("#bridgeEndpoint").value || "taslak uÃ§ nokta";
+  logActivity(`${deal.company} verisi ${target} hedefine gÃ¶nderildi: ${endpoint}.`);
   render();
 });
 
 document.querySelector("#receiveButton").addEventListener("click", () => {
   addDeal({
-    contact: "Yeni API Kişisi",
-    company: "Webhook Kaydı",
+    contact: "Yeni API KiÅŸisi",
+    company: "Webhook KaydÄ±",
     email: "lead@webhook.example",
     value: 59000,
     source: document.querySelector("#bridgeTarget").value,
     owner: "Otomasyon",
-    note: "Veri köprüsünden alınan örnek kayıt."
+    note: "Veri kÃ¶prÃ¼sÃ¼nden alÄ±nan Ã¶rnek kayÄ±t."
   });
 });
 
@@ -1625,7 +1625,7 @@ document.querySelectorAll("[data-connect]").forEach((button) => {
   button.addEventListener("click", () => {
     const key = button.dataset.connect;
     state.integrations[key] = true;
-    logActivity(`${key === "gmail" ? "Gmail" : "Outlook"} bağlantısı taslak olarak etkinleşti.`);
+    logActivity(`${key === "gmail" ? "Gmail" : "Outlook"} baÄŸlantÄ±sÄ± taslak olarak etkinleÅŸti.`);
     render();
   });
 });
@@ -1634,13 +1634,13 @@ document.querySelectorAll("[data-calendar-connect]").forEach((button) => {
   button.addEventListener("click", () => {
     const key = button.dataset.calendarConnect;
     state.integrations[key] = true;
-    logActivity(`${key === "googleCalendar" ? "Google Calendar" : "Outlook Calendar"} izni taslak olarak etkinleşti.`);
+    logActivity(`${key === "googleCalendar" ? "Google Calendar" : "Outlook Calendar"} izni taslak olarak etkinleÅŸti.`);
     render();
   });
 });
 
 document.querySelector("#syncInboxButton").addEventListener("click", () => {
-  logActivity("E-posta senkronizasyonu çalıştırıldı.");
+  logActivity("E-posta senkronizasyonu Ã§alÄ±ÅŸtÄ±rÄ±ldÄ±.");
   render();
 });
 
@@ -1677,7 +1677,7 @@ document.querySelector("#addMinuteButton").addEventListener("click", () => {
     text
   });
   minuteText.value = "";
-  logActivity("Toplantı tutanağı güncellendi.");
+  logActivity("ToplantÄ± tutanaÄŸÄ± gÃ¼ncellendi.");
   render();
 });
 
@@ -1701,13 +1701,13 @@ document.querySelector("#createMeetingDealButton").addEventListener("click", () 
   addDeal({
     contact: meeting.owner,
     company: meeting.title,
-    email: "toplanti@akis-crm.local",
+    email: "toplanti@argeka.local",
     value: 35000,
-    source: "Toplantı",
+    source: "ToplantÄ±",
     owner: meeting.owner,
     probability: 30,
     forecast: "Pipeline",
-    nextAction: "Toplantı aksiyonlarını takip et",
+    nextAction: "ToplantÄ± aksiyonlarÄ±nÄ± takip et",
     note: meeting.agenda.join(", ")
   });
   switchView("pipeline");
@@ -1723,7 +1723,7 @@ document.querySelector("#calendarForm").addEventListener("submit", (event) => {
     ...Object.fromEntries(formData.entries())
   });
   event.currentTarget.reset();
-  logActivity("Takvim etkinliği CRM kaydına eklendi.");
+  logActivity("Takvim etkinliÄŸi CRM kaydÄ±na eklendi.");
   render();
 });
 
@@ -1732,14 +1732,14 @@ document.querySelector("#createDealCalendarButton").addEventListener("click", ()
   if (!deal) return;
   state.calendarEvents.push({
     id: `event-${Date.now()}`,
-    title: `${deal.company} satış görüşmesi`,
+    title: `${deal.company} satÄ±ÅŸ gÃ¶rÃ¼ÅŸmesi`,
     date: deal.closeDate && deal.closeDate !== "Planlanacak" ? deal.closeDate : "2026-05-12",
     time: "11:00",
     provider: deal.source === "Outlook" ? "Outlook Calendar" : "Google Calendar",
     attendees: deal.email,
     dealId: deal.id
   });
-  logActivity(`${deal.company} için takvim etkinliği oluşturuldu.`);
+  logActivity(`${deal.company} iÃ§in takvim etkinliÄŸi oluÅŸturuldu.`);
   render();
 });
 
@@ -1751,10 +1751,10 @@ document.querySelector("#downloadIcsButton").addEventListener("click", () => {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "akis-crm-toplanti.ics";
+  anchor.download = "argeka-sync-toplanti.ics";
   anchor.click();
   URL.revokeObjectURL(url);
-  logActivity("iOS uyumlu örnek ICS dosyası hazırlandı.");
+  logActivity("iOS uyumlu Ã¶rnek ICS dosyasÄ± hazÄ±rlandÄ±.");
   render();
 });
 
@@ -1764,13 +1764,13 @@ function createIcs(event) {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//ARGEKA CRM//TR",
+    "PRODID:-//ARGEKA Sync//TR",
     "BEGIN:VEVENT",
-    `UID:${event.id}@akis-crm.local`,
+    `UID:${event.id}@argeka.local`,
     `DTSTAMP:${compactDate}T${compactTime}`,
     `DTSTART:${compactDate}T${compactTime}`,
     `SUMMARY:${event.title}`,
-    `DESCRIPTION:${event.provider} üzerinden CRM toplantısı`,
+    `DESCRIPTION:${event.provider} Ã¼zerinden CRM toplantÄ±sÄ±`,
     "END:VEVENT",
     "END:VCALENDAR"
   ].join("\r\n");
@@ -1779,15 +1779,15 @@ function createIcs(event) {
 document.querySelector("#saveRuleButton").addEventListener("click", () => {
   const trigger = document.querySelector("#ruleTrigger").value;
   const action = document.querySelector("#ruleAction").value;
-  logActivity(`Kural kaydedildi: ${trigger} → ${action}.`);
+  logActivity(`Kural kaydedildi: ${trigger} â†’ ${action}.`);
   render();
 });
 
 document.querySelector("#checkoutButton").addEventListener("click", () => {
   const item = document.createElement("li");
-  item.textContent = "Checkout oturumu için backend uç noktası tasarlanacak.";
+  item.textContent = "Checkout oturumu iÃ§in backend uÃ§ noktasÄ± tasarlanacak.";
   billingLog.prepend(item);
-  logActivity("Ödeme sayfası hazırlama isteği oluşturuldu.");
+  logActivity("Ã–deme sayfasÄ± hazÄ±rlama isteÄŸi oluÅŸturuldu.");
   render();
 });
 
@@ -1801,10 +1801,10 @@ document.querySelector("#exportButton").addEventListener("click", () => {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = "akis-crm-veri.json";
+  anchor.download = "argeka-sync-veri.json";
   anchor.click();
   URL.revokeObjectURL(url);
-  logActivity("CRM verisi JSON olarak dışa aktarıldı.");
+  logActivity("CRM verisi JSON olarak dÄ±ÅŸa aktarÄ±ldÄ±.");
   render();
 });
 
@@ -1831,10 +1831,10 @@ importFile.addEventListener("change", async () => {
     state.minutes = parsed.minutes || state.minutes;
     state.calendarEvents = parsed.calendarEvents || state.calendarEvents;
     state.activity = parsed.activity || [];
-    logActivity("JSON verisi içe aktarıldı.");
+    logActivity("JSON verisi iÃ§e aktarÄ±ldÄ±.");
     render();
   } catch {
-    logActivity("İçe aktarma başarısız oldu.");
+    logActivity("Ä°Ã§e aktarma baÅŸarÄ±sÄ±z oldu.");
     render();
   } finally {
     importFile.value = "";
@@ -1851,12 +1851,12 @@ async function downloadAdminExport(format) {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `argeka-crm-export.${format === "json" ? "json" : format}`;
+    anchor.download = `argeka-sync-export.${format === "json" ? "json" : format}`;
     anchor.click();
     URL.revokeObjectURL(url);
-    logActivity(`${format.toLocaleUpperCase("tr-TR")} aktarım dosyası hazırlandı.`);
+    logActivity(`${format.toLocaleUpperCase("tr-TR")} aktarÄ±m dosyasÄ± hazÄ±rlandÄ±.`);
   } catch {
-    logActivity("Aktarım dosyası oluşturulamadı.");
+    logActivity("AktarÄ±m dosyasÄ± oluÅŸturulamadÄ±.");
   }
   render();
 }
@@ -1882,4 +1882,3 @@ async function initApp() {
 }
 
 initApp();
-

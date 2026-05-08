@@ -1,4 +1,4 @@
-﻿# ARGEKA CRM Desktop
+﻿# ARGEKA Sync Desktop
 
 Desktop hedefi, ayni web uygulamasini Windows kurulum paketi olarak sunmaktir.
 
@@ -27,4 +27,3 @@ Alternatif:
 2. IndexedDB verisini SQLite'a tasiyacak adapter yaz.
 3. Windows installer ve auto-update ekle.
 4. Lisans aktivasyon ekranini ekle.
-

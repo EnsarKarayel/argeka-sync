@@ -1,33 +1,33 @@
-services:
-  akis-crm-db:
+﻿services:
+  argeka-sync-db:
     image: postgres:17-alpine
-    container_name: akis-crm-db
+    container_name: argeka-sync-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-akis_crm}
+      POSTGRES_DB: ${POSTGRES_DB:-argeka_sync}
       POSTGRES_USER: ${POSTGRES_USER:-akis}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-akis}
     volumes:
-      - akis-crm-db-data:/var/lib/postgresql/data
+      - argeka-sync-db-data:/var/lib/postgresql/data
       - ../../db/schema.sql:/docker-entrypoint-initdb.d/001_schema.sql:ro
       - ../../db/seed.sql:/docker-entrypoint-initdb.d/002_seed.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-akis} -d ${POSTGRES_DB:-akis_crm}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-akis} -d ${POSTGRES_DB:-argeka_sync}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  akis-crm-api:
+  argeka-sync-api:
     build:
       context: ../..
       dockerfile: deployment/backend/Dockerfile
-    container_name: akis-crm-api
+    container_name: argeka-sync-api
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-akis}:${POSTGRES_PASSWORD:-akis}@akis-crm-db:5432/${POSTGRES_DB:-akis_crm}
+      DATABASE_URL: postgres://${POSTGRES_USER:-akis}:${POSTGRES_PASSWORD:-akis}@argeka-sync-db:5432/${POSTGRES_DB:-argeka_sync}
       PORT: 3000
     depends_on:
-      akis-crm-db:
+      argeka-sync-db:
         condition: service_healthy
     ports:
       - "${API_PORT:-3000}:3000"
@@ -37,16 +37,16 @@ services:
       timeout: 5s
       retries: 3
 
-  akis-crm-web:
+  argeka-sync-web:
     build:
       context: ../..
       dockerfile: deployment/self-hosted/Dockerfile
-    container_name: akis-crm-web
+    container_name: argeka-sync-web
     restart: unless-stopped
     ports:
       - "${WEB_PORT:-8080}:80"
     depends_on:
-      akis-crm-api:
+      argeka-sync-api:
         condition: service_started
     healthcheck:
       test: ["CMD", "wget", "-Y", "off", "-qO-", "http://127.0.0.1/"]
@@ -55,4 +55,4 @@ services:
       retries: 3
 
 volumes:
-  akis-crm-db-data:
+  argeka-sync-db-data:

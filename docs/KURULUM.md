@@ -1,4 +1,4 @@
-# ARGEKA Sync Kurulum Rehberi
+﻿# ARGEKA Sync Kurulum Rehberi
 
 Bu rehber, ARGEKA Sync'i baska bir Windows bilgisayara kurmak isteyen ve teknik kurulumlara alisik olmayan kisiler icindir.
 
@@ -7,7 +7,7 @@ Bu rehber, ARGEKA Sync'i baska bir Windows bilgisayara kurmak isteyen ve teknik 
 Windows bilgisayarda PowerShell acin ve su komutu calistirin:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
 ```
 
 Kurulum bittiginde tarayicida su adres acilir:
@@ -19,7 +19,7 @@ http://localhost:8080
 Demo girisi:
 
 ```text
-E-posta: admin@akis-crm.local
+E-posta: admin@argeka.local
 Sifre: admin123
 ```
 
@@ -48,7 +48,7 @@ Sifre: admin123
 3. Asagidaki komutu tek parca halinde yapistirin.
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
 ```
 
 4. Ekranda izin veya onay sorarsa kabul edin.
@@ -62,7 +62,7 @@ powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.c
 1. Tarayicida su adrese gidin:
 
 ```text
-https://github.com/EnsarKarayel/akis-crm
+https://github.com/EnsarKarayel/argeka-sync
 ```
 
 2. Yesil `Code` butonuna basin.
@@ -100,7 +100,7 @@ Programi durdurmak icin:
 ## Ilk test
 
 1. `http://localhost:8080` adresine girin.
-2. `admin@akis-crm.local / admin123` ile oturum acin.
+2. `admin@argeka.local / admin123` ile oturum acin.
 3. `Aktarim Isleri` ekranina gidin.
 4. `Demo PostgreSQL -> PostgreSQL aktarim` isinde `Calistir` butonuna basin.
 5. `Calisma Gecmisi` ekraninda `completed`, `3 okunan`, `3 yazilan` benzeri sonucu gorun.

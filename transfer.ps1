@@ -1,4 +1,4 @@
-param(
+﻿param(
   [ValidateSet("csv", "sql")]
   [string]$Format = "csv",
   [string]$OutputDir = ".\exports"
@@ -19,7 +19,7 @@ function Read-EnvValue($Name, $Default) {
   return $line -replace "^$Name=", ""
 }
 
-$dbName = Read-EnvValue "POSTGRES_DB" "akis_crm"
+$dbName = Read-EnvValue "POSTGRES_DB" "argeka_sync"
 $dbUser = Read-EnvValue "POSTGRES_USER" "akis"
 $exportPath = Join-Path $RepoRoot $OutputDir
 if (!(Test-Path $exportPath)) {
@@ -29,10 +29,10 @@ if (!(Test-Path $exportPath)) {
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
 if ($Format -eq "csv") {
   $filePath = Join-Path $exportPath "argeka-opportunities-$stamp.csv"
-  docker exec akis-crm-db psql -U $dbUser -d $dbName -c "\copy (select title, stage, value, probability, forecast, source, close_date, next_action, note from opportunities order by created_at desc) to stdout with csv header" | Out-File -FilePath $filePath -Encoding utf8
+  docker exec argeka-sync-db psql -U $dbUser -d $dbName -c "\copy (select title, stage, value, probability, forecast, source, close_date, next_action, note from opportunities order by created_at desc) to stdout with csv header" | Out-File -FilePath $filePath -Encoding utf8
 } else {
   $filePath = Join-Path $exportPath "argeka-portable-$stamp.sql"
-  docker exec akis-crm-db pg_dump -U $dbUser -d $dbName --data-only --inserts --table=opportunities --table=accounts --table=contacts | Out-File -FilePath $filePath -Encoding utf8
+  docker exec argeka-sync-db pg_dump -U $dbUser -d $dbName --data-only --inserts --table=opportunities --table=accounts --table=contacts | Out-File -FilePath $filePath -Encoding utf8
 }
 
 Write-Host "Aktarim dosyasi hazir: $filePath" -ForegroundColor Green

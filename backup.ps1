@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$BackupDir = ".\backups"
 )
 
@@ -17,7 +17,7 @@ function Read-EnvValue($Name, $Default) {
   return $line -replace "^$Name=", ""
 }
 
-$dbName = Read-EnvValue "POSTGRES_DB" "akis_crm"
+$dbName = Read-EnvValue "POSTGRES_DB" "argeka_sync"
 $dbUser = Read-EnvValue "POSTGRES_USER" "akis"
 $backupPath = Join-Path $RepoRoot $BackupDir
 if (!(Test-Path $backupPath)) {
@@ -25,14 +25,14 @@ if (!(Test-Path $backupPath)) {
 }
 
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$fileName = "argeka-crm-$stamp.sql"
+$fileName = "argeka-sync-$stamp.sql"
 $filePath = Join-Path $backupPath $fileName
 
-Write-Host "ARGEKA CRM yedek aliniyor: $filePath" -ForegroundColor Cyan
-docker exec akis-crm-db pg_dump -U $dbUser -d $dbName --clean --if-exists --encoding=UTF8 | Out-File -FilePath $filePath -Encoding utf8
+Write-Host "ARGEKA Sync yedek aliniyor: $filePath" -ForegroundColor Cyan
+docker exec argeka-sync-db pg_dump -U $dbUser -d $dbName --clean --if-exists --encoding=UTF8 | Out-File -FilePath $filePath -Encoding utf8
 
 $size = (Get-Item $filePath).Length
 $sqlFileName = $fileName.Replace("'", "''")
-docker exec akis-crm-db psql -U $dbUser -d $dbName -c "insert into backup_runs (file_name, status, kind, size_bytes) values ('$sqlFileName', 'completed', 'backup', $size);"
+docker exec argeka-sync-db psql -U $dbUser -d $dbName -c "insert into backup_runs (file_name, status, kind, size_bytes) values ('$sqlFileName', 'completed', 'backup', $size);"
 
 Write-Host "Yedek tamamlandi: $filePath" -ForegroundColor Green

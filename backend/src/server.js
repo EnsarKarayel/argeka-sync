@@ -1,4 +1,4 @@
-const http = require("node:http");
+﻿const http = require("node:http");
 const { createHash, randomBytes, randomUUID } = require("node:crypto");
 const { Pool } = require("pg");
 const mssql = require("mssql");
@@ -7,7 +7,7 @@ const bcrypt = require("bcryptjs");
 
 const port = Number(process.env.PORT || 3000);
 const schedulerIntervalMs = Number(process.env.SCHEDULER_INTERVAL_MS || 60000);
-const databaseUrl = process.env.DATABASE_URL || "postgres://akis:akis@localhost:5432/akis_crm";
+const databaseUrl = process.env.DATABASE_URL || "postgres://akis:akis@localhost:5432/argeka_sync";
 const pool = new Pool({ connectionString: databaseUrl });
 let schedulerBusy = false;
 let schedulerTimer = null;
@@ -41,14 +41,14 @@ const defaultRoles = [
   },
   {
     key: "business_development",
-    name: "İş geliştirme",
+    name: "Ä°ÅŸ geliÅŸtirme",
     dataScope: "own",
     hiddenColumns: ["forecast", "probability"],
     permissions: { opportunities: true, meetings: true }
   },
   {
     key: "sales_operations",
-    name: "Satış operasyon",
+    name: "SatÄ±ÅŸ operasyon",
     dataScope: "team",
     hiddenColumns: ["note"],
     permissions: { opportunities: true, meetings: true, export: true }
@@ -305,8 +305,12 @@ async function ensureSchema() {
     alter table sync_jobs add column if not exists last_error text;
   `);
 
+  await pool.query(
+    "update users set email = 'admin@argeka.local' where email = 'admin@akis-crm.local'"
+  );
+
   const tid = await tenantId();
-  for (const teamName of ["İş Geliştirme", "Satış Operasyon", "Finans"]) {
+  for (const teamName of ["Ä°ÅŸ GeliÅŸtirme", "SatÄ±ÅŸ Operasyon", "Finans"]) {
     await pool.query(
       `insert into teams (tenant_id, name)
        values ($1, $2)
@@ -343,7 +347,7 @@ async function ensureSchema() {
      set team_id = t.id
      from teams t
      where u.tenant_id = t.tenant_id
-       and t.name = 'İş Geliştirme'
+       and t.name = 'Ä°ÅŸ GeliÅŸtirme'
        and u.team_id is null`
   );
 
@@ -358,7 +362,7 @@ async function ensureSchema() {
     `insert into accounts (id, tenant_id, name, sector, territory)
      values
        ('55555555-5555-4555-8555-555555555551', $1, 'Nova Teknoloji', 'Teknoloji', 'TR Marmara'),
-       ('55555555-5555-4555-8555-555555555552', $1, 'Atlas Lojistik', 'Lojistik', 'TR İç Anadolu')
+       ('55555555-5555-4555-8555-555555555552', $1, 'Atlas Lojistik', 'Lojistik', 'TR Ä°Ã§ Anadolu')
      on conflict (id) do nothing`,
     [tid]
   );
@@ -366,7 +370,7 @@ async function ensureSchema() {
   await pool.query(
     `insert into contacts (id, tenant_id, account_id, full_name, email, phone)
      values
-       ('66666666-6666-4666-8666-666666666661', $1, '55555555-5555-4555-8555-555555555551', 'Ayşe Yılmaz', 'ayse@novatek.example', '+90 212 000 00 01'),
+       ('66666666-6666-4666-8666-666666666661', $1, '55555555-5555-4555-8555-555555555551', 'AyÅŸe YÄ±lmaz', 'ayse@novatek.example', '+90 212 000 00 01'),
        ('66666666-6666-4666-8666-666666666662', $1, '55555555-5555-4555-8555-555555555552', 'Mehmet Arslan', 'mehmet@atlas.example', '+90 312 000 00 02')
      on conflict (id) do nothing`,
     [tid]
@@ -379,7 +383,7 @@ async function ensureSchema() {
   if (admin.rows[0]) {
     await pool.query(
       `insert into quotes (tenant_id, account_id, contact_id, owner_id, quote_no, title, status, subtotal, discount, tax, total, valid_until, notes)
-       values ($1, '55555555-5555-4555-8555-555555555551', '66666666-6666-4666-8666-666666666661', $2, 'ARG-2026-0001', 'Nova Teknoloji CRM başlangıç paketi', 'sent', 84000, 0, 16800, 100800, '2026-05-31', 'Demo sonrası yıllık lisans teklifidir.')
+       values ($1, '55555555-5555-4555-8555-555555555551', '66666666-6666-4666-8666-666666666661', $2, 'ARG-2026-0001', 'Nova Teknoloji CRM baÅŸlangÄ±Ã§ paketi', 'sent', 84000, 0, 16800, 100800, '2026-05-31', 'Demo sonrasÄ± yÄ±llÄ±k lisans teklifidir.')
        on conflict (tenant_id, quote_no) do nothing`,
       [tid, admin.rows[0].id]
     );
@@ -399,8 +403,8 @@ async function ensureSchema() {
     const internal = await pool.query(
       `insert into sync_connections (tenant_id, name, db_type, role, connection_url, database_name, status, notes)
        values
-         ($1, 'Demo Kaynak PostgreSQL', 'postgresql', 'source', 'internal://app', 'akis_crm', 'active', 'Kurulumla gelen ornek kaynak baglanti.'),
-         ($1, 'Demo Hedef PostgreSQL', 'postgresql', 'target', 'internal://app', 'akis_crm', 'active', 'Kurulumla gelen ornek hedef baglanti.')
+         ($1, 'Demo Kaynak PostgreSQL', 'postgresql', 'source', 'internal://app', 'argeka_sync', 'active', 'Kurulumla gelen ornek kaynak baglanti.'),
+         ($1, 'Demo Hedef PostgreSQL', 'postgresql', 'target', 'internal://app', 'argeka_sync', 'active', 'Kurulumla gelen ornek hedef baglanti.')
        returning id, role`,
       [tid]
     );
@@ -649,9 +653,9 @@ function licensePayload(row, userCount = 0) {
     updatedAt: row?.updated_at || null,
     canCreateUser: ["active", "trialing"].includes(status) && seatsAvailable > 0,
     warnings: [
-      ...(status === "expired" ? ["Lisans süresi doldu."] : []),
-      ...(status === "review_required" ? ["Lisans anahtarı inceleme gerektiriyor."] : []),
-      ...(seatsAvailable === 0 ? ["Kullanıcı limiti doldu."] : [])
+      ...(status === "expired" ? ["Lisans sÃ¼resi doldu."] : []),
+      ...(status === "review_required" ? ["Lisans anahtarÄ± inceleme gerektiriyor."] : []),
+      ...(seatsAvailable === 0 ? ["KullanÄ±cÄ± limiti doldu."] : [])
     ]
   };
 }
@@ -800,7 +804,7 @@ async function login(req, res) {
     [body.email || ""]
   );
   const user = result.rows[0];
-  const demoPasswordOk = user?.email === "admin@akis-crm.local" && body.password === "admin123";
+  const demoPasswordOk = user?.email === "admin@argeka.local" && body.password === "admin123";
   const passwordOk = demoPasswordOk || (user?.password_hash && bcrypt.compareSync(body.password || "", user.password_hash));
   if (!user || !passwordOk) return send(res, 401, { error: "invalid_credentials" });
 
@@ -993,7 +997,7 @@ async function createAdminUser(req, res) {
   if (!license.canCreateUser) {
     return send(res, 402, {
       error: "license_limit",
-      message: license.warnings[0] || "Lisans yeni kullanıcı oluşturmaya izin vermiyor.",
+      message: license.warnings[0] || "Lisans yeni kullanÄ±cÄ± oluÅŸturmaya izin vermiyor.",
       license
     });
   }
@@ -1155,7 +1159,7 @@ async function exportData(req, res, format) {
       res,
       200,
       "application/sql; charset=utf-8",
-      ["-- ARGEKA CRM portable SQL export", ...statements].join("\n"),
+      ["-- ARGEKA Sync portable SQL export", ...statements].join("\n"),
       { "content-disposition": 'attachment; filename="argeka-export.sql"' }
     );
   }
@@ -1473,7 +1477,7 @@ async function createOAuthAuthorize(req, res, provider) {
   if (!setting?.client_id || !setting?.redirect_uri) {
     return send(res, 400, {
       error: "oauth_not_configured",
-      message: "Client ID ve Redirect URI kaydedilmeden OAuth linki üretilemez."
+      message: "Client ID ve Redirect URI kaydedilmeden OAuth linki Ã¼retilemez."
     });
   }
 
@@ -1530,7 +1534,7 @@ async function oauthCallback(req, res, provider, url) {
     res,
     200,
     "text/html; charset=utf-8",
-    `<!doctype html><meta charset="utf-8"><title>ARGEKA CRM OAuth</title><body style="font-family:system-ui;padding:32px"><h1>OAuth sonucu</h1><p>Sağlayıcı: ${provider}</p><p>Durum: ${status}</p><p>Bu aşamada kod alındı; gerçek token exchange domain/SSL ve client secret hazır olunca açılacak.</p></body>`
+    `<!doctype html><meta charset="utf-8"><title>ARGEKA Sync OAuth</title><body style="font-family:system-ui;padding:32px"><h1>OAuth sonucu</h1><p>SaÄŸlayÄ±cÄ±: ${provider}</p><p>Durum: ${status}</p><p>Bu aÅŸamada kod alÄ±ndÄ±; gerÃ§ek token exchange domain/SSL ve client secret hazÄ±r olunca aÃ§Ä±lacak.</p></body>`
   );
 }
 
@@ -2374,7 +2378,7 @@ async function createOpportunity(req, res) {
     [
       session.tenant_id,
       session.user_id,
-      body.title || body.company || "Yeni fırsat",
+      body.title || body.company || "Yeni fÄ±rsat",
       body.stage || "new",
       Number(body.value || 0),
       Number(body.probability || 20),
@@ -2458,7 +2462,7 @@ async function createMeeting(req, res) {
     [
       randomUUID(),
       tid,
-      body.title || "CRM toplantısı",
+      body.title || "CRM toplantÄ±sÄ±",
       body.startsAt || new Date().toISOString(),
       body.provider || "Google Calendar",
       JSON.stringify(body.attendees || []),
@@ -2475,7 +2479,7 @@ async function handler(req, res) {
     const url = new URL(req.url, `http://${req.headers.host}`);
     if (req.method === "GET" && url.pathname === "/health") {
       await pool.query("select 1");
-      return send(res, 200, { ok: true, service: "akis-crm-api" });
+      return send(res, 200, { ok: true, service: "argeka-sync-api" });
     }
     if (req.method === "GET" && url.pathname === "/api/meta") {
       return send(res, 200, { name: "ARGEKA Sync", edition: "self-hosted", api: "0.2.0" });
@@ -2549,4 +2553,3 @@ ensureSchema()
     console.error("ARGEKA Sync API startup failed", error);
     process.exit(1);
   });
-

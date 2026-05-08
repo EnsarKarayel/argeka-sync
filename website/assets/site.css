@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --ink: #10231d;
   --muted: #61736c;
   --teal: #087f74;
@@ -47,14 +47,12 @@ a {
   font-weight: 800;
 }
 
-.brand-mark {
-  display: inline-grid;
+.brand-logo {
+  display: inline-block;
   width: 42px;
   height: 42px;
-  place-items: center;
   border-radius: 10px;
-  background: var(--lime);
-  color: var(--ink);
+  box-shadow: 0 12px 28px rgba(8, 127, 116, 0.2);
 }
 
 .nav {

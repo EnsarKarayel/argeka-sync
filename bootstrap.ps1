@@ -1,5 +1,5 @@
-param(
-  [string]$RepoUrl = "https://github.com/EnsarKarayel/akis-crm.git",
+﻿param(
+  [string]$RepoUrl = "https://github.com/EnsarKarayel/argeka-sync.git",
   [string]$InstallDir = "$env:USERPROFILE\Desktop\ARGEKA-Sync"
 )
 

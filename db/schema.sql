@@ -1,4 +1,4 @@
-﻿-- ARGEKA CRM SaaS PostgreSQL taslagi
+﻿-- ARGEKA Sync SaaS PostgreSQL taslagi
 -- Multi-tenant yapida her kayit tenant_id ile ayrilir.
 
 create extension if not exists pgcrypto;
@@ -361,4 +361,3 @@ create index teams_tenant_idx on teams (tenant_id);
 create index users_tenant_team_idx on users (tenant_id, team_id);
 create index backup_runs_tenant_created_idx on backup_runs (tenant_id, created_at desc);
 create index audit_logs_tenant_created_idx on audit_logs (tenant_id, created_at desc);
-

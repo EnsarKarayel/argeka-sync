@@ -1,4 +1,4 @@
-# ARGEKA Sync
+﻿# ARGEKA Sync
 
 ARGEKA Sync, teknik ekipler icin hazirlanan self-hosted mini ETL ve veritabani aktarim aracidir. Amac tek yonlu veri akislarini kolayca kurmak, zamanlamak ve izlemektir.
 
@@ -18,15 +18,15 @@ Ilk calisan motor PostgreSQL/Internal, Microsoft SQL Server ve MySQL/MariaDB bag
 
 ## Tek komut Windows kurulumu
 
-Hiç teknik bilmeyen kullanıcı için adım adım kurulum rehberi:
+HiÃ§ teknik bilmeyen kullanÄ±cÄ± iÃ§in adÄ±m adÄ±m kurulum rehberi:
 
 - [docs/KURULUM.md](docs/KURULUM.md)
-- GitHub üzerinde açmak için: https://github.com/EnsarKarayel/akis-crm/blob/main/docs/KURULUM.md
+- GitHub Ã¼zerinde aÃ§mak iÃ§in: https://github.com/EnsarKarayel/argeka-sync/blob/main/docs/KURULUM.md
 
 Sifir bir Windows bilgisayarda PowerShell acip su komutu calistirin:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
 ```
 
 Bu komut Git yoksa kurmayi dener, repo'yu `Desktop\ARGEKA-Sync` klasorune indirir, Docker Desktop'i kontrol eder ve ARGEKA Sync servislerini baslatir.
@@ -58,7 +58,7 @@ http://localhost:8080
 Demo girisi:
 
 ```text
-admin@akis-crm.local / admin123
+admin@argeka.local / admin123
 ```
 
 ## Ilk demo aktarim
@@ -155,7 +155,7 @@ powershell -ExecutionPolicy Bypass -File .\backup.ps1
 Yedegi geri yuklemek icin:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\argeka-crm-YYYYMMDD-HHMMSS.sql
+powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\argeka-sync-YYYYMMDD-HHMMSS.sql
 ```
 
 ## Self-hosted Docker

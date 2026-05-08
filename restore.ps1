@@ -1,4 +1,4 @@
-param(
+﻿param(
   [Parameter(Mandatory = $true)]
   [string]$BackupFile
 )
@@ -22,16 +22,16 @@ if (!(Test-Path $BackupFile)) {
   throw "Yedek dosyasi bulunamadi: $BackupFile"
 }
 
-$dbName = Read-EnvValue "POSTGRES_DB" "akis_crm"
+$dbName = Read-EnvValue "POSTGRES_DB" "argeka_sync"
 $dbUser = Read-EnvValue "POSTGRES_USER" "akis"
 $resolved = Resolve-Path $BackupFile
 
-Write-Host "ARGEKA CRM geri yukleme basliyor: $resolved" -ForegroundColor Yellow
-docker cp $resolved akis-crm-db:/tmp/argeka-restore.sql
-docker exec akis-crm-db psql -U $dbUser -d $dbName -f /tmp/argeka-restore.sql
+Write-Host "ARGEKA Sync geri yukleme basliyor: $resolved" -ForegroundColor Yellow
+docker cp $resolved argeka-sync-db:/tmp/argeka-restore.sql
+docker exec argeka-sync-db psql -U $dbUser -d $dbName -f /tmp/argeka-restore.sql
 
 $fileName = Split-Path $resolved -Leaf
 $sqlFileName = $fileName.Replace("'", "''")
-docker exec akis-crm-db psql -U $dbUser -d $dbName -c "insert into backup_runs (file_name, status, kind, size_bytes) values ('$sqlFileName', 'completed', 'restore', 0);"
+docker exec argeka-sync-db psql -U $dbUser -d $dbName -c "insert into backup_runs (file_name, status, kind, size_bytes) values ('$sqlFileName', 'completed', 'restore', 0);"
 
 Write-Host "Geri yukleme tamamlandi." -ForegroundColor Green

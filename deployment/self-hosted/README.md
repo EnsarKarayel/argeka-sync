@@ -1,6 +1,6 @@
-﻿# ARGEKA CRM Self-hosted
+﻿# ARGEKA Sync Self-hosted
 
-Bu paket ARGEKA CRM web, API ve PostgreSQL servislerini tek Docker Compose dosyasi ile calistirir.
+Bu paket ARGEKA Sync web, API ve PostgreSQL servislerini tek Docker Compose dosyasi ile calistirir.
 
 ## Kurulum
 
@@ -13,7 +13,7 @@ powershell -ExecutionPolicy Bypass -File .\install.ps1
 Sifir bilgisayarda repo'yu da otomatik indirmek icin:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
+powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
 ```
 
 Elle Docker Compose calistirmak icin:
@@ -46,7 +46,7 @@ http://localhost:3000/health
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\backup.ps1
-powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\argeka-crm-YYYYMMDD-HHMMSS.sql
+powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\argeka-sync-YYYYMMDD-HHMMSS.sql
 powershell -ExecutionPolicy Bypass -File .\transfer.ps1 -Format csv
 ```
 
@@ -54,7 +54,6 @@ Yonetim ekraninda manuel kullanici olusturma, rol/veri kapsami atama, kolon gizl
 
 ## Sonraki faz
 
-- `akis-crm-worker`: mail/takvim/webhook kuyrugu
+- `argeka-sync-worker`: mail/takvim/webhook kuyrugu
 - Lisans aktivasyon servisinin online dogrulama merkezi
 - SSL ve domain otomasyonu
-

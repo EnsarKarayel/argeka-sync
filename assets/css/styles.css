@@ -93,15 +93,13 @@ button {
   gap: 12px;
 }
 
-.brand-mark {
-  display: grid;
+.brand-logo {
+  display: block;
   width: 42px;
   height: 42px;
-  place-items: center;
   border-radius: 8px;
-  background: #d2f55b;
-  color: #14231d;
-  font-weight: 800;
+  box-shadow: 0 12px 28px rgba(8, 127, 116, 0.22);
+  flex: 0 0 auto;
 }
 
 .brand strong,
@@ -1476,4 +1474,3 @@ textarea:focus {
     grid-template-columns: repeat(4, 82vw);
   }
 }
-
