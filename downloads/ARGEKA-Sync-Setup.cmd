@@ -14,7 +14,7 @@ if "%CHOICE%"=="2" (
 )
 echo.
 echo Setup dosyalari indiriliyor...
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$p=Join-Path $env:TEMP 'argeka-sync-bootstrap.ps1'; Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1' -OutFile $p; & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $p -Lang %LANG%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; $p=Join-Path $env:TEMP 'argeka-sync-bootstrap.ps1'; Invoke-WebRequest -UseBasicParsing -Uri 'https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1' -OutFile $p; & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $p -Lang %LANG%"
 echo.
 echo Kurulum bitti. Tarayici acilmadiysa / If browser did not open:
 echo http://localhost:8080

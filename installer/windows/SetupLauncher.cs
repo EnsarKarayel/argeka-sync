@@ -20,6 +20,7 @@ public static class SetupLauncher
         string runner = string.Join(Environment.NewLine, new[]
         {
             "$ErrorActionPreference = 'Stop'",
+            "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12",
             "$url = '" + BootstrapUrl + "'",
             "$script = '" + scriptPath.Replace("'", "''") + "'",
             "Write-Host ''",
