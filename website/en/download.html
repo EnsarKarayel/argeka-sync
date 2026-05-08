@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Download ARGEKA Sync setup and install the self-hosted mini ETL tool on your own Windows computer or server.">
+    <meta name="robots" content="index, follow">
+    <title>Download ARGEKA Sync Setup</title>
+    <link rel="canonical" href="https://argeka.com.tr/en/download.html">
+    <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/download.html">
+    <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/download.html">
+    <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/download.html">
+    <link rel="stylesheet" href="../assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="../assets/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Main menu">
+        <a href="index.html">Product</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <span class="lang-switch" aria-label="Language">
+          <a href="../download.html">TR</a>
+          <a href="download.html" aria-current="true">EN</a>
+        </span>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Self-hosted Windows setup</p>
+      <h1>Download the setup file and run it on your own computer.</h1>
+      <p class="lead">ARGEKA Sync does not run on our servers. You download the setup file and install it on your Windows computer or Windows server. Database connections and data stay in your environment.</p>
+
+      <div class="download-panel">
+        <div>
+          <h2>Windows Setup</h2>
+          <p>The recommended file is the Windows setup executable. When opened, it lets you choose Turkish or English setup.</p>
+          <div class="actions">
+            <a class="button primary" href="../downloads/ARGEKA-Sync-Setup.exe">Download Windows setup</a>
+            <a class="button" href="../downloads/ARGEKA-Sync-Setup.cmd">Backup CMD setup</a>
+          </div>
+          <p class="small-note">For Google Ads and user safety, this page never starts an automatic download. The setup file is downloaded only after the user clicks the button.</p>
+          <p class="small-note">Windows may show a warning because the file is not code-signed yet. The next enterprise distribution step is a signed installer.</p>
+        </div>
+        <aside>
+          <h3>What gets installed?</h3>
+          <ul class="requirements">
+            <li>ARGEKA Sync web panel</li>
+            <li>API service</li>
+            <li>PostgreSQL database</li>
+            <li>Docker services</li>
+            <li>Desktop ARGEKA Sync.exe launcher</li>
+          </ul>
+        </aside>
+      </div>
+
+      <section class="steps">
+        <h2>Installation for non-technical users</h2>
+        <ol>
+          <li><strong>Download the setup file.</strong> Click the Download Windows setup button above.</li>
+          <li><strong>Run the file.</strong> Double-click <code>ARGEKA-Sync-Setup.exe</code>.</li>
+          <li><strong>Choose language.</strong> <code>1</code> Turkish, <code>2</code> English.</li>
+          <li><strong>Wait.</strong> Setup checks Git, Docker Desktop and WSL. It guides you when something is missing.</li>
+          <li><strong>If Windows asks for restart, run setup again.</strong> Restart the computer, then double-click the same setup file again.</li>
+          <li><strong>Open the program.</strong> Setup opens <code>http://localhost:8080</code>. Later, use ARGEKA Sync.exe on the desktop.</li>
+        </ol>
+      </section>
+
+      <section class="language-grid">
+        <article class="card">
+          <h2>English docs</h2>
+          <p>Installation and first-use guide for non-technical users.</p>
+          <div class="actions compact">
+            <a class="button" href="../docs/INSTALLATION-EN.md">Installation guide</a>
+            <a class="button" href="../docs/USER-GUIDE-EN.md">User guide</a>
+          </div>
+        </article>
+        <article class="card">
+          <h2>Turkish docs</h2>
+          <p>Turkish installation and first-use guide.</p>
+          <div class="actions compact">
+            <a class="button" href="../docs/KURULUM.md">Kurulum kilavuzu</a>
+            <a class="button" href="../docs/KULLANIM.md">Kullanim kilavuzu</a>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>&copy; 2026 ARGEKA Sync</span>
+      <span>Self-hosted setup: data stays in the user's own environment.</span>
+    </footer>
+  </body>
+</html>

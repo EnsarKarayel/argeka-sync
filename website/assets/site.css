@@ -67,6 +67,29 @@ a {
   text-decoration: none;
 }
 
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.lang-switch a {
+  min-width: 34px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.lang-switch a[aria-current="true"] {
+  background: var(--ink);
+  color: var(--white);
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 0.88fr) minmax(420px, 1.12fr);
