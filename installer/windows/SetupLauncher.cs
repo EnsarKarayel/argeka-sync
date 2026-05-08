@@ -25,7 +25,12 @@ public static class SetupLauncher
             "$script = '" + scriptPath.Replace("'", "''") + "'",
             "Write-Host ''",
             "Write-Host 'Downloading ARGEKA Sync setup files...'",
-            "Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $script",
+            "if (Get-Command curl.exe -ErrorAction SilentlyContinue) {",
+            "  & curl.exe -L --fail -o $script $url",
+            "  if ($LASTEXITCODE -ne 0) { throw 'curl download failed' }",
+            "} else {",
+            "  Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $script",
+            "}",
             "& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $script -Lang " + lang,
             "exit $LASTEXITCODE"
         });
