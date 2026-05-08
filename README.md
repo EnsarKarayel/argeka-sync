@@ -2,7 +2,7 @@
 
 ARGEKA Sync, teknik ekipler icin hazirlanan self-hosted mini ETL ve veritabani aktarim aracidir. Amac tek yonlu veri akislarini kolayca kurmak, zamanlamak ve izlemektir.
 
-Ilk calisan motor PostgreSQL -> PostgreSQL ve internal demo baglantisidir. MSSQL, MySQL/MariaDB, Oracle, SQLite, ODBC, CSV/Excel, REST API, SAP HANA ve Firebird connector mimarisi arayuzde hazirdir; bu baglantilar icin driver/ODBC calisma motoru sonraki fazlarda eklenecektir.
+Ilk calisan motor PostgreSQL/Internal ve Microsoft SQL Server baglantilarini destekler. MySQL/MariaDB, Oracle, SQLite, ODBC, CSV/Excel, REST API, SAP HANA ve Firebird connector mimarisi arayuzde hazirdir; bu baglantilar icin calisma motoru sonraki fazlarda eklenecektir.
 
 ## Ne ise yarar?
 
@@ -11,6 +11,7 @@ Ilk calisan motor PostgreSQL -> PostgreSQL ve internal demo baglantisidir. MSSQL
 - Kolon esleme yapar: kaynak kolon -> hedef kolon.
 - Kolon veya veri hatasi icin politika belirler: strict, ignore extra, skip row, quarantine.
 - Manuel, saatlik, gunluk veya haftalik calisma plani tutar.
+- Arka planda self-hosted scheduler worker ile zamani gelen isleri otomatik calistirir.
 - Her calisma icin okunan, yazilan, atlanan satir ve hata logu kaydeder.
 - Self-hosted calisir; veritabani sifreleri ve veriler kullanicinin kendi makinesi/sunucusunda kalir.
 
@@ -72,6 +73,18 @@ Kurulumla birlikte bir demo PostgreSQL kaynak ve hedef baglantisi gelir.
 Demo kaynak tablo: `sync_demo_source`
 
 Demo hedef tablo: `sync_demo_target`
+
+## MSSQL baglantisi
+
+MSSQL icin iki yol vardir:
+
+```text
+mssql://kullanici:sifre@10.0.0.12:1433/ERPDB?encrypt=false&trustServerCertificate=true
+```
+
+Veya `Baglantilar` ekraninda host, port, veritabani, kullanici ve sifre alanlarini doldurun. Sifre API cevabinda geri donmez; URL icindeki parola da maskelenir.
+
+MSSQL kaynak veya hedef olarak kullanilabilir. Parametreli sorgularda yine `:parametre_adi` yazilir; motor bunu MSSQL tarafinda `@p1`, `@p2` seklinde calistirir.
 
 ## Moduller
 
@@ -153,11 +166,10 @@ ARGEKA Sync simdilik ucretsiz beta/self-hosted urun olarak dusunulmustur. SaaS d
 
 Sonraki fazlar:
 
-- MSSQL driver/ODBC runtime.
+- MSSQL upsert anahtari ve gelismis tip esleme.
 - MySQL/MariaDB driver.
 - Oracle Instant Client/ODBC dokumantasyonu.
 - Windows EXE installer.
-- Ayrintili scheduler worker.
 - Hata satirlari icin quarantine tablosu.
 - Upsert anahtar secimi.
 - Tanitim ve indirme web sayfasi.

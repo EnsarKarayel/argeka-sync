@@ -30,6 +30,8 @@ Sifre: admin123
 - PostgreSQL veritabani
 - Docker uzerinde kalici veri alani
 - Demo PostgreSQL kaynak/hedef aktarim isi
+- PostgreSQL ve MSSQL icin calisan aktarim motoru
+- Saatlik, gunluk ve haftalik isleri calistiran scheduler worker
 
 ## Kurulumdan once
 

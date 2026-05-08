@@ -241,6 +241,10 @@
                   </label>
                 </div>
                 <label>
+                  Sifre
+                  <input name="password" type="password" autocomplete="new-password" placeholder="Baglanti sifresi">
+                </label>
+                <label>
                   Not
                   <textarea name="notes" rows="3" placeholder="ODBC DSN, VPN veya driver notu"></textarea>
                 </label>
@@ -411,6 +415,10 @@
               <span>Zamanlanmis isler</span>
               <span class="pill">Self-hosted scheduler</span>
             </div>
+            <div class="scheduler-toolbar">
+              <div class="scheduler-status" id="schedulerStatus"></div>
+              <button class="secondary-button" id="schedulerTickButton" type="button">Zamanlayiciyi simdi calistir</button>
+            </div>
             <div class="schedule-list" id="scheduleList"></div>
           </div>
         </section>
@@ -433,7 +441,7 @@
                 <li>Her run icin okunan, yazilan ve atlanan satir sayisi tutulur.</li>
                 <li>Hatalar run seviyesinde ve satir metadata'si ile loglanir.</li>
                 <li>Tek yonlu aktarim varsayilandir; cift yonlu senkron yoktur.</li>
-                <li>PostgreSQL/Internal motor aktif; diger DB tipleri connector mimarisine hazirdir.</li>
+                <li>PostgreSQL/Internal ve MSSQL motor aktif; diger DB tipleri connector mimarisine hazirdir.</li>
               </ul>
             </section>
           </div>

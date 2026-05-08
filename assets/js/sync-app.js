@@ -1,6 +1,6 @@
 const dbTypes = [
   { id: "postgresql", label: "PostgreSQL", status: "Aktif" },
-  { id: "mssql", label: "Microsoft SQL Server", status: "ODBC/driver" },
+  { id: "mssql", label: "Microsoft SQL Server", status: "Aktif" },
   { id: "mysql", label: "MySQL / MariaDB", status: "ODBC/driver" },
   { id: "oracle", label: "Oracle", status: "ODBC/driver" },
   { id: "sqlite", label: "SQLite", status: "Planli" },
@@ -18,6 +18,7 @@ const state = {
   queries: [],
   jobs: [],
   runs: [],
+  schedulerStatus: null,
   selectedConnectionId: null,
   selectedQueryId: null,
   selectedJobId: null,
@@ -62,6 +63,8 @@ const els = {
   mappingRows: document.querySelector("#mappingRows"),
   addMappingRowButton: document.querySelector("#addMappingRowButton"),
   scheduleList: document.querySelector("#scheduleList"),
+  schedulerStatus: document.querySelector("#schedulerStatus"),
+  schedulerTickButton: document.querySelector("#schedulerTickButton"),
   runList: document.querySelector("#runList"),
   refreshRunsButton: document.querySelector("#refreshRunsButton"),
   adminSummary: document.querySelector("#adminSummary"),
@@ -126,17 +129,19 @@ async function restoreSession() {
 
 async function syncAll() {
   if (!state.session?.token) return;
-  const [connections, queries, jobs, runs, overview] = await Promise.all([
+  const [connections, queries, jobs, runs, scheduler, overview] = await Promise.all([
     apiRequest("/api/sync/connections"),
     apiRequest("/api/sync/queries"),
     apiRequest("/api/sync/jobs"),
     apiRequest("/api/sync/runs"),
+    apiRequest("/api/sync/scheduler/status"),
     apiRequest("/api/admin/overview")
   ]);
   state.connections = connections.data || [];
   state.queries = queries.data || [];
   state.jobs = jobs.data || [];
   state.runs = runs.data || [];
+  state.schedulerStatus = scheduler.data || null;
   state.adminOverview = overview;
   state.selectedConnectionId ||= state.connections[0]?.id || null;
   state.selectedQueryId ||= state.queries[0]?.id || null;
@@ -257,13 +262,22 @@ function renderMappings() {
 }
 
 function renderSchedule() {
+  if (els.schedulerStatus) {
+    const status = state.schedulerStatus || {};
+    els.schedulerStatus.innerHTML = `
+      <span><strong>${status.enabled ? "Aktif" : "Pasif"}</strong> worker</span>
+      <span>${Number(status.dueCount || 0)} bekleyen is</span>
+      <span>${Math.round(Number(status.intervalMs || 0) / 1000)} sn kontrol</span>
+    `;
+  }
   els.scheduleList.innerHTML = state.jobs.length ? state.jobs.map((job) => `
     <article class="record-card">
       <header>
         <strong>${escapeHtml(job.name)}</strong>
         <span class="source-tag">${job.enabled ? "Aktif" : "Pasif"}</span>
       </header>
-      <small>${escapeHtml(job.scheduleType)} ${escapeHtml(job.scheduleValue || "")} · Son: ${job.lastRunAt ? new Date(job.lastRunAt).toLocaleString("tr-TR") : "Yok"}</small>
+      <small>${escapeHtml(job.scheduleType)} ${escapeHtml(job.scheduleValue || "")} - Son: ${job.lastRunAt ? new Date(job.lastRunAt).toLocaleString("tr-TR") : "Yok"} - Siradaki: ${job.nextRunAt ? new Date(job.nextRunAt).toLocaleString("tr-TR") : "Yok"}</small>
+      ${job.lastError ? `<small>Son hata: ${escapeHtml(job.lastError)}</small>` : ""}
     </article>
   `).join("") : `<div class="empty-state">Zamanlanmis is yok</div>`;
 }
@@ -558,6 +572,17 @@ els.mappingForm.addEventListener("submit", async (event) => {
 
 els.refreshRunsButton.addEventListener("click", async () => {
   await syncAll();
+  render();
+});
+
+els.schedulerTickButton?.addEventListener("click", async () => {
+  try {
+    const result = await apiRequest("/api/sync/scheduler/tick", { method: "POST", body: "{}" });
+    await syncAll();
+    logActivity(`Scheduler calisti: ${result.data.completed} tamamlandi, ${result.data.failed} hata.`);
+  } catch {
+    logActivity("Scheduler calistirilamadi.");
+  }
   render();
 });
 

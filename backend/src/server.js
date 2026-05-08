@@ -1,11 +1,15 @@
 const http = require("node:http");
 const { createHash, randomBytes, randomUUID } = require("node:crypto");
 const { Pool } = require("pg");
+const mssql = require("mssql");
 const bcrypt = require("bcryptjs");
 
 const port = Number(process.env.PORT || 3000);
+const schedulerIntervalMs = Number(process.env.SCHEDULER_INTERVAL_MS || 60000);
 const databaseUrl = process.env.DATABASE_URL || "postgres://akis:akis@localhost:5432/akis_crm";
 const pool = new Pool({ connectionString: databaseUrl });
+let schedulerBusy = false;
+let schedulerTimer = null;
 
 function send(res, status, body) {
   res.writeHead(status, {
@@ -180,6 +184,7 @@ async function ensureSchema() {
       port integer,
       database_name text,
       username text,
+      password_secret text,
       ssl_mode text not null default 'prefer',
       status text not null default 'draft',
       notes text,
@@ -213,6 +218,8 @@ async function ensureSchema() {
       enabled boolean not null default true,
       last_run_at timestamptz,
       next_run_at timestamptz,
+      scheduler_lock_until timestamptz,
+      last_error text,
       created_at timestamptz not null default now(),
       updated_at timestamptz not null default now()
     );
@@ -284,8 +291,15 @@ async function ensureSchema() {
     create index if not exists sync_connections_tenant_idx on sync_connections (tenant_id, db_type);
     create index if not exists sync_queries_tenant_idx on sync_queries (tenant_id, created_at desc);
     create index if not exists sync_jobs_tenant_idx on sync_jobs (tenant_id, enabled);
+    create index if not exists sync_jobs_due_idx on sync_jobs (tenant_id, next_run_at) where enabled = true;
     create index if not exists sync_job_runs_tenant_idx on sync_job_runs (tenant_id, started_at desc);
     create unique index if not exists sync_demo_source_customer_code_idx on sync_demo_source (customer_code);
+  `);
+
+  await pool.query(`
+    alter table sync_connections add column if not exists password_secret text;
+    alter table sync_jobs add column if not exists scheduler_lock_until timestamptz;
+    alter table sync_jobs add column if not exists last_error text;
   `);
 
   const tid = await tenantId();
@@ -531,11 +545,12 @@ function syncConnectionPayload(row) {
     name: row.name,
     dbType: row.db_type,
     role: row.role,
-    connectionUrl: row.connection_url,
+    connectionUrl: maskConnectionUrl(row.connection_url),
     host: row.host,
     port: row.port,
     databaseName: row.database_name,
     username: row.username,
+    hasPassword: Boolean(row.password_secret || urlHasPassword(row.connection_url)),
     sslMode: row.ssl_mode,
     status: row.status,
     notes: row.notes,
@@ -575,6 +590,7 @@ function syncJobPayload(row) {
     enabled: Boolean(row.enabled),
     lastRunAt: row.last_run_at,
     nextRunAt: row.next_run_at,
+    lastError: row.last_error,
     mappingCount: Number(row.mapping_count || 0),
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -1561,7 +1577,7 @@ async function listSyncConnections(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
   const result = await pool.query(
-    `select id, name, db_type, role, connection_url, host, port, database_name, username, ssl_mode, status, notes, created_at, updated_at
+    `select id, name, db_type, role, connection_url, host, port, database_name, username, password_secret, ssl_mode, status, notes, created_at, updated_at
      from sync_connections
      where tenant_id = $1
      order by created_at desc`,
@@ -1577,9 +1593,9 @@ async function createSyncConnection(req, res) {
   if (!body.name || !body.dbType) return send(res, 400, { error: "missing_fields" });
   const result = await pool.query(
     `insert into sync_connections
-       (tenant_id, name, db_type, role, connection_url, host, port, database_name, username, ssl_mode, status, notes)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-     returning id, name, db_type, role, connection_url, host, port, database_name, username, ssl_mode, status, notes, created_at, updated_at`,
+       (tenant_id, name, db_type, role, connection_url, host, port, database_name, username, password_secret, ssl_mode, status, notes)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+     returning id, name, db_type, role, connection_url, host, port, database_name, username, password_secret, ssl_mode, status, notes, created_at, updated_at`,
     [
       session.tenant_id,
       body.name,
@@ -1590,6 +1606,7 @@ async function createSyncConnection(req, res) {
       body.port ? Number(body.port) : null,
       body.databaseName || null,
       body.username || null,
+      body.password || body.passwordSecret || null,
       body.sslMode || "prefer",
       body.status || "draft",
       body.notes || null
@@ -1608,26 +1625,22 @@ async function testSyncConnection(req, res, id) {
   );
   const row = connection.rows[0];
   if (!row) return send(res, 404, { error: "not_found" });
-  if (row.connection_url === "internal://app" || row.db_type === "postgresql") {
-    if (row.connection_url && row.connection_url !== "internal://app") {
-      const testPool = new Pool({ connectionString: row.connection_url });
-      try {
-        await testPool.query("select 1");
-      } finally {
-        await testPool.end();
-      }
-    } else {
-      await pool.query("select 1");
-    }
-    await pool.query("update sync_connections set status = 'active', updated_at = now() where id = $1", [id]);
-    return send(res, 200, { ok: true, status: "active", message: "PostgreSQL baglantisi calisiyor." });
+  if (!supportedRuntimeDb(row.db_type)) {
+    await pool.query("update sync_connections set status = 'driver_needed', updated_at = now() where id = $1", [id]);
+    return send(res, 200, {
+      ok: false,
+      status: "driver_needed",
+      message: `${row.db_type} connector tanimi hazir, calisma motoru sonraki fazda eklenecek.`
+    });
   }
-  await pool.query("update sync_connections set status = 'driver_needed', updated_at = now() where id = $1", [id]);
-  return send(res, 200, {
-    ok: false,
-    status: "driver_needed",
-    message: `${row.db_type} connector hazir listede, calisma motoru icin driver/ODBC kurulumu gerekir.`
-  });
+  const client = await openDbClient(row);
+  try {
+    await dbQuery(client, row.db_type === "mssql" ? "select 1 as ok" : "select 1 as ok");
+    await pool.query("update sync_connections set status = 'active', updated_at = now() where id = $1", [id]);
+    return send(res, 200, { ok: true, status: "active", message: `${dbTypeName(row.db_type)} baglantisi calisiyor.` });
+  } finally {
+    await closeDbClient(client);
+  }
 }
 
 async function listSyncQueries(req, res) {
@@ -1667,7 +1680,7 @@ async function previewSyncQuery(req, res, id) {
   const session = await requireSession(req, res);
   if (!session) return;
   const query = await pool.query(
-    `select q.*, c.connection_url, c.db_type
+    `select q.*, c.connection_url, c.db_type, c.host, c.port, c.database_name, c.username, c.password_secret, c.ssl_mode
      from sync_queries q
      join sync_connections c on c.id = q.source_connection_id
      where q.id = $1 and q.tenant_id = $2`,
@@ -1675,13 +1688,14 @@ async function previewSyncQuery(req, res, id) {
   );
   const row = query.rows[0];
   if (!row) return send(res, 404, { error: "not_found" });
-  const { sql, values } = parameterizeSql(row.sql_text, row.parameters || {});
-  const sourcePool = connectionPool(row);
+  if (!supportedRuntimeDb(row.db_type)) return send(res, 400, { error: "unsupported_connector" });
+  const { sql, values } = parameterizeSql(row.sql_text, row.parameters || {}, row.db_type);
+  const sourceDb = await openDbClient(row);
   try {
-    const result = await sourcePool.query(`${sql} limit 20`, values);
-    send(res, 200, { columns: result.fields.map((field) => field.name), data: result.rows });
+    const result = await dbQuery(sourceDb, previewSql(sql, row.db_type), values);
+    send(res, 200, { columns: result.columns, data: result.rows });
   } finally {
-    if (sourcePool !== pool) await sourcePool.end();
+    await closeDbClient(sourceDb);
   }
 }
 
@@ -1692,7 +1706,7 @@ async function listSyncJobs(req, res) {
     `select j.id, j.name, j.query_id, q.name as query_name, sc.name as source_connection_name,
             j.target_connection_id, tc.name as target_connection_name, j.target_table,
             j.write_mode, j.conflict_policy, j.schedule_type, j.schedule_value, j.enabled,
-            j.last_run_at, j.next_run_at, j.created_at, j.updated_at,
+            j.last_run_at, j.next_run_at, j.last_error, j.created_at, j.updated_at,
             count(m.id)::int as mapping_count
      from sync_jobs j
      left join sync_queries q on q.id = j.query_id
@@ -1716,9 +1730,9 @@ async function createSyncJob(req, res) {
   }
   const result = await pool.query(
     `insert into sync_jobs
-       (tenant_id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-     returning id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled, last_run_at, next_run_at, created_at, updated_at`,
+       (tenant_id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled, next_run_at)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+     returning id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled, last_run_at, next_run_at, last_error, created_at, updated_at`,
     [
       session.tenant_id,
       body.name,
@@ -1729,7 +1743,8 @@ async function createSyncJob(req, res) {
       body.conflictPolicy || "strict",
       body.scheduleType || "manual",
       body.scheduleValue || null,
-      body.enabled !== false
+      body.enabled !== false,
+      computeNextRun(body.scheduleType || "manual", body.scheduleValue || null)
     ]
   );
   if (Array.isArray(body.mappings)) {
@@ -1799,32 +1814,79 @@ async function listSyncRuns(req, res) {
   send(res, 200, { data: result.rows.map(syncRunPayload) });
 }
 
+async function schedulerStatus(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const due = await pool.query(
+    `select count(*)::int as due_count
+     from sync_jobs
+     where tenant_id = $1
+       and enabled = true
+       and schedule_type <> 'manual'
+       and (next_run_at is null or next_run_at <= now())`,
+    [session.tenant_id]
+  );
+  send(res, 200, {
+    data: {
+      enabled: Boolean(schedulerTimer),
+      busy: schedulerBusy,
+      intervalMs: schedulerIntervalMs,
+      dueCount: Number(due.rows[0]?.due_count || 0)
+    }
+  });
+}
+
+async function schedulerTick(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await runDueSyncJobs(session.tenant_id);
+  await auditLog(session, "sync.scheduler_tick", "sync_scheduler", null, result);
+  send(res, 200, { data: result });
+}
+
 async function runSyncJob(req, res, jobId) {
   const session = await requireSession(req, res);
   if (!session) return;
+  try {
+    const summary = await createAndExecuteSyncRun(session.tenant_id, jobId);
+    await auditLog(session, "sync.job_run", "sync_job", jobId, summary);
+    send(res, 200, { data: summary });
+  } catch (error) {
+    send(res, 500, { error: "sync_failed", message: error.message, runId: error.runId });
+  }
+}
+
+async function createAndExecuteSyncRun(tenant, jobId) {
   const run = await pool.query(
     "insert into sync_job_runs (tenant_id, job_id, status) values ($1,$2,'running') returning id, started_at",
-    [session.tenant_id, jobId]
+    [tenant, jobId]
   );
   const runId = run.rows[0].id;
   try {
-    const summary = await executeSyncJob(session.tenant_id, jobId, runId);
-    await auditLog(session, "sync.job_run", "sync_job", jobId, summary);
-    send(res, 200, { data: summary });
+    const summary = await executeSyncJob(tenant, jobId, runId);
+    await finalizeJobSchedule(jobId, null);
+    return summary;
   } catch (error) {
     await pool.query(
       "update sync_job_runs set status = 'failed', error_message = $2, finished_at = now() where id = $1",
       [runId, error.message]
     );
-    await syncRunLog(session.tenant_id, runId, "error", error.message);
-    send(res, 500, { error: "sync_failed", message: error.message, runId });
+    await syncRunLog(tenant, runId, "error", error.message);
+    await finalizeJobSchedule(jobId, error);
+    error.runId = runId;
+    throw error;
   }
 }
 
 async function executeSyncJob(tenant, jobId, runId) {
   const jobResult = await pool.query(
-    `select j.*, q.sql_text, q.parameters, sc.connection_url as source_url, sc.db_type as source_type,
-            tc.connection_url as target_url, tc.db_type as target_type
+    `select j.*, q.sql_text, q.parameters,
+            sc.connection_url as source_url, sc.db_type as source_type, sc.host as source_host,
+            sc.port as source_port, sc.database_name as source_database_name, sc.username as source_username,
+            sc.password_secret as source_password_secret, sc.ssl_mode as source_ssl_mode,
+            tc.connection_url as target_url, tc.db_type as target_type, tc.host as target_host,
+            tc.port as target_port, tc.database_name as target_database_name, tc.username as target_username,
+            tc.password_secret as target_password_secret, tc.ssl_mode as target_ssl_mode
      from sync_jobs j
      join sync_queries q on q.id = j.query_id
      join sync_connections sc on sc.id = q.source_connection_id
@@ -1834,8 +1896,8 @@ async function executeSyncJob(tenant, jobId, runId) {
   );
   const job = jobResult.rows[0];
   if (!job) throw new Error("Aktarim isi bulunamadi.");
-  if (!["postgresql"].includes(job.source_type) || !["postgresql"].includes(job.target_type)) {
-    throw new Error("Bu connector henuz calisma motoruna baglanmadi. PostgreSQL/Internal demo aktif.");
+  if (!supportedRuntimeDb(job.source_type) || !supportedRuntimeDb(job.target_type)) {
+    throw new Error("Bu connector henuz calisma motoruna baglanmadi. PostgreSQL ve MSSQL aktif.");
   }
   const mappings = await pool.query(
     `select source_column, target_column, default_value, transform, required
@@ -1846,16 +1908,34 @@ async function executeSyncJob(tenant, jobId, runId) {
   );
   if (!mappings.rows.length) throw new Error("Kolon eslemesi yok.");
 
-  const sourcePool = connectionPool({ connection_url: job.source_url });
-  const targetPool = connectionPool({ connection_url: job.target_url });
+  const sourceDb = await openDbClient({
+    db_type: job.source_type,
+    connection_url: job.source_url,
+    host: job.source_host,
+    port: job.source_port,
+    database_name: job.source_database_name,
+    username: job.source_username,
+    password_secret: job.source_password_secret,
+    ssl_mode: job.source_ssl_mode
+  });
+  const targetDb = await openDbClient({
+    db_type: job.target_type,
+    connection_url: job.target_url,
+    host: job.target_host,
+    port: job.target_port,
+    database_name: job.target_database_name,
+    username: job.target_username,
+    password_secret: job.target_password_secret,
+    ssl_mode: job.target_ssl_mode
+  });
   try {
     const parameters = { ...(job.parameters || {}), last_run_at: job.last_run_at || job.parameters?.last_run_at || "2000-01-01T00:00:00Z" };
-    const { sql, values } = parameterizeSql(job.sql_text, parameters);
-    const source = await sourcePool.query(sql, values);
+    const { sql, values } = parameterizeSql(job.sql_text, parameters, sourceDb.type);
+    const source = await dbQuery(sourceDb, sql, values);
     let written = 0;
     let skipped = 0;
     if (job.write_mode === "truncate_reload") {
-      await targetPool.query(`truncate table ${safeIdentifier(job.target_table)} restart identity`);
+      await truncateTarget(targetDb, job.target_table);
     }
     for (const row of source.rows) {
       const built = buildTargetRow(row, mappings.rows, job.conflict_policy);
@@ -1864,8 +1944,18 @@ async function executeSyncJob(tenant, jobId, runId) {
         await syncRunLog(tenant, runId, "warn", built.message, { row });
         continue;
       }
-      await insertTargetRow(targetPool, job.target_table, built.values, job.write_mode);
-      written += 1;
+      try {
+        const inserted = await insertTargetRow(targetDb, job.target_table, built.values, job.write_mode);
+        if (inserted === false) skipped += 1;
+        else written += 1;
+      } catch (error) {
+        if (job.write_mode === "skip_duplicates" && isDuplicateError(error)) {
+          skipped += 1;
+          await syncRunLog(tenant, runId, "warn", "Duplicate satir atlandi.", { error: error.message });
+        } else {
+          throw error;
+        }
+      }
     }
     await pool.query(
       `update sync_job_runs
@@ -1877,23 +1967,137 @@ async function executeSyncJob(tenant, jobId, runId) {
     await syncRunLog(tenant, runId, "info", "Aktarim tamamlandi.", { read: source.rows.length, written, skipped });
     return { runId, status: "completed", rowsRead: source.rows.length, rowsWritten: written, rowsSkipped: skipped };
   } finally {
-    if (sourcePool !== pool) await sourcePool.end();
-    if (targetPool !== pool && targetPool !== sourcePool) await targetPool.end();
+    await closeDbClient(sourceDb);
+    await closeDbClient(targetDb);
   }
 }
 
-function connectionPool(connection) {
-  if (!connection.connection_url || connection.connection_url === "internal://app") return pool;
-  return new Pool({ connectionString: connection.connection_url });
+async function finalizeJobSchedule(jobId, error) {
+  const job = await pool.query("select schedule_type, schedule_value from sync_jobs where id = $1", [jobId]);
+  const row = job.rows[0];
+  const nextRunAt = row ? computeNextRun(row.schedule_type, row.schedule_value) : null;
+  await pool.query(
+    `update sync_jobs
+     set scheduler_lock_until = null,
+         next_run_at = $2,
+         last_error = $3,
+         updated_at = now()
+     where id = $1`,
+    [jobId, nextRunAt, error ? error.message : null]
+  );
 }
 
-function parameterizeSql(sqlText, params) {
+async function runDueSyncJobs(tenant = null) {
+  if (schedulerBusy) return { picked: 0, completed: 0, failed: 0, busy: true };
+  schedulerBusy = true;
+  const summary = { picked: 0, completed: 0, failed: 0, runs: [] };
+  try {
+    const params = tenant ? [tenant] : [];
+    const tenantClause = tenant ? "and tenant_id = $1" : "";
+    const due = await pool.query(
+      `update sync_jobs
+       set scheduler_lock_until = now() + interval '10 minutes',
+           updated_at = now()
+       where id in (
+         select id
+         from sync_jobs
+         where enabled = true
+           and schedule_type <> 'manual'
+           ${tenantClause}
+           and (next_run_at is null or next_run_at <= now())
+           and (scheduler_lock_until is null or scheduler_lock_until < now())
+         order by coalesce(next_run_at, created_at) asc
+         limit 5
+       )
+       returning id, tenant_id, name`,
+      params
+    );
+    summary.picked = due.rows.length;
+    for (const job of due.rows) {
+      try {
+        const result = await createAndExecuteSyncRun(job.tenant_id, job.id);
+        summary.completed += 1;
+        summary.runs.push({ jobId: job.id, name: job.name, status: "completed", runId: result.runId });
+      } catch (error) {
+        summary.failed += 1;
+        summary.runs.push({ jobId: job.id, name: job.name, status: "failed", message: error.message, runId: error.runId });
+      }
+    }
+    return summary;
+  } finally {
+    schedulerBusy = false;
+  }
+}
+
+function startScheduler() {
+  if (schedulerTimer || schedulerIntervalMs <= 0) return;
+  schedulerTimer = setInterval(() => {
+    runDueSyncJobs().catch((error) => console.error("ARGEKA Sync scheduler failed", error));
+  }, schedulerIntervalMs);
+  schedulerTimer.unref?.();
+}
+
+function supportedRuntimeDb(type) {
+  return ["postgresql", "mssql"].includes(String(type || "").toLowerCase());
+}
+
+function dbTypeName(type) {
+  if (type === "mssql") return "MSSQL";
+  if (type === "postgresql") return "PostgreSQL";
+  return type || "DB";
+}
+
+async function openDbClient(connection) {
+  const type = String(connection.db_type || "postgresql").toLowerCase();
+  if (type === "postgresql") {
+    if (!connection.connection_url || connection.connection_url === "internal://app") {
+      return { type, client: pool, shared: true };
+    }
+    return { type, client: new Pool({ connectionString: connection.connection_url }), shared: false };
+  }
+  if (type === "mssql") {
+    const client = new mssql.ConnectionPool(mssqlConfig(connection));
+    await client.connect();
+    return { type, client, shared: false };
+  }
+  throw new Error(`${type} connector calisma motorunda aktif degil.`);
+}
+
+async function closeDbClient(db) {
+  if (!db || db.shared) return;
+  if (db.type === "postgresql") await db.client.end();
+  else await db.client.close();
+}
+
+async function dbQuery(db, sql, values = []) {
+  if (db.type === "postgresql") {
+    const result = await db.client.query(sql, values);
+    return { rows: result.rows, columns: result.fields.map((field) => field.name) };
+  }
+  if (db.type === "mssql") {
+    const request = db.client.request();
+    values.forEach((value, index) => request.input(`p${index + 1}`, value));
+    const result = await request.query(sql);
+    const rows = result.recordset || [];
+    const columns = result.recordset?.columns ? Object.keys(result.recordset.columns) : Object.keys(rows[0] || {});
+    return { rows, columns };
+  }
+  throw new Error(`${db.type} sorgu motoru yok.`);
+}
+
+function parameterizeSql(sqlText, params, dbType = "postgresql") {
   const values = [];
   const sql = String(sqlText).replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_, key) => {
     values.push(params[key] ?? null);
-    return `$${values.length}`;
+    return dbType === "mssql" ? `@p${values.length}` : `$${values.length}`;
   });
   return { sql, values };
+}
+
+function previewSql(sql, dbType) {
+  const clean = String(sql || "").trim().replace(/;+\s*$/, "");
+  if (dbType === "mssql") return `select top (20) * from (${clean}) as _preview`;
+  return `select * from (${clean}) as _preview limit 20`;
 }
 
 function buildTargetRow(row, mappings, policy) {
@@ -1921,21 +2125,111 @@ function applyTransform(value, transform) {
   return value;
 }
 
-async function insertTargetRow(targetPool, table, values, writeMode) {
-  const columns = Object.keys(values);
-  if (!columns.length) return;
-  const placeholders = columns.map((_, index) => `$${index + 1}`);
-  const suffix = writeMode === "skip_duplicates" ? " on conflict do nothing" : "";
-  await targetPool.query(
-    `insert into ${safeIdentifier(table)} (${columns.map(safeIdentifier).join(",")}) values (${placeholders.join(",")})${suffix}`,
-    columns.map((column) => values[column])
-  );
+async function truncateTarget(db, table) {
+  if (db.type === "mssql") {
+    await dbQuery(db, `truncate table ${safeIdentifier(table, db.type)}`);
+    return;
+  }
+  await dbQuery(db, `truncate table ${safeIdentifier(table, db.type)} restart identity`);
 }
 
-function safeIdentifier(value) {
+async function insertTargetRow(db, table, values, writeMode) {
+  const columns = Object.keys(values);
+  if (!columns.length) return;
+  if (db.type === "mssql") {
+    const placeholders = columns.map((_, index) => `@p${index + 1}`);
+    await dbQuery(
+      db,
+      `insert into ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")}) values (${placeholders.join(",")})`,
+      columns.map((column) => values[column])
+    );
+    return true;
+  }
+  const placeholders = columns.map((_, index) => `$${index + 1}`);
+  const suffix = writeMode === "skip_duplicates" ? " on conflict do nothing" : "";
+  const result = await db.client.query(
+    `insert into ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")}) values (${placeholders.join(",")})${suffix}`,
+    columns.map((column) => values[column])
+  );
+  return result.rowCount > 0;
+}
+
+function safeIdentifier(value, dbType = "postgresql") {
   const text = String(value || "");
-  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(text)) throw new Error(`Gecersiz SQL tanimlayici: ${text}`);
-  return `"${text}"`;
+  const parts = text.split(".");
+  if (!parts.every((part) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(part))) throw new Error(`Gecersiz SQL tanimlayici: ${text}`);
+  if (dbType === "mssql") return parts.map((part) => `[${part}]`).join(".");
+  return parts.map((part) => `"${part}"`).join(".");
+}
+
+function isDuplicateError(error) {
+  return error?.code === "23505" || error?.number === 2601 || error?.number === 2627;
+}
+
+function mssqlConfig(connection) {
+  const config = {
+    server: connection.host || "localhost",
+    port: Number(connection.port || 1433),
+    database: connection.database_name || undefined,
+    user: connection.username || undefined,
+    password: connection.password_secret || undefined,
+    options: {
+      encrypt: connection.ssl_mode === "require",
+      trustServerCertificate: true
+    }
+  };
+  if (connection.connection_url && connection.connection_url !== "internal://app") {
+    const parsed = new URL(String(connection.connection_url).replace(/^sqlserver:\/\//, "mssql://"));
+    config.server = parsed.hostname || config.server;
+    config.port = parsed.port ? Number(parsed.port) : config.port;
+    config.database = decodeURIComponent(parsed.pathname.replace(/^\//, "")) || config.database;
+    config.user = parsed.username ? decodeURIComponent(parsed.username) : config.user;
+    config.password = parsed.password ? decodeURIComponent(parsed.password) : config.password;
+    if (parsed.searchParams.has("encrypt")) config.options.encrypt = parsed.searchParams.get("encrypt") === "true";
+    if (parsed.searchParams.has("trustServerCertificate")) {
+      config.options.trustServerCertificate = parsed.searchParams.get("trustServerCertificate") !== "false";
+    }
+  }
+  return config;
+}
+
+function maskConnectionUrl(value) {
+  if (!value || value === "internal://app") return value;
+  try {
+    const parsed = new URL(value);
+    if (parsed.password) parsed.password = "****";
+    return parsed.toString();
+  } catch {
+    return value;
+  }
+}
+
+function urlHasPassword(value) {
+  if (!value || value === "internal://app") return false;
+  try {
+    return Boolean(new URL(value).password);
+  } catch {
+    return false;
+  }
+}
+
+function computeNextRun(scheduleType = "manual", scheduleValue = null, from = new Date()) {
+  if (scheduleType === "manual") return null;
+  const next = new Date(from.getTime());
+  if (scheduleType === "hourly") {
+    next.setHours(next.getHours() + 1);
+    return next.toISOString();
+  }
+  if (scheduleType === "weekly") {
+    next.setDate(next.getDate() + 7);
+    return next.toISOString();
+  }
+  const match = String(scheduleValue || "02:00").match(/(\d{1,2}):(\d{2})/);
+  const hour = match ? Math.min(Number(match[1]), 23) : 2;
+  const minute = match ? Math.min(Number(match[2]), 59) : 0;
+  next.setHours(hour, minute, 0, 0);
+  if (next <= from) next.setDate(next.getDate() + 1);
+  return next.toISOString();
 }
 
 async function syncRunLog(tenant, runId, level, message, metadata = {}) {
@@ -2114,6 +2408,8 @@ async function handler(req, res) {
     if (req.method === "POST" && url.pathname === "/api/sync/queries") return createSyncQuery(req, res);
     const syncQueryPreviewMatch = url.pathname.match(/^\/api\/sync\/queries\/([^/]+)\/preview$/);
     if (req.method === "POST" && syncQueryPreviewMatch) return previewSyncQuery(req, res, syncQueryPreviewMatch[1]);
+    if (req.method === "GET" && url.pathname === "/api/sync/scheduler/status") return schedulerStatus(req, res);
+    if (req.method === "POST" && url.pathname === "/api/sync/scheduler/tick") return schedulerTick(req, res);
     if (req.method === "GET" && url.pathname === "/api/sync/jobs") return listSyncJobs(req, res);
     if (req.method === "POST" && url.pathname === "/api/sync/jobs") return createSyncJob(req, res);
     const syncMappingMatch = url.pathname.match(/^\/api\/sync\/jobs\/([^/]+)\/mappings$/);
@@ -2136,7 +2432,12 @@ async function handler(req, res) {
 
 ensureSchema()
   .then(() => {
-    http.createServer(handler).listen(port, () => {
+    startScheduler();
+    http.createServer((req, res) => {
+      handler(req, res).catch((error) => {
+        if (!res.headersSent) send(res, 500, { error: "server_error", message: error.message });
+      });
+    }).listen(port, () => {
       console.log(`ARGEKA Sync API listening on ${port}`);
     });
   })
