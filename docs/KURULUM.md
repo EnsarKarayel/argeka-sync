@@ -77,7 +77,8 @@ https://github.com/EnsarKarayel/argeka-sync
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-9. Kurulum bittiginde su adresi acin:
+9. Kurulum bittiginde masaustunde `ARGEKA Sync.exe` olusur. Bu dosya uygulamayi tekrar baslatmak icindir.
+10. Su adresi acin:
 
 ```text
 http://localhost:8080
@@ -90,6 +91,8 @@ Programi tekrar baslatmak icin proje klasorunde:
 ```powershell
 .\start.ps1
 ```
+
+Ya da masaustundeki `ARGEKA Sync.exe` dosyasina cift tiklayin.
 
 Programi durdurmak icin:
 

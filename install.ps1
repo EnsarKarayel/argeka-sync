@@ -143,12 +143,60 @@ function Show-Status {
   Write-Host "Demo: admin@argeka.local / admin123" -ForegroundColor Green
 }
 
+function Ensure-DesktopLauncher {
+  $desktop = [Environment]::GetFolderPath("Desktop")
+  if (-not $desktop) {
+    Write-Host "Masaustu yolu bulunamadi, EXE olusturma atlandi." -ForegroundColor Yellow
+    return
+  }
+
+  $launcherPath = Join-Path $desktop "ARGEKA Sync.exe"
+  $repoLiteral = $RepoRoot.Replace('"', '""')
+  $source = @"
+using System;
+using System.Diagnostics;
+using System.IO;
+
+public static class ArgekaSyncLauncher {
+  [STAThread]
+  public static void Main() {
+    string repo = @"$repoLiteral";
+    string script = Path.Combine(repo, "start.ps1");
+    if (!File.Exists(script)) {
+      Process.Start(new ProcessStartInfo("https://github.com/EnsarKarayel/argeka-sync") { UseShellExecute = true });
+      return;
+    }
+
+    ProcessStartInfo psi = new ProcessStartInfo("powershell.exe");
+    psi.Arguments = "-ExecutionPolicy Bypass -File \"" + script + "\"";
+    psi.WorkingDirectory = repo;
+    psi.UseShellExecute = false;
+    psi.CreateNoWindow = true;
+    psi.WindowStyle = ProcessWindowStyle.Hidden;
+    Process.Start(psi);
+  }
+}
+"@
+
+  try {
+    if (Test-Path $launcherPath) {
+      Remove-Item -LiteralPath $launcherPath -Force
+    }
+
+    Add-Type -TypeDefinition $source -OutputAssembly $launcherPath -OutputType WindowsApplication -ReferencedAssemblies "System.dll"
+    Write-Host "Masaustu uygulamasi: $launcherPath" -ForegroundColor Green
+  } catch {
+    Write-Host "Masaustu EXE olusturulamadi: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
+}
+
 Ensure-ElevatedForDependencyInstall
 Ensure-WSL
 Ensure-Docker
 Ensure-EnvFile
 Start-Stack
 Show-Status
+Ensure-DesktopLauncher
 
 if (-not $NoOpen) {
   $webPort = (Get-Content $EnvFile | Where-Object { $_ -match '^WEB_PORT=' } | Select-Object -First 1) -replace '^WEB_PORT=', ''

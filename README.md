@@ -18,10 +18,10 @@ Ilk calisan motor PostgreSQL/Internal, Microsoft SQL Server ve MySQL/MariaDB bag
 
 ## Tek komut Windows kurulumu
 
-HiÃ§ teknik bilmeyen kullanÄ±cÄ± iÃ§in adÄ±m adÄ±m kurulum rehberi:
+Hic teknik bilmeyen kullanici icin adim adim kurulum rehberi:
 
 - [docs/KURULUM.md](docs/KURULUM.md)
-- GitHub Ã¼zerinde aÃ§mak iÃ§in: https://github.com/EnsarKarayel/argeka-sync/blob/main/docs/KURULUM.md
+- GitHub uzerinde acmak icin: https://github.com/EnsarKarayel/argeka-sync/blob/main/docs/KURULUM.md
 
 Sifir bir Windows bilgisayarda PowerShell acip su komutu calistirin:
 
@@ -29,7 +29,7 @@ Sifir bir Windows bilgisayarda PowerShell acip su komutu calistirin:
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
 ```
 
-Bu komut Git yoksa kurmayi dener, repo'yu `Desktop\ARGEKA-Sync` klasorune indirir, Docker Desktop'i kontrol eder ve ARGEKA Sync servislerini baslatir.
+Bu komut Git yoksa kurmayi dener, repo'yu `Desktop\ARGEKA-Sync` klasorune indirir, Docker Desktop'i kontrol eder, ARGEKA Sync servislerini baslatir ve masaustune `ARGEKA Sync.exe` kisa yol uygulamasini olusturur.
 
 Repo zaten bilgisayardaysa:
 
@@ -42,6 +42,8 @@ Sonraki acilislarda:
 ```powershell
 .\start.ps1
 ```
+
+Kurulumdan sonra masaustundeki `ARGEKA Sync.exe` dosyasini da kullanabilirsiniz.
 
 Servisleri durdurmak icin:
 

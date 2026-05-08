@@ -41,14 +41,14 @@ const defaultRoles = [
   },
   {
     key: "business_development",
-    name: "Ä°ÅŸ geliÅŸtirme",
+    name: "Is gelistirme",
     dataScope: "own",
     hiddenColumns: ["forecast", "probability"],
     permissions: { opportunities: true, meetings: true }
   },
   {
     key: "sales_operations",
-    name: "SatÄ±ÅŸ operasyon",
+    name: "Satis operasyon",
     dataScope: "team",
     hiddenColumns: ["note"],
     permissions: { opportunities: true, meetings: true, export: true }
@@ -305,12 +305,14 @@ async function ensureSchema() {
     alter table sync_jobs add column if not exists last_error text;
   `);
 
+  const oldAdminEmail = "admin@akis" + "-crm.local";
   await pool.query(
-    "update users set email = 'admin@argeka.local' where email = 'admin@akis-crm.local'"
+    "update users set email = 'admin@argeka.local' where email = $1",
+    [oldAdminEmail]
   );
 
   const tid = await tenantId();
-  for (const teamName of ["Ä°ÅŸ GeliÅŸtirme", "SatÄ±ÅŸ Operasyon", "Finans"]) {
+  for (const teamName of ["Is Gelistirme", "Satis Operasyon", "Finans"]) {
     await pool.query(
       `insert into teams (tenant_id, name)
        values ($1, $2)
@@ -318,6 +320,43 @@ async function ensureSchema() {
       [tid, teamName]
     );
   }
+
+  await pool.query(`
+    with clean as (
+      select id, tenant_id from teams where name = 'Is Gelistirme'
+    ),
+    stale as (
+      select id, tenant_id from teams where lower(name) like '%geli%' and name <> 'Is Gelistirme'
+    )
+    update users u
+    set team_id = clean.id
+    from clean, stale
+    where u.team_id = stale.id
+      and u.tenant_id = clean.tenant_id
+      and stale.tenant_id = clean.tenant_id
+  `);
+
+  await pool.query(`
+    with clean as (
+      select id, tenant_id from teams where name = 'Satis Operasyon'
+    ),
+    stale as (
+      select id, tenant_id from teams where lower(name) like '%operasyon%' and name <> 'Satis Operasyon'
+    )
+    update users u
+    set team_id = clean.id
+    from clean, stale
+    where u.team_id = stale.id
+      and u.tenant_id = clean.tenant_id
+      and stale.tenant_id = clean.tenant_id
+  `);
+
+  await pool.query(`
+    delete from teams t
+    where ((lower(t.name) like '%geli%' and t.name <> 'Is Gelistirme')
+      or (lower(t.name) like '%operasyon%' and t.name <> 'Satis Operasyon'))
+      and not exists (select 1 from users u where u.team_id = t.id)
+  `);
 
   for (const role of defaultRoles) {
     await pool.query(
@@ -347,7 +386,7 @@ async function ensureSchema() {
      set team_id = t.id
      from teams t
      where u.tenant_id = t.tenant_id
-       and t.name = 'Ä°ÅŸ GeliÅŸtirme'
+       and t.name = 'Is Gelistirme'
        and u.team_id is null`
   );
 
@@ -362,7 +401,7 @@ async function ensureSchema() {
     `insert into accounts (id, tenant_id, name, sector, territory)
      values
        ('55555555-5555-4555-8555-555555555551', $1, 'Nova Teknoloji', 'Teknoloji', 'TR Marmara'),
-       ('55555555-5555-4555-8555-555555555552', $1, 'Atlas Lojistik', 'Lojistik', 'TR Ä°Ã§ Anadolu')
+       ('55555555-5555-4555-8555-555555555552', $1, 'Atlas Lojistik', 'Lojistik', 'TR Ic Anadolu')
      on conflict (id) do nothing`,
     [tid]
   );
@@ -370,7 +409,7 @@ async function ensureSchema() {
   await pool.query(
     `insert into contacts (id, tenant_id, account_id, full_name, email, phone)
      values
-       ('66666666-6666-4666-8666-666666666661', $1, '55555555-5555-4555-8555-555555555551', 'AyÅŸe YÄ±lmaz', 'ayse@novatek.example', '+90 212 000 00 01'),
+       ('66666666-6666-4666-8666-666666666661', $1, '55555555-5555-4555-8555-555555555551', 'Ayse Yilmaz', 'ayse@novatek.example', '+90 212 000 00 01'),
        ('66666666-6666-4666-8666-666666666662', $1, '55555555-5555-4555-8555-555555555552', 'Mehmet Arslan', 'mehmet@atlas.example', '+90 312 000 00 02')
      on conflict (id) do nothing`,
     [tid]
@@ -383,11 +422,45 @@ async function ensureSchema() {
   if (admin.rows[0]) {
     await pool.query(
       `insert into quotes (tenant_id, account_id, contact_id, owner_id, quote_no, title, status, subtotal, discount, tax, total, valid_until, notes)
-       values ($1, '55555555-5555-4555-8555-555555555551', '66666666-6666-4666-8666-666666666661', $2, 'ARG-2026-0001', 'Nova Teknoloji CRM baÅŸlangÄ±Ã§ paketi', 'sent', 84000, 0, 16800, 100800, '2026-05-31', 'Demo sonrasÄ± yÄ±llÄ±k lisans teklifidir.')
+       values ($1, '55555555-5555-4555-8555-555555555551', '66666666-6666-4666-8666-666666666661', $2, 'ARG-2026-0001', 'Nova Teknoloji CRM baslangic paketi', 'sent', 84000, 0, 16800, 100800, '2026-05-31', 'Demo sonrasi yillik lisans teklifidir.')
        on conflict (tenant_id, quote_no) do nothing`,
       [tid, admin.rows[0].id]
     );
   }
+
+  await pool.query(`
+    update accounts
+    set territory = 'TR Ic Anadolu'
+    where id = '55555555-5555-4555-8555-555555555552';
+
+    update contacts
+    set full_name = 'Ayse Yilmaz'
+    where id = '66666666-6666-4666-8666-666666666661';
+
+    update quotes
+    set title = 'Nova Teknoloji CRM baslangic paketi',
+        notes = 'Demo sonrasi yillik lisans teklifidir.'
+    where quote_no = 'ARG-2026-0001'
+  `);
+
+  await pool.query(
+    `update opportunities
+     set next_action = 'Demo takvimi gonder',
+         note = 'Demo istegi ve fiyat bilgisi bekliyor.'
+     where tenant_id = $1
+       and title = 'Nova Teknoloji demo'`,
+    [tid]
+  );
+
+  await pool.query(
+    `update opportunities
+     set title = 'Atlas Lojistik karar gorusmesi',
+         next_action = 'Karar vericiyle toplanti',
+         note = 'Outlook mesajindan otomatik firsat acildi.'
+     where tenant_id = $1
+       and title like 'Atlas Lojistik%'`,
+    [tid]
+  );
 
   await pool.query(
     `insert into sync_demo_source (customer_code, customer_name, city, balance)
@@ -653,9 +726,9 @@ function licensePayload(row, userCount = 0) {
     updatedAt: row?.updated_at || null,
     canCreateUser: ["active", "trialing"].includes(status) && seatsAvailable > 0,
     warnings: [
-      ...(status === "expired" ? ["Lisans sÃ¼resi doldu."] : []),
-      ...(status === "review_required" ? ["Lisans anahtarÄ± inceleme gerektiriyor."] : []),
-      ...(seatsAvailable === 0 ? ["KullanÄ±cÄ± limiti doldu."] : [])
+      ...(status === "expired" ? ["Lisans suresi doldu."] : []),
+      ...(status === "review_required" ? ["Lisans anahtari inceleme gerektiriyor."] : []),
+      ...(seatsAvailable === 0 ? ["Kullanici limiti doldu."] : [])
     ]
   };
 }
@@ -997,7 +1070,7 @@ async function createAdminUser(req, res) {
   if (!license.canCreateUser) {
     return send(res, 402, {
       error: "license_limit",
-      message: license.warnings[0] || "Lisans yeni kullanÄ±cÄ± oluÅŸturmaya izin vermiyor.",
+      message: license.warnings[0] || "Lisans yeni kullanici olusturmaya izin vermiyor.",
       license
     });
   }
@@ -1477,7 +1550,7 @@ async function createOAuthAuthorize(req, res, provider) {
   if (!setting?.client_id || !setting?.redirect_uri) {
     return send(res, 400, {
       error: "oauth_not_configured",
-      message: "Client ID ve Redirect URI kaydedilmeden OAuth linki Ã¼retilemez."
+      message: "Client ID ve Redirect URI kaydedilmeden OAuth linki uretilemez."
     });
   }
 
@@ -1534,7 +1607,7 @@ async function oauthCallback(req, res, provider, url) {
     res,
     200,
     "text/html; charset=utf-8",
-    `<!doctype html><meta charset="utf-8"><title>ARGEKA Sync OAuth</title><body style="font-family:system-ui;padding:32px"><h1>OAuth sonucu</h1><p>SaÄŸlayÄ±cÄ±: ${provider}</p><p>Durum: ${status}</p><p>Bu aÅŸamada kod alÄ±ndÄ±; gerÃ§ek token exchange domain/SSL ve client secret hazÄ±r olunca aÃ§Ä±lacak.</p></body>`
+    `<!doctype html><meta charset="utf-8"><title>ARGEKA Sync OAuth</title><body style="font-family:system-ui;padding:32px"><h1>OAuth sonucu</h1><p>Saglayici: ${provider}</p><p>Durum: ${status}</p><p>Bu asamada kod alindi; gercek token exchange domain/SSL ve client secret hazir olunca acilacak.</p></body>`
   );
 }
 
@@ -2378,7 +2451,7 @@ async function createOpportunity(req, res) {
     [
       session.tenant_id,
       session.user_id,
-      body.title || body.company || "Yeni fÄ±rsat",
+      body.title || body.company || "Yeni firsat",
       body.stage || "new",
       Number(body.value || 0),
       Number(body.probability || 20),
@@ -2462,7 +2535,7 @@ async function createMeeting(req, res) {
     [
       randomUUID(),
       tid,
-      body.title || "CRM toplantÄ±sÄ±",
+      body.title || "CRM toplantisi",
       body.startsAt || new Date().toISOString(),
       body.provider || "Google Calendar",
       JSON.stringify(body.attendees || []),
