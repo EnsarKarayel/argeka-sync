@@ -1,12 +1,15 @@
 # ARGEKA Sync Windows Installer
 
-Bu klasor, ileride imzali `ARGEKA-Sync-Setup.exe` uretmek icin hazirlandi.
+Bu klasor Windows setup uretimi icindir.
 
-Simdiki dagitim dosyasi:
+Simdiki web dagitim dosyalari:
 
-- `downloads/ARGEKA-Sync-Install.cmd`
+- `downloads/ARGEKA-Sync-Setup.exe`
+- `downloads/ARGEKA-Sync-Setup.cmd`
 
-EXE uretimi icin onerilen yol:
+Basit setup EXE, `SetupLauncher.cs` dosyasindan derlenir. Bu EXE webden `bootstrap.ps1` indirir, dil secimini alir ve kurulumu kullanicinin kendi bilgisayarinda baslatir.
+
+Kurumsal/imzali installer uretimi icin onerilen yol:
 
 1. Inno Setup kurun.
 2. `ARGEKA-Sync-Setup.iss` dosyasini acin.

@@ -1,6 +1,8 @@
 ﻿param(
   [switch]$SkipDependencyInstall,
-  [switch]$NoOpen
+  [switch]$NoOpen,
+  [ValidateSet("tr", "en")]
+  [string]$Lang = "tr"
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,6 +11,14 @@ $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ComposeFile = Join-Path $RepoRoot "deployment\self-hosted\docker-compose.yml"
 $EnvFile = Join-Path $RepoRoot ".env"
 $EnvExample = Join-Path $RepoRoot ".env.example"
+
+function T($Tr, $En) {
+  if ($Lang -eq "en") {
+    return $En
+  }
+
+  return $Tr
+}
 
 function Write-Step($Message) {
   Write-Host ""
@@ -45,11 +55,12 @@ function Ensure-ElevatedForDependencyInstall {
 
   $needsInstall = (-not (Test-Command "docker")) -or (-not (Test-WslReady))
   if ($needsInstall -and -not (Test-Admin)) {
-    Write-Step "Kurulum icin yonetici izni isteniyor"
+    Write-Step (T "Kurulum icin yonetici izni isteniyor" "Administrator permission is required for setup")
     $arguments = @("-ExecutionPolicy", "Bypass", "-File", "`"$InstallerPath`"")
     if ($NoOpen) {
       $arguments += "-NoOpen"
     }
+    $arguments += @("-Lang", $Lang)
 
     Start-Process powershell.exe -Verb RunAs -ArgumentList $arguments
     exit
@@ -58,14 +69,14 @@ function Ensure-ElevatedForDependencyInstall {
 
 function Install-WithWinget($Id, $Name) {
   if ($SkipDependencyInstall) {
-    throw "$Name bulunamadi. -SkipDependencyInstall kullanildigi icin otomatik kurulum atlandi."
+    throw (T "$Name bulunamadi. -SkipDependencyInstall kullanildigi icin otomatik kurulum atlandi." "$Name was not found. Automatic installation was skipped because -SkipDependencyInstall was used.")
   }
 
   if (-not (Test-Command "winget")) {
-    throw "winget bulunamadi. Lutfen once Microsoft App Installer/winget kurun veya $Name uygulamasini elle kurun."
+    throw (T "winget bulunamadi. Lutfen once Microsoft App Installer/winget kurun veya $Name uygulamasini elle kurun." "winget was not found. Please install Microsoft App Installer/winget first, or install $Name manually.")
   }
 
-  Write-Step "$Name kuruluyor"
+  Write-Step (T "$Name kuruluyor" "Installing $Name")
   winget install --exact --id $Id --accept-package-agreements --accept-source-agreements
 }
 
@@ -75,12 +86,12 @@ function Ensure-WSL {
   }
 
   if ($SkipDependencyInstall) {
-    throw "WSL hazir degil. Docker Desktop icin WSL gerekli olabilir."
+    throw (T "WSL hazir degil. Docker Desktop icin WSL gerekli olabilir." "WSL is not ready. Docker Desktop may need WSL.")
   }
 
-  Write-Step "WSL altyapisi kuruluyor"
+  Write-Step (T "WSL altyapisi kuruluyor" "Installing WSL")
   wsl --install --no-distribution
-  Write-Host "WSL kurulumu yeniden baslatma isteyebilir. Yeniden baslatma gerekirse ayni komutu tekrar calistirin." -ForegroundColor Yellow
+  Write-Host (T "WSL kurulumu yeniden baslatma isteyebilir. Yeniden baslatma gerekirse setup dosyasini tekrar calistirin." "WSL may ask for a restart. If that happens, restart the computer and run the setup file again.") -ForegroundColor Yellow
 }
 
 function Ensure-Docker {
@@ -91,7 +102,7 @@ function Ensure-Docker {
   }
 
   if (-not (Test-Command "docker")) {
-    throw "Docker komutu bulunamadi. Docker Desktop kurulduysa bilgisayari yeniden baslatin ve install.ps1 dosyasini tekrar calistirin."
+    throw (T "Docker komutu bulunamadi. Docker Desktop kurulduysa bilgisayari yeniden baslatin ve setup dosyasini tekrar calistirin." "Docker was not found. If Docker Desktop was installed, restart the computer and run the setup file again.")
   }
 
   try {
@@ -100,12 +111,12 @@ function Ensure-Docker {
   } catch {
     $dockerDesktop = Join-Path $env:ProgramFiles "Docker\Docker\Docker Desktop.exe"
     if (Test-Path $dockerDesktop) {
-      Write-Step "Docker Desktop baslatiliyor"
+      Write-Step (T "Docker Desktop baslatiliyor" "Starting Docker Desktop")
       Start-Process -FilePath $dockerDesktop -WindowStyle Hidden
     }
   }
 
-  Write-Step "Docker motoru bekleniyor"
+  Write-Step (T "Docker motoru bekleniyor" "Waiting for Docker engine")
   for ($i = 1; $i -le 36; $i++) {
     try {
       docker info | Out-Null
@@ -115,18 +126,18 @@ function Ensure-Docker {
     }
   }
 
-  throw "Docker Desktop hazir olmadi. Uygulamayi acip Linux engine hazir olduktan sonra install.ps1 dosyasini tekrar calistirin."
+  throw (T "Docker Desktop hazir olmadi. Uygulamayi acip Linux engine hazir olduktan sonra setup dosyasini tekrar calistirin." "Docker Desktop is not ready yet. Open Docker Desktop, wait for the Linux engine, then run the setup file again.")
 }
 
 function Ensure-EnvFile {
   if (-not (Test-Path $EnvFile)) {
     Copy-Item -Path $EnvExample -Destination $EnvFile
-    Write-Host ".env olusturuldu. Canli ortamda POSTGRES_PASSWORD degerini degistirin." -ForegroundColor Yellow
+    Write-Host (T ".env olusturuldu. Canli ortamda POSTGRES_PASSWORD degerini degistirin." ".env was created. For production use, change POSTGRES_PASSWORD.") -ForegroundColor Yellow
   }
 }
 
 function Start-Stack {
-  Write-Step "ARGEKA Sync Docker servisleri baslatiliyor"
+  Write-Step (T "ARGEKA Sync Docker servisleri baslatiliyor" "Starting ARGEKA Sync Docker services")
   Push-Location $RepoRoot
   try {
     docker compose --env-file $EnvFile -f $ComposeFile up -d --build
@@ -136,7 +147,7 @@ function Start-Stack {
 }
 
 function Show-Status {
-  Write-Step "Servis durumu"
+  Write-Step (T "Servis durumu" "Service status")
   docker compose --env-file $EnvFile -f $ComposeFile ps
   Write-Host ""
   Write-Host "Web: http://localhost:$((Get-Content $EnvFile | Where-Object { $_ -match '^WEB_PORT=' } | Select-Object -First 1) -replace '^WEB_PORT=', '')" -ForegroundColor Green
@@ -161,7 +172,7 @@ function Find-CSharpCompiler {
 function Ensure-DesktopLauncher {
   $desktop = [Environment]::GetFolderPath("Desktop")
   if (-not $desktop) {
-    Write-Host "Masaustu yolu bulunamadi, EXE olusturma atlandi." -ForegroundColor Yellow
+    Write-Host (T "Masaustu yolu bulunamadi, EXE olusturma atlandi." "Desktop folder was not found. EXE creation was skipped.") -ForegroundColor Yellow
     return
   }
 
@@ -218,9 +229,9 @@ public static class ArgekaSyncLauncher {
     } else {
       Add-Type -TypeDefinition $source -OutputAssembly $launcherPath -OutputType WindowsApplication -ReferencedAssemblies "System.dll"
     }
-    Write-Host "Masaustu uygulamasi: $launcherPath" -ForegroundColor Green
+    Write-Host (T "Masaustu uygulamasi: $launcherPath" "Desktop app: $launcherPath") -ForegroundColor Green
   } catch {
-    Write-Host "Masaustu EXE olusturulamadi: $($_.Exception.Message)" -ForegroundColor Yellow
+    Write-Host (T "Masaustu EXE olusturulamadi: $($_.Exception.Message)" "Desktop EXE could not be created: $($_.Exception.Message)") -ForegroundColor Yellow
   }
 }
 

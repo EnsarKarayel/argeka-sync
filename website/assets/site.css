@@ -185,6 +185,35 @@ h1 {
   padding-left: 20px;
 }
 
+.small-note {
+  max-width: 760px;
+  font-size: 14px;
+}
+
+.steps {
+  margin-top: 34px;
+}
+
+.steps ol {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.steps li + li {
+  margin-top: 10px;
+}
+
+.language-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.actions.compact {
+  margin-top: 16px;
+}
+
 .site-footer {
   display: flex;
   justify-content: space-between;
@@ -203,6 +232,7 @@ h1 {
 
   .hero,
   .grid,
+  .language-grid,
   .download-panel {
     grid-template-columns: 1fr;
   }

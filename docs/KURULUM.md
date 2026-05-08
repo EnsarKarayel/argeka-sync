@@ -1,190 +1,109 @@
-﻿# ARGEKA Sync Kurulum Rehberi
+# ARGEKA Sync Kurulum Kilavuzu
 
-Bu rehber, ARGEKA Sync'i baska bir Windows bilgisayara kurmak isteyen ve teknik kurulumlara alisik olmayan kisiler icindir.
+Bu rehber teknik olmayan kullanicilar icindir. Amac basit: web sitesinden setup dosyasini indirip kendi bilgisayarinizda ARGEKA Sync calistirmak.
 
-## Kisa cevap
+## Once sunu bilin
 
-Windows bilgisayarda PowerShell acin ve su komutu calistirin:
+- ARGEKA Sync bir web sitesine girip kullanilan bulut servis degildir.
+- Program sizin bilgisayariniza veya kendi Windows sunucunuza kurulur.
+- Veritabani sifreleri ve aktardiginiz veriler sizin ortamda kalir.
+- Kurulumdan sonra program tarayicida `http://localhost:8080` adresinde acilir.
+- Sonraki acilislarda masaustundeki `ARGEKA Sync.exe` dosyasini kullanirsiniz.
 
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
+## Gerekenler
+
+- Windows 10 veya Windows 11 bilgisayar
+- Internet baglantisi
+- Kurulum sirasinda yonetici izni verebilme
+- En az 4 GB RAM, tercihen 8 GB
+
+Setup gerekli kontrolleri yapar. Git, Docker Desktop veya WSL eksikse kurulum sizi yonlendirir.
+
+## Web sitesinden kurulum
+
+1. Tarayicida ARGEKA Sync indirme sayfasini acin.
+2. `Windows setup indir` butonuna basin.
+3. `ARGEKA-Sync-Setup.exe` dosyasi iner.
+4. Dosyaya cift tiklayin.
+5. Windows guvenlik uyarisi gosterirse `Ek bilgi` ve sonra `Yine de calistir` seceneklerini kullanin. Bu uyari dosya henuz imzali olmadigi icin cikabilir.
+6. Dil secimi gelir:
+   - `1` Turkce
+   - `2` English
+7. Kurulum penceresi acik kalsin. Git, Docker Desktop, WSL ve servis kontrolleri otomatik yapilir.
+8. Bilgisayar yeniden baslatma isterse yeniden baslatin.
+9. Yeniden baslattiktan sonra ayni `ARGEKA-Sync-Setup.exe` dosyasini tekrar calistirin.
+10. Kurulum bitince tarayici acilir.
+
+## Programi acma
+
+Kurulumdan sonra masaustunde su dosya olusur:
+
+```text
+ARGEKA Sync.exe
 ```
 
-Kurulum bittiginde tarayicida su adres acilir:
+Programi acmak icin bu dosyaya cift tiklayin. Tarayici acilmazsa kendiniz su adresi yazin:
 
 ```text
 http://localhost:8080
 ```
 
-Demo girisi:
+## Ilk giris
+
+Demo kullanici:
 
 ```text
 E-posta: admin@argeka.local
 Sifre: admin123
 ```
 
-## Bu program ne kurar?
-
-- ARGEKA Sync web paneli
-- Node.js API servisi
-- PostgreSQL veritabani
-- Docker uzerinde kalici veri alani
-- Demo PostgreSQL kaynak/hedef aktarim isi
-- PostgreSQL, MSSQL ve MySQL/MariaDB icin calisan aktarim motoru
-- Saatlik, gunluk ve haftalik isleri calistiran scheduler worker
-
-## Kurulumdan once
-
-- Windows bilgisayar gerekir.
-- Docker Desktop gerekir. Kurulum komutu kontrol eder ve eksikse sizi yonlendirir.
-- Ilk Docker/WSL kurulumunda bilgisayar yeniden baslatma isteyebilir.
-- Yeniden baslatma olursa ayni komutu tekrar calistirin.
-- Docker Desktop acildiginda GitHub ile giris yapmak zorunlu degildir; `Skip` secilebilir.
-
-## Yontem 1: Tek komutla kurulum
-
-1. Windows arama kutusuna `PowerShell` yazin.
-2. PowerShell'i acin.
-3. Asagidaki komutu tek parca halinde yapistirin.
-
-```powershell
-powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
-```
-
-4. Ekranda izin veya onay sorarsa kabul edin.
-5. Docker kurulumu baslarsa bitmesini bekleyin.
-6. Yeniden baslatma isterse bilgisayari yeniden baslatin.
-7. Yeniden baslatmadan sonra ayni komutu tekrar calistirin.
-8. Kurulum bittiginde `http://localhost:8080` adresine gidin.
-
-## Yontem 2: GitHub'dan indirerek kurulum
-
-1. Tarayicida su adrese gidin:
-
-```text
-https://github.com/EnsarKarayel/argeka-sync
-```
-
-2. Yesil `Code` butonuna basin.
-3. `Download ZIP` secenegine basin.
-4. ZIP dosyasini indirin.
-5. ZIP dosyasini masaustune cikarin.
-6. Cikan klasorun icine girin.
-7. Bos bir alana sag tiklayip `Terminalde ac` veya `PowerShell penceresini burada ac` secin.
-8. Su komutu calistirin:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
-
-9. Kurulum bittiginde masaustunde `ARGEKA Sync.exe` olusur. Bu dosya uygulamayi tekrar baslatmak icindir.
-10. Su adresi acin:
-
-```text
-http://localhost:8080
-```
-
-## Sonraki acilislarda
-
-Programi tekrar baslatmak icin proje klasorunde:
-
-```powershell
-.\start.ps1
-```
-
-Ya da masaustundeki `ARGEKA Sync.exe` dosyasina cift tiklayin.
-
-Programi durdurmak icin:
-
-```powershell
-.\stop.ps1
-```
+Canli kullanimdan once sifreyi degistirin.
 
 ## Ilk test
 
-1. `http://localhost:8080` adresine girin.
-2. `admin@argeka.local / admin123` ile oturum acin.
-3. `Aktarim Isleri` ekranina gidin.
-4. `Demo PostgreSQL -> PostgreSQL aktarim` isinde `Calistir` butonuna basin.
-5. `Calisma Gecmisi` ekraninda `completed`, `3 okunan`, `3 yazilan` benzeri sonucu gorun.
+1. `http://localhost:8080` adresini acin.
+2. Demo kullanici ile giris yapin.
+3. `Baglantilar` ekraninda demo kaynak ve hedef baglantilari gorun.
+4. `Aktarim Isleri` ekranina gidin.
+5. Demo PostgreSQL aktarim isinde `Calistir` butonuna basin.
+6. `Calisma Gecmisi` ekraninda basarili sonuc gorun.
 
-Bu sonuc gorunuyorsa kurulum basarilidir.
+Bu adimlar tamamlanirsa kurulum basarilidir.
 
-## Veriler nerede duruyor?
+## Sik sorulan durumlar
 
-Veriler Docker icindeki PostgreSQL volume alaninda tutulur. Tarayiciyi kapatmak verileri silmez.
+### Docker Desktop acildi ve GitHub girisi sordu
 
-Yedek almak icin:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\backup.ps1
-```
-
-Yedekler `backups` klasorune gelir.
-
-## Baska bilgisayara tasima
-
-1. Eski bilgisayarda yedek alin:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\backup.ps1
-```
-
-2. Yeni bilgisayarda ARGEKA Sync kurulumunu yapin.
-3. Eski bilgisayardaki son `.sql` yedek dosyasini yeni bilgisayardaki `backups` klasorune koyun.
-4. Yeni bilgisayarda proje klasorunde su komutu calistirin:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\yedek-dosyasi.sql
-```
-
-`yedek-dosyasi.sql` yerine kendi dosya adinizi yazin.
-
-## Sik karsilasilan durumlar
-
-### Docker Desktop acilmadi
-
-Docker Desktop'i Baslat menusunden acin. Tam acilmasini bekleyin. Sonra:
-
-```powershell
-.\start.ps1
-```
+GitHub ile giris yapmak zorunda degilsiniz. `Skip` secilebilir.
 
 ### Bilgisayar yeniden baslatma istedi
 
-Yeniden baslatin. Sonra kurulum komutunu tekrar calistirin.
+Yeniden baslatin. Sonra setup dosyasini tekrar calistirin.
 
 ### Sayfa acilmiyor
 
-Proje klasorunde:
-
-```powershell
-.\start.ps1
-```
-
-Ardindan tarayicida:
+Masaustundeki `ARGEKA Sync.exe` dosyasina tekrar cift tiklayin. Yine acilmazsa tarayicida su adresi yazin:
 
 ```text
 http://localhost:8080
 ```
 
-### API calisiyor mu?
+### Programi baska bilgisayara tasimak istiyorum
 
-Tarayicida su adresi acin:
+1. Eski bilgisayarda yedek alin.
+2. Yeni bilgisayarda setup dosyasiyla ARGEKA Sync kurun.
+3. Yedek dosyasini yeni bilgisayara kopyalayin.
+4. Geri yukleme islemini yapin.
 
-```text
-http://localhost:3000/health
-```
+Detayli yedek komutlari icin teknik destekten yardim almak daha sagliklidir.
 
-`ok: true` benzeri cevap varsa API calisiyor.
+## Kaldirma
 
-## Kurulum kontrol listesi
+Basit kaldirma icin:
 
-- `http://localhost:8080` aciliyor mu?
-- Demo kullanici ile giris oluyor mu?
-- Dashboard gorunuyor mu?
-- Baglantilar ekraninda demo kaynak/hedef baglantilar var mi?
-- Aktarim Isleri ekraninda demo is var mi?
-- Demo isi calisinca Calisma Gecmisi'nde completed gorunuyor mu?
+1. Docker Desktop'i acin.
+2. ARGEKA Sync containerlarini durdurun.
+3. Masaustundeki `ARGEKA Sync.exe` dosyasini silin.
+4. `Desktop\ARGEKA-Sync` klasorunu silin.
 
-Bu maddeler tamamsa ARGEKA Sync kullanima hazirdir.
+Veritabani volume silinirse kayitlar da silinir. Silmeden once yedek alin.

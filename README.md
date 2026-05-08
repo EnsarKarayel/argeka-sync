@@ -16,20 +16,28 @@ Ilk calisan motor PostgreSQL/Internal, Microsoft SQL Server ve MySQL/MariaDB bag
 - Her calisma icin okunan, yazilan, atlanan satir ve hata logu kaydeder.
 - Self-hosted calisir; veritabani sifreleri ve veriler kullanicinin kendi makinesi/sunucusunda kalir.
 
-## Tek komut Windows kurulumu
+## Web sitesinden Windows setup kurulumu
 
-Hic teknik bilmeyen kullanici icin adim adim kurulum rehberi:
+Normal kullanici akisi web sitesinden baslar:
 
-- [docs/KURULUM.md](docs/KURULUM.md)
-- GitHub uzerinde acmak icin: https://github.com/EnsarKarayel/argeka-sync/blob/main/docs/KURULUM.md
+1. Kullanici `download.html` sayfasina girer.
+2. `ARGEKA-Sync-Setup.exe` dosyasini indirir.
+3. Setup dosyasini calistirir.
+4. Turkce veya English kurulum secilir.
+5. ARGEKA Sync kullanicinin kendi bilgisayarina/sunucusuna kurulur.
 
-Sifir bir Windows bilgisayarda PowerShell acip su komutu calistirin:
+Klavuzlar:
+
+- [Turkce kurulum](docs/KURULUM.md)
+- [Turkce kullanim](docs/KULLANIM.md)
+- [English installation](docs/INSTALLATION-EN.md)
+- [English user guide](docs/USER-GUIDE-EN.md)
+
+Teknik ekipler icin tek komut kurulum hala desteklenir:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/argeka-sync/main/bootstrap.ps1 | iex"
 ```
-
-Bu komut Git yoksa kurmayi dener, repo'yu `Desktop\ARGEKA-Sync` klasorune indirir, Docker Desktop'i kontrol eder, ARGEKA Sync servislerini baslatir ve masaustune `ARGEKA Sync.exe` kisa yol uygulamasini olusturur.
 
 Repo zaten bilgisayardaysa:
 

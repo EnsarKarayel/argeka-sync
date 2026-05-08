@@ -19,11 +19,13 @@ WizardStyle=modern
 PrivilegesRequired=admin
 
 [Files]
-Source: "..\..\downloads\ARGEKA-Sync-Install.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\downloads\ARGEKA-Sync-Setup.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\downloads\ARGEKA-Sync-Setup-TR.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\downloads\ARGEKA-Sync-Setup-EN.cmd"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\ARGEKA Sync Kur"; Filename: "{app}\ARGEKA-Sync-Install.cmd"
-Name: "{commondesktop}\ARGEKA Sync Kur"; Filename: "{app}\ARGEKA-Sync-Install.cmd"
+Name: "{group}\ARGEKA Sync Kur"; Filename: "{app}\ARGEKA-Sync-Setup.cmd"
+Name: "{commondesktop}\ARGEKA Sync Kur"; Filename: "{app}\ARGEKA-Sync-Setup.cmd"
 
 [Run]
-Filename: "{app}\ARGEKA-Sync-Install.cmd"; Description: "ARGEKA Sync kurulumunu baslat"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\ARGEKA-Sync-Setup.cmd"; Description: "ARGEKA Sync kurulumunu baslat"; Flags: postinstall nowait skipifsilent
