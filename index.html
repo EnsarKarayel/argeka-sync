@@ -332,6 +332,7 @@
                     <select name="writeMode">
                       <option value="insert_only">Insert only</option>
                       <option value="skip_duplicates">Skip duplicates</option>
+                      <option value="upsert">Upsert: varsa guncelle</option>
                       <option value="truncate_reload">Truncate and reload</option>
                     </select>
                   </label>
@@ -345,6 +346,10 @@
                     </select>
                   </label>
                 </div>
+                <label>
+                  Upsert anahtari
+                  <input name="upsertKey" placeholder="code veya customer_id">
+                </label>
                 <div class="compact-fields">
                   <label>
                     Zamanlama
@@ -441,7 +446,7 @@
                 <li>Her run icin okunan, yazilan ve atlanan satir sayisi tutulur.</li>
                 <li>Hatalar run seviyesinde ve satir metadata'si ile loglanir.</li>
                 <li>Tek yonlu aktarim varsayilandir; cift yonlu senkron yoktur.</li>
-                <li>PostgreSQL/Internal ve MSSQL motor aktif; diger DB tipleri connector mimarisine hazirdir.</li>
+                <li>PostgreSQL/Internal, MSSQL ve MySQL/MariaDB motor aktif; diger DB tipleri connector mimarisine hazirdir.</li>
               </ul>
             </section>
           </div>

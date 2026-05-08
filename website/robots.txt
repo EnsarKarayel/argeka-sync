@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://argeka.com.tr/sitemap.xml

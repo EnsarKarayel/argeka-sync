@@ -2,12 +2,13 @@
 
 ARGEKA Sync, teknik ekipler icin hazirlanan self-hosted mini ETL ve veritabani aktarim aracidir. Amac tek yonlu veri akislarini kolayca kurmak, zamanlamak ve izlemektir.
 
-Ilk calisan motor PostgreSQL/Internal ve Microsoft SQL Server baglantilarini destekler. MySQL/MariaDB, Oracle, SQLite, ODBC, CSV/Excel, REST API, SAP HANA ve Firebird connector mimarisi arayuzde hazirdir; bu baglantilar icin calisma motoru sonraki fazlarda eklenecektir.
+Ilk calisan motor PostgreSQL/Internal, Microsoft SQL Server ve MySQL/MariaDB baglantilarini destekler. Oracle, SQLite, ODBC, CSV/Excel, REST API, SAP HANA ve Firebird connector mimarisi arayuzde hazirdir; bu baglantilar icin calisma motoru sonraki fazlarda eklenecektir.
 
 ## Ne ise yarar?
 
 - Kaynak veritabanindan parametreli SQL sorgusu calistirir.
 - Sonucu hedef veritabaninda tabloya insert eder.
+- Hedefte unique anahtar varsa upsert ile mevcut satiri guncelleyebilir.
 - Kolon esleme yapar: kaynak kolon -> hedef kolon.
 - Kolon veya veri hatasi icin politika belirler: strict, ignore extra, skip row, quarantine.
 - Manuel, saatlik, gunluk veya haftalik calisma plani tutar.
@@ -86,6 +87,16 @@ Veya `Baglantilar` ekraninda host, port, veritabani, kullanici ve sifre alanlari
 
 MSSQL kaynak veya hedef olarak kullanilabilir. Parametreli sorgularda yine `:parametre_adi` yazilir; motor bunu MSSQL tarafinda `@p1`, `@p2` seklinde calistirir.
 
+## MySQL / MariaDB baglantisi
+
+Connection URL:
+
+```text
+mysql://kullanici:sifre@10.0.0.12:3306/ERPDB
+```
+
+Veya `Baglantilar` ekraninda host, port, veritabani, kullanici ve sifre alanlarini doldurun. Parametreli sorgularda `:parametre_adi` formati ayni kalir; motor MySQL tarafinda `?` parametreleri ile calistirir.
+
 ## Moduller
 
 - `Dashboard`: connector durumu, son run ve mini ETL akisi.
@@ -101,6 +112,7 @@ MSSQL kaynak veya hedef olarak kullanilabilir. Parametreli sorgularda yine `:par
 
 - `insert_only`: Gelen satirlari hedef tabloya insert eder.
 - `skip_duplicates`: Hedefte unique conflict olursa satiri atlar.
+- `upsert`: Upsert anahtari ile varsa gunceller, yoksa insert eder.
 - `truncate_reload`: Hedef tabloyu temizler ve yeniden yukler.
 
 ## Kolon hatasi politikalari
@@ -160,16 +172,31 @@ Servisler:
 - API: `http://localhost:3000/health`
 - DB: PostgreSQL Docker volume
 
+## Indirme web sitesi
+
+Public indirme sitesi icin statik sayfalar `website` klasorundedir. Docker ile denemek icin:
+
+```powershell
+docker compose -f deployment/website/docker-compose.yml up -d --build
+```
+
+Site adresi:
+
+```text
+http://localhost:8090
+```
+
+Google Ads final URL'i dogrudan dosya indirme linki degil, `download.html` gibi urun ve gereksinim bilgisi olan sayfa olmalidir. Ayrintilar: [docs/YAYIN.md](docs/YAYIN.md)
+
 ## Urun stratejisi
 
 ARGEKA Sync simdilik ucretsiz beta/self-hosted urun olarak dusunulmustur. SaaS degil; cunku hedef kullanici sirket veritabani sifrelerini ve verilerini kendi ortaminda tutmak ister.
 
 Sonraki fazlar:
 
-- MSSQL upsert anahtari ve gelismis tip esleme.
-- MySQL/MariaDB driver.
+- Gelismis tip esleme.
 - Oracle Instant Client/ODBC dokumantasyonu.
-- Windows EXE installer.
+- Imzali Windows EXE installer.
 - Hata satirlari icin quarantine tablosu.
 - Upsert anahtar secimi.
 - Tanitim ve indirme web sayfasi.

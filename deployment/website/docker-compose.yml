@@ -1,0 +1,9 @@
+services:
+  argeka-sync-website:
+    build:
+      context: ../..
+      dockerfile: deployment/website/Dockerfile
+    container_name: argeka-sync-website
+    restart: unless-stopped
+    ports:
+      - "${WEBSITE_PORT:-8090}:80"

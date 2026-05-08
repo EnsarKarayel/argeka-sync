@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-label="ARGEKA Sync uygulama ekranı">
+  <rect width="1280" height="820" rx="32" fill="#eef5f0"/>
+  <rect x="48" y="48" width="1184" height="724" rx="24" fill="#ffffff" stroke="#cfded5"/>
+  <rect x="48" y="48" width="210" height="724" rx="24" fill="#10261e"/>
+  <rect x="74" y="82" width="48" height="48" rx="12" fill="#caff4a"/>
+  <text x="142" y="108" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#ffffff">ARGEKA Sync</text>
+  <text x="142" y="134" font-family="Arial, sans-serif" font-size="14" fill="#b7c9c0">Mini ETL paneli</text>
+  <g font-family="Arial, sans-serif" font-size="18" fill="#f6fff8">
+    <text x="82" y="202">Dashboard</text>
+    <text x="82" y="260">Bağlantılar</text>
+    <text x="82" y="318">Sorgular</text>
+    <text x="82" y="376">Aktarım İşleri</text>
+    <text x="82" y="434">Zamanlama</text>
+  </g>
+  <text x="300" y="112" font-family="Arial, sans-serif" font-size="18" fill="#65766f">Tek yönlü, zamanlanabilir DB aktarım paneli</text>
+  <text x="300" y="154" font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#13231d">Dashboard</text>
+  <g>
+    <rect x="300" y="198" width="260" height="128" rx="14" fill="#f7fbf8" stroke="#d5e2da"/>
+    <text x="326" y="240" font-family="Arial, sans-serif" font-size="16" fill="#65766f">Bağlantı</text>
+    <text x="326" y="290" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="#10261e">12</text>
+    <rect x="590" y="198" width="260" height="128" rx="14" fill="#f7fbf8" stroke="#d5e2da"/>
+    <text x="616" y="240" font-family="Arial, sans-serif" font-size="16" fill="#65766f">Aktarım işi</text>
+    <text x="616" y="290" font-family="Arial, sans-serif" font-size="52" font-weight="700" fill="#10261e">38</text>
+    <rect x="880" y="198" width="260" height="128" rx="14" fill="#f7fbf8" stroke="#d5e2da"/>
+    <text x="906" y="240" font-family="Arial, sans-serif" font-size="16" fill="#65766f">Son çalışma</text>
+    <text x="906" y="290" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#087f74">completed</text>
+  </g>
+  <g>
+    <rect x="300" y="374" width="840" height="72" rx="12" fill="#ffffff" stroke="#d5e2da"/>
+    <circle cx="334" cy="410" r="12" fill="#087f74"/>
+    <text x="364" y="404" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#10261e">ERP MSSQL -> Rapor PostgreSQL</text>
+    <text x="364" y="428" font-family="Arial, sans-serif" font-size="14" fill="#65766f">Upsert: customer_code · Günlük 02:00 · 1284 satır</text>
+    <rect x="300" y="466" width="840" height="72" rx="12" fill="#ffffff" stroke="#d5e2da"/>
+    <circle cx="334" cy="502" r="12" fill="#caff4a"/>
+    <text x="364" y="496" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#10261e">MySQL stok -> Merkez PostgreSQL</text>
+    <text x="364" y="520" font-family="Arial, sans-serif" font-size="14" fill="#65766f">Saatlik · Skip duplicates · 409 satır</text>
+    <rect x="300" y="558" width="840" height="72" rx="12" fill="#ffffff" stroke="#d5e2da"/>
+    <circle cx="334" cy="594" r="12" fill="#f4b942"/>
+    <text x="364" y="588" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#10261e">Oracle cari -> SQL Server staging</text>
+    <text x="364" y="612" font-family="Arial, sans-serif" font-size="14" fill="#65766f">Connector planlı · Parametreli sorgu hazır</text>
+  </g>
+</svg>

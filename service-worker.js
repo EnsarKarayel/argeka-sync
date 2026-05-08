@@ -1,4 +1,4 @@
-const CACHE_NAME = "argeka-sync-v2";
+const CACHE_NAME = "argeka-sync-v3";
 const ASSETS = [
   "./",
   "./index.html",

@@ -1,7 +1,7 @@
 const dbTypes = [
   { id: "postgresql", label: "PostgreSQL", status: "Aktif" },
   { id: "mssql", label: "Microsoft SQL Server", status: "Aktif" },
-  { id: "mysql", label: "MySQL / MariaDB", status: "ODBC/driver" },
+  { id: "mysql", label: "MySQL / MariaDB", status: "Aktif" },
   { id: "oracle", label: "Oracle", status: "ODBC/driver" },
   { id: "sqlite", label: "SQLite", status: "Planli" },
   { id: "odbc", label: "Generic ODBC", status: "Planli" },

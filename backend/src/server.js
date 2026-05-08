@@ -2,6 +2,7 @@ const http = require("node:http");
 const { createHash, randomBytes, randomUUID } = require("node:crypto");
 const { Pool } = require("pg");
 const mssql = require("mssql");
+const mysql = require("mysql2/promise");
 const bcrypt = require("bcryptjs");
 
 const port = Number(process.env.PORT || 3000);
@@ -213,6 +214,7 @@ async function ensureSchema() {
       target_table text not null,
       write_mode text not null default 'insert_only',
       conflict_policy text not null default 'strict',
+      upsert_key text,
       schedule_type text not null default 'manual',
       schedule_value text,
       enabled boolean not null default true,
@@ -298,6 +300,7 @@ async function ensureSchema() {
 
   await pool.query(`
     alter table sync_connections add column if not exists password_secret text;
+    alter table sync_jobs add column if not exists upsert_key text;
     alter table sync_jobs add column if not exists scheduler_lock_until timestamptz;
     alter table sync_jobs add column if not exists last_error text;
   `);
@@ -585,6 +588,7 @@ function syncJobPayload(row) {
     targetTable: row.target_table,
     writeMode: row.write_mode,
     conflictPolicy: row.conflict_policy,
+    upsertKey: row.upsert_key,
     scheduleType: row.schedule_type,
     scheduleValue: row.schedule_value,
     enabled: Boolean(row.enabled),
@@ -1705,7 +1709,7 @@ async function listSyncJobs(req, res) {
   const result = await pool.query(
     `select j.id, j.name, j.query_id, q.name as query_name, sc.name as source_connection_name,
             j.target_connection_id, tc.name as target_connection_name, j.target_table,
-            j.write_mode, j.conflict_policy, j.schedule_type, j.schedule_value, j.enabled,
+            j.write_mode, j.conflict_policy, j.upsert_key, j.schedule_type, j.schedule_value, j.enabled,
             j.last_run_at, j.next_run_at, j.last_error, j.created_at, j.updated_at,
             count(m.id)::int as mapping_count
      from sync_jobs j
@@ -1730,9 +1734,9 @@ async function createSyncJob(req, res) {
   }
   const result = await pool.query(
     `insert into sync_jobs
-       (tenant_id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled, next_run_at)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-     returning id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled, last_run_at, next_run_at, last_error, created_at, updated_at`,
+       (tenant_id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, upsert_key, schedule_type, schedule_value, enabled, next_run_at)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+     returning id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, upsert_key, schedule_type, schedule_value, enabled, last_run_at, next_run_at, last_error, created_at, updated_at`,
     [
       session.tenant_id,
       body.name,
@@ -1741,6 +1745,7 @@ async function createSyncJob(req, res) {
       body.targetTable,
       body.writeMode || "insert_only",
       body.conflictPolicy || "strict",
+      body.upsertKey || null,
       body.scheduleType || "manual",
       body.scheduleValue || null,
       body.enabled !== false,
@@ -1897,7 +1902,7 @@ async function executeSyncJob(tenant, jobId, runId) {
   const job = jobResult.rows[0];
   if (!job) throw new Error("Aktarim isi bulunamadi.");
   if (!supportedRuntimeDb(job.source_type) || !supportedRuntimeDb(job.target_type)) {
-    throw new Error("Bu connector henuz calisma motoruna baglanmadi. PostgreSQL ve MSSQL aktif.");
+    throw new Error("Bu connector henuz calisma motoruna baglanmadi. PostgreSQL, MSSQL ve MySQL/MariaDB aktif.");
   }
   const mappings = await pool.query(
     `select source_column, target_column, default_value, transform, required
@@ -1945,7 +1950,7 @@ async function executeSyncJob(tenant, jobId, runId) {
         continue;
       }
       try {
-        const inserted = await insertTargetRow(targetDb, job.target_table, built.values, job.write_mode);
+        const inserted = await insertTargetRow(targetDb, job.target_table, built.values, job.write_mode, job.upsert_key);
         if (inserted === false) skipped += 1;
         else written += 1;
       } catch (error) {
@@ -2038,11 +2043,12 @@ function startScheduler() {
 }
 
 function supportedRuntimeDb(type) {
-  return ["postgresql", "mssql"].includes(String(type || "").toLowerCase());
+  return ["postgresql", "mssql", "mysql", "mariadb"].includes(String(type || "").toLowerCase());
 }
 
 function dbTypeName(type) {
   if (type === "mssql") return "MSSQL";
+  if (type === "mysql" || type === "mariadb") return "MySQL/MariaDB";
   if (type === "postgresql") return "PostgreSQL";
   return type || "DB";
 }
@@ -2060,12 +2066,18 @@ async function openDbClient(connection) {
     await client.connect();
     return { type, client, shared: false };
   }
+  if (type === "mysql" || type === "mariadb") {
+    const client = mysql.createPool(mysqlConfig(connection));
+    await client.query("select 1 as ok");
+    return { type: "mysql", client, shared: false };
+  }
   throw new Error(`${type} connector calisma motorunda aktif degil.`);
 }
 
 async function closeDbClient(db) {
   if (!db || db.shared) return;
   if (db.type === "postgresql") await db.client.end();
+  else if (db.type === "mysql") await db.client.end();
   else await db.client.close();
 }
 
@@ -2082,6 +2094,10 @@ async function dbQuery(db, sql, values = []) {
     const columns = result.recordset?.columns ? Object.keys(result.recordset.columns) : Object.keys(rows[0] || {});
     return { rows, columns };
   }
+  if (db.type === "mysql") {
+    const [rows, fields] = await db.client.execute(sql, values);
+    return { rows: Array.isArray(rows) ? rows : [], columns: (fields || []).map((field) => field.name) };
+  }
   throw new Error(`${db.type} sorgu motoru yok.`);
 }
 
@@ -2089,6 +2105,7 @@ function parameterizeSql(sqlText, params, dbType = "postgresql") {
   const values = [];
   const sql = String(sqlText).replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_, key) => {
     values.push(params[key] ?? null);
+    if (dbType === "mysql" || dbType === "mariadb") return "?";
     return dbType === "mssql" ? `@p${values.length}` : `$${values.length}`;
   });
   return { sql, values };
@@ -2126,16 +2143,17 @@ function applyTransform(value, transform) {
 }
 
 async function truncateTarget(db, table) {
-  if (db.type === "mssql") {
+  if (db.type === "mssql" || db.type === "mysql") {
     await dbQuery(db, `truncate table ${safeIdentifier(table, db.type)}`);
     return;
   }
   await dbQuery(db, `truncate table ${safeIdentifier(table, db.type)} restart identity`);
 }
 
-async function insertTargetRow(db, table, values, writeMode) {
+async function insertTargetRow(db, table, values, writeMode, upsertKey = null) {
   const columns = Object.keys(values);
   if (!columns.length) return;
+  if (writeMode === "upsert") return upsertTargetRow(db, table, values, upsertKey);
   if (db.type === "mssql") {
     const placeholders = columns.map((_, index) => `@p${index + 1}`);
     await dbQuery(
@@ -2144,6 +2162,14 @@ async function insertTargetRow(db, table, values, writeMode) {
       columns.map((column) => values[column])
     );
     return true;
+  }
+  if (db.type === "mysql") {
+    const placeholders = columns.map(() => "?");
+    const [result] = await db.client.execute(
+      `${writeMode === "skip_duplicates" ? "insert ignore into" : "insert into"} ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")}) values (${placeholders.join(",")})`,
+      columns.map((column) => values[column])
+    );
+    return Number(result.affectedRows || 0) > 0;
   }
   const placeholders = columns.map((_, index) => `$${index + 1}`);
   const suffix = writeMode === "skip_duplicates" ? " on conflict do nothing" : "";
@@ -2154,16 +2180,70 @@ async function insertTargetRow(db, table, values, writeMode) {
   return result.rowCount > 0;
 }
 
+async function upsertTargetRow(db, table, values, upsertKey) {
+  const columns = Object.keys(values);
+  if (!upsertKey || !columns.includes(upsertKey)) throw new Error("Upsert icin hedef anahtar kolonu gerekli.");
+  const updateColumns = columns.filter((column) => column !== upsertKey);
+  if (db.type === "postgresql") {
+    const placeholders = columns.map((_, index) => `$${index + 1}`);
+    const updateSql = updateColumns.length
+      ? ` do update set ${updateColumns.map((column) => `${safeIdentifier(column, db.type)} = excluded.${safeIdentifier(column, db.type)}`).join(", ")}`
+      : " do nothing";
+    const result = await db.client.query(
+      `insert into ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")}) values (${placeholders.join(",")}) on conflict (${safeIdentifier(upsertKey, db.type)})${updateSql}`,
+      columns.map((column) => values[column])
+    );
+    return result.rowCount > 0;
+  }
+  if (db.type === "mysql") {
+    const placeholders = columns.map(() => "?");
+    const updateSql = updateColumns.length
+      ? updateColumns.map((column) => `${safeIdentifier(column, db.type)} = values(${safeIdentifier(column, db.type)})`).join(", ")
+      : `${safeIdentifier(upsertKey, db.type)} = ${safeIdentifier(upsertKey, db.type)}`;
+    const [result] = await db.client.execute(
+      `insert into ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")}) values (${placeholders.join(",")}) on duplicate key update ${updateSql}`,
+      columns.map((column) => values[column])
+    );
+    return Number(result.affectedRows || 0) > 0;
+  }
+  if (db.type === "mssql") {
+    if (updateColumns.length) {
+      const updateSql = `update ${safeIdentifier(table, db.type)} set ${updateColumns.map((column, index) => `${safeIdentifier(column, db.type)} = @p${index + 1}`).join(", ")} where ${safeIdentifier(upsertKey, db.type)} = @p${updateColumns.length + 1};`;
+      const insertParams = columns.map((_, index) => `@p${updateColumns.length + 2 + index}`);
+      await dbQuery(db, `
+        ${updateSql}
+        if @@ROWCOUNT = 0
+        insert into ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")})
+        values (${insertParams.join(",")});
+      `, [
+        ...updateColumns.map((column) => values[column]),
+        values[upsertKey],
+        ...columns.map((column) => values[column])
+      ]);
+      return true;
+    }
+    const insertParams = columns.map((_, index) => `@p${index + 2}`);
+    await dbQuery(db, `
+      if not exists (select 1 from ${safeIdentifier(table, db.type)} where ${safeIdentifier(upsertKey, db.type)} = @p1)
+      insert into ${safeIdentifier(table, db.type)} (${columns.map((column) => safeIdentifier(column, db.type)).join(",")})
+      values (${insertParams.join(",")});
+    `, [values[upsertKey], ...columns.map((column) => values[column])]);
+    return true;
+  }
+  throw new Error(`${db.type} upsert desteklenmiyor.`);
+}
+
 function safeIdentifier(value, dbType = "postgresql") {
   const text = String(value || "");
   const parts = text.split(".");
   if (!parts.every((part) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(part))) throw new Error(`Gecersiz SQL tanimlayici: ${text}`);
   if (dbType === "mssql") return parts.map((part) => `[${part}]`).join(".");
+  if (dbType === "mysql") return parts.map((part) => `\`${part}\``).join(".");
   return parts.map((part) => `"${part}"`).join(".");
 }
 
 function isDuplicateError(error) {
-  return error?.code === "23505" || error?.number === 2601 || error?.number === 2627;
+  return error?.code === "23505" || error?.code === "ER_DUP_ENTRY" || error?.errno === 1062 || error?.number === 2601 || error?.number === 2627;
 }
 
 function mssqlConfig(connection) {
@@ -2189,6 +2269,30 @@ function mssqlConfig(connection) {
     if (parsed.searchParams.has("trustServerCertificate")) {
       config.options.trustServerCertificate = parsed.searchParams.get("trustServerCertificate") !== "false";
     }
+  }
+  return config;
+}
+
+function mysqlConfig(connection) {
+  const config = {
+    host: connection.host || "localhost",
+    port: Number(connection.port || 3306),
+    database: connection.database_name || undefined,
+    user: connection.username || undefined,
+    password: connection.password_secret || undefined,
+    waitForConnections: true,
+    connectionLimit: 5,
+    charset: "utf8mb4"
+  };
+  if (connection.ssl_mode === "require") config.ssl = {};
+  if (connection.connection_url && connection.connection_url !== "internal://app") {
+    const parsed = new URL(String(connection.connection_url).replace(/^mariadb:\/\//, "mysql://"));
+    config.host = parsed.hostname || config.host;
+    config.port = parsed.port ? Number(parsed.port) : config.port;
+    config.database = decodeURIComponent(parsed.pathname.replace(/^\//, "")) || config.database;
+    config.user = parsed.username ? decodeURIComponent(parsed.username) : config.user;
+    config.password = parsed.password ? decodeURIComponent(parsed.password) : config.password;
+    if (parsed.searchParams.get("ssl") === "true") config.ssl = {};
   }
   return config;
 }
