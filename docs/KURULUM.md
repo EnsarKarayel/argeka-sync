@@ -1,10 +1,10 @@
-# ARGEKA CRM Kurulum Rehberi
+# ARGEKA Sync Kurulum Rehberi
 
-Bu rehber, ARGEKA CRM'i baska bir Windows bilgisayara kurmak isteyen ve teknik kurulumlara alisik olmayan kisiler icindir.
+Bu rehber, ARGEKA Sync'i baska bir Windows bilgisayara kurmak isteyen ve teknik kurulumlara alisik olmayan kisiler icindir.
 
 ## Kisa cevap
 
-En kolay kurulum icin Windows bilgisayarda PowerShell acin ve su komutu calistirin:
+Windows bilgisayarda PowerShell acin ve su komutu calistirin:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/EnsarKarayel/akis-crm/main/bootstrap.ps1 | iex"
@@ -23,13 +23,21 @@ E-posta: admin@akis-crm.local
 Sifre: admin123
 ```
 
-## Kurulumdan once bilinmesi gerekenler
+## Bu program ne kurar?
 
-- Bu kurulum Windows bilgisayar icindir.
-- Docker Desktop gerekir. Kurulum komutu Docker'i kontrol eder, eksikse sizi yonlendirir.
+- ARGEKA Sync web paneli
+- Node.js API servisi
+- PostgreSQL veritabani
+- Docker uzerinde kalici veri alani
+- Demo PostgreSQL kaynak/hedef aktarim isi
+
+## Kurulumdan once
+
+- Windows bilgisayar gerekir.
+- Docker Desktop gerekir. Kurulum komutu kontrol eder ve eksikse sizi yonlendirir.
 - Ilk Docker/WSL kurulumunda bilgisayar yeniden baslatma isteyebilir.
-- Bilgisayar yeniden baslatilirsa ayni komutu tekrar calistirin.
-- Docker Desktop acildiginda GitHub ile giris yapmak zorunlu degildir; "Skip" secilebilir.
+- Yeniden baslatma olursa ayni komutu tekrar calistirin.
+- Docker Desktop acildiginda GitHub ile giris yapmak zorunlu degildir; `Skip` secilebilir.
 
 ## Yontem 1: Tek komutla kurulum
 
@@ -42,14 +50,12 @@ powershell -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.c
 ```
 
 4. Ekranda izin veya onay sorarsa kabul edin.
-5. Docker kurulumu baslarsa kurulumun bitmesini bekleyin.
+5. Docker kurulumu baslarsa bitmesini bekleyin.
 6. Yeniden baslatma isterse bilgisayari yeniden baslatin.
 7. Yeniden baslatmadan sonra ayni komutu tekrar calistirin.
 8. Kurulum bittiginde `http://localhost:8080` adresine gidin.
 
 ## Yontem 2: GitHub'dan indirerek kurulum
-
-Bu yontem, komutla indirme calismazsa veya repo dosyalarini elle gormek isterseniz kullanilir.
 
 1. Tarayicida su adrese gidin:
 
@@ -77,7 +83,7 @@ http://localhost:8080
 
 ## Sonraki acilislarda
 
-Programi tekrar calistirmak icin proje klasorunde PowerShell acip:
+Programi tekrar baslatmak icin proje klasorunde:
 
 ```powershell
 .\start.ps1
@@ -89,9 +95,19 @@ Programi durdurmak icin:
 .\stop.ps1
 ```
 
+## Ilk test
+
+1. `http://localhost:8080` adresine girin.
+2. `admin@akis-crm.local / admin123` ile oturum acin.
+3. `Aktarim Isleri` ekranina gidin.
+4. `Demo PostgreSQL -> PostgreSQL aktarim` isinde `Calistir` butonuna basin.
+5. `Calisma Gecmisi` ekraninda `completed`, `3 okunan`, `3 yazilan` benzeri sonucu gorun.
+
+Bu sonuc gorunuyorsa kurulum basarilidir.
+
 ## Veriler nerede duruyor?
 
-Veriler PostgreSQL veritabaninda Docker volume icinde tutulur. Yani tarayiciyi kapatmak verileri silmez.
+Veriler Docker icindeki PostgreSQL volume alaninda tutulur. Tarayiciyi kapatmak verileri silmez.
 
 Yedek almak icin:
 
@@ -109,8 +125,8 @@ Yedekler `backups` klasorune gelir.
 powershell -ExecutionPolicy Bypass -File .\backup.ps1
 ```
 
-2. Yeni bilgisayarda kurulumu yapin.
-3. Eski bilgisayardaki `backups` klasorunden son `.sql` dosyasini yeni bilgisayara kopyalayin.
+2. Yeni bilgisayarda ARGEKA Sync kurulumunu yapin.
+3. Eski bilgisayardaki son `.sql` yedek dosyasini yeni bilgisayardaki `backups` klasorune koyun.
 4. Yeni bilgisayarda proje klasorunde su komutu calistirin:
 
 ```powershell
@@ -123,7 +139,7 @@ powershell -ExecutionPolicy Bypass -File .\restore.ps1 -BackupFile .\backups\yed
 
 ### Docker Desktop acilmadi
 
-Docker Desktop'i Baslat menusunden acin. Tam acilmasini bekleyin. Sonra tekrar:
+Docker Desktop'i Baslat menusunden acin. Tam acilmasini bekleyin. Sonra:
 
 ```powershell
 .\start.ps1
@@ -135,7 +151,7 @@ Yeniden baslatin. Sonra kurulum komutunu tekrar calistirin.
 
 ### Sayfa acilmiyor
 
-Once Docker'in calistigindan emin olun. Sonra proje klasorunde:
+Proje klasorunde:
 
 ```powershell
 .\start.ps1
@@ -147,7 +163,7 @@ Ardindan tarayicida:
 http://localhost:8080
 ```
 
-### API calisiyor mu kontrol etmek
+### API calisiyor mu?
 
 Tarayicida su adresi acin:
 
@@ -155,14 +171,15 @@ Tarayicida su adresi acin:
 http://localhost:3000/health
 ```
 
-Ekranda `ok: true` benzeri bir cevap gorurseniz API calisiyor demektir.
+`ok: true` benzeri cevap varsa API calisiyor.
 
-## Kurulumdan sonra ilk kontrol listesi
+## Kurulum kontrol listesi
 
 - `http://localhost:8080` aciliyor mu?
-- `admin@akis-crm.local / admin123` ile giris oluyor mu?
-- Pipeline ekrani geliyor mu?
-- Musteriler, Teklifler, Gorevler ve Entegrasyon ekranlari gorunuyor mu?
-- Yonetim ekraninda lisans ve kullanici bilgileri gorunuyor mu?
+- Demo kullanici ile giris oluyor mu?
+- Dashboard gorunuyor mu?
+- Baglantilar ekraninda demo kaynak/hedef baglantilar var mi?
+- Aktarim Isleri ekraninda demo is var mi?
+- Demo isi calisinca Calisma Gecmisi'nde completed gorunuyor mu?
 
-Bu maddeler tamamsa kurulum basarilidir.
+Bu maddeler tamamsa ARGEKA Sync kullanima hazirdir.

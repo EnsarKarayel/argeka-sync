@@ -169,6 +169,108 @@ async function ensureSchema() {
       updated_at timestamptz not null default now()
     );
 
+    create table if not exists sync_connections (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      name text not null,
+      db_type text not null,
+      role text not null default 'both',
+      connection_url text,
+      host text,
+      port integer,
+      database_name text,
+      username text,
+      ssl_mode text not null default 'prefer',
+      status text not null default 'draft',
+      notes text,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
+
+    create table if not exists sync_queries (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      name text not null,
+      source_connection_id uuid references sync_connections(id) on delete set null,
+      sql_text text not null,
+      parameters jsonb not null default '{}',
+      status text not null default 'draft',
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
+
+    create table if not exists sync_jobs (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      name text not null,
+      query_id uuid references sync_queries(id) on delete set null,
+      target_connection_id uuid references sync_connections(id) on delete set null,
+      target_table text not null,
+      write_mode text not null default 'insert_only',
+      conflict_policy text not null default 'strict',
+      schedule_type text not null default 'manual',
+      schedule_value text,
+      enabled boolean not null default true,
+      last_run_at timestamptz,
+      next_run_at timestamptz,
+      created_at timestamptz not null default now(),
+      updated_at timestamptz not null default now()
+    );
+
+    create table if not exists sync_column_mappings (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      job_id uuid not null references sync_jobs(id) on delete cascade,
+      source_column text not null,
+      target_column text not null,
+      default_value text,
+      transform text not null default 'none',
+      required boolean not null default false,
+      ordinal integer not null default 0,
+      created_at timestamptz not null default now()
+    );
+
+    create table if not exists sync_job_runs (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      job_id uuid references sync_jobs(id) on delete set null,
+      status text not null default 'queued',
+      rows_read integer not null default 0,
+      rows_written integer not null default 0,
+      rows_skipped integer not null default 0,
+      error_message text,
+      started_at timestamptz not null default now(),
+      finished_at timestamptz
+    );
+
+    create table if not exists sync_run_logs (
+      id uuid primary key default gen_random_uuid(),
+      tenant_id uuid not null references tenants(id) on delete cascade,
+      run_id uuid references sync_job_runs(id) on delete cascade,
+      level text not null default 'info',
+      message text not null,
+      metadata jsonb not null default '{}',
+      created_at timestamptz not null default now()
+    );
+
+    create table if not exists sync_demo_source (
+      id serial primary key,
+      customer_code text not null unique,
+      customer_name text not null,
+      city text,
+      balance numeric(14,2) not null default 0,
+      updated_at timestamptz not null default now()
+    );
+
+    create table if not exists sync_demo_target (
+      id serial primary key,
+      code text,
+      title text,
+      city text,
+      balance numeric(14,2),
+      loaded_at timestamptz not null default now()
+    );
+
     create index if not exists app_roles_tenant_idx on app_roles (tenant_id);
     create index if not exists teams_tenant_idx on teams (tenant_id);
     create index if not exists users_tenant_team_idx on users (tenant_id, team_id);
@@ -179,6 +281,11 @@ async function ensureSchema() {
     create index if not exists quotes_tenant_created_idx on quotes (tenant_id, created_at desc);
     create index if not exists oauth_app_settings_tenant_idx on oauth_app_settings (tenant_id);
     create index if not exists oauth_authorization_attempts_tenant_idx on oauth_authorization_attempts (tenant_id, created_at desc);
+    create index if not exists sync_connections_tenant_idx on sync_connections (tenant_id, db_type);
+    create index if not exists sync_queries_tenant_idx on sync_queries (tenant_id, created_at desc);
+    create index if not exists sync_jobs_tenant_idx on sync_jobs (tenant_id, enabled);
+    create index if not exists sync_job_runs_tenant_idx on sync_job_runs (tenant_id, started_at desc);
+    create unique index if not exists sync_demo_source_customer_code_idx on sync_demo_source (customer_code);
   `);
 
   const tid = await tenantId();
@@ -259,6 +366,52 @@ async function ensureSchema() {
        on conflict (tenant_id, quote_no) do nothing`,
       [tid, admin.rows[0].id]
     );
+  }
+
+  await pool.query(
+    `insert into sync_demo_source (customer_code, customer_name, city, balance)
+     values
+       ('C-1001', 'Nova Teknoloji', 'Istanbul', 12500),
+       ('C-1002', 'Atlas Lojistik', 'Ankara', 8420),
+       ('C-1003', 'Vera Medikal', 'Izmir', 21900)
+     on conflict (customer_code) do nothing`
+  );
+
+  const existingSync = await pool.query("select id from sync_jobs where tenant_id = $1 limit 1", [tid]);
+  if (!existingSync.rows[0]) {
+    const internal = await pool.query(
+      `insert into sync_connections (tenant_id, name, db_type, role, connection_url, database_name, status, notes)
+       values
+         ($1, 'Demo Kaynak PostgreSQL', 'postgresql', 'source', 'internal://app', 'akis_crm', 'active', 'Kurulumla gelen ornek kaynak baglanti.'),
+         ($1, 'Demo Hedef PostgreSQL', 'postgresql', 'target', 'internal://app', 'akis_crm', 'active', 'Kurulumla gelen ornek hedef baglanti.')
+       returning id, role`,
+      [tid]
+    );
+    const sourceId = internal.rows.find((row) => row.role === "source")?.id;
+    const targetId = internal.rows.find((row) => row.role === "target")?.id;
+    if (sourceId && targetId) {
+      const query = await pool.query(
+        `insert into sync_queries (tenant_id, name, source_connection_id, sql_text, parameters, status)
+         values ($1, 'Demo musteri bakiyesi', $2, 'select customer_code, customer_name, city, balance from sync_demo_source where updated_at >= :last_run_at order by id', '{"last_run_at":"2000-01-01T00:00:00Z"}', 'ready')
+         returning id`,
+        [tid, sourceId]
+      );
+      const job = await pool.query(
+        `insert into sync_jobs (tenant_id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled)
+         values ($1, 'Demo PostgreSQL -> PostgreSQL aktarim', $2, $3, 'sync_demo_target', 'insert_only', 'strict', 'daily', '02:00', true)
+         returning id`,
+        [tid, query.rows[0].id, targetId]
+      );
+      await pool.query(
+        `insert into sync_column_mappings (tenant_id, job_id, source_column, target_column, ordinal)
+         values
+           ($1, $2, 'customer_code', 'code', 1),
+           ($1, $2, 'customer_name', 'title', 2),
+           ($1, $2, 'city', 'city', 3),
+           ($1, $2, 'balance', 'balance', 4)`,
+        [tid, job.rows[0].id]
+      );
+    }
   }
 }
 
@@ -369,6 +522,90 @@ function oauthAttemptPayload(row) {
     error: row.error,
     createdAt: row.created_at,
     updatedAt: row.updated_at
+  };
+}
+
+function syncConnectionPayload(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    dbType: row.db_type,
+    role: row.role,
+    connectionUrl: row.connection_url,
+    host: row.host,
+    port: row.port,
+    databaseName: row.database_name,
+    username: row.username,
+    sslMode: row.ssl_mode,
+    status: row.status,
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function syncQueryPayload(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    sourceConnectionId: row.source_connection_id,
+    sourceConnectionName: row.source_connection_name,
+    sqlText: row.sql_text,
+    parameters: row.parameters || {},
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function syncJobPayload(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    queryId: row.query_id,
+    queryName: row.query_name,
+    sourceConnectionName: row.source_connection_name,
+    targetConnectionId: row.target_connection_id,
+    targetConnectionName: row.target_connection_name,
+    targetTable: row.target_table,
+    writeMode: row.write_mode,
+    conflictPolicy: row.conflict_policy,
+    scheduleType: row.schedule_type,
+    scheduleValue: row.schedule_value,
+    enabled: Boolean(row.enabled),
+    lastRunAt: row.last_run_at,
+    nextRunAt: row.next_run_at,
+    mappingCount: Number(row.mapping_count || 0),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+function syncMappingPayload(row) {
+  return {
+    id: row.id,
+    jobId: row.job_id,
+    sourceColumn: row.source_column,
+    targetColumn: row.target_column,
+    defaultValue: row.default_value,
+    transform: row.transform,
+    required: Boolean(row.required),
+    ordinal: Number(row.ordinal || 0)
+  };
+}
+
+function syncRunPayload(row) {
+  return {
+    id: row.id,
+    jobId: row.job_id,
+    jobName: row.job_name,
+    status: row.status,
+    rowsRead: Number(row.rows_read || 0),
+    rowsWritten: Number(row.rows_written || 0),
+    rowsSkipped: Number(row.rows_skipped || 0),
+    errorMessage: row.error_message,
+    startedAt: row.started_at,
+    finishedAt: row.finished_at
   };
 }
 
@@ -1320,6 +1557,394 @@ async function sandboxConnectOAuth(req, res) {
   send(res, 200, { data: integrationSettingPayload(updated.rows[0]) });
 }
 
+async function listSyncConnections(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await pool.query(
+    `select id, name, db_type, role, connection_url, host, port, database_name, username, ssl_mode, status, notes, created_at, updated_at
+     from sync_connections
+     where tenant_id = $1
+     order by created_at desc`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(syncConnectionPayload) });
+}
+
+async function createSyncConnection(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  if (!body.name || !body.dbType) return send(res, 400, { error: "missing_fields" });
+  const result = await pool.query(
+    `insert into sync_connections
+       (tenant_id, name, db_type, role, connection_url, host, port, database_name, username, ssl_mode, status, notes)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+     returning id, name, db_type, role, connection_url, host, port, database_name, username, ssl_mode, status, notes, created_at, updated_at`,
+    [
+      session.tenant_id,
+      body.name,
+      body.dbType,
+      body.role || "both",
+      body.connectionUrl || null,
+      body.host || null,
+      body.port ? Number(body.port) : null,
+      body.databaseName || null,
+      body.username || null,
+      body.sslMode || "prefer",
+      body.status || "draft",
+      body.notes || null
+    ]
+  );
+  await auditLog(session, "sync.connection_created", "sync_connection", result.rows[0].id, { dbType: body.dbType });
+  send(res, 201, { data: syncConnectionPayload(result.rows[0]) });
+}
+
+async function testSyncConnection(req, res, id) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const connection = await pool.query(
+    "select * from sync_connections where id = $1 and tenant_id = $2 limit 1",
+    [id, session.tenant_id]
+  );
+  const row = connection.rows[0];
+  if (!row) return send(res, 404, { error: "not_found" });
+  if (row.connection_url === "internal://app" || row.db_type === "postgresql") {
+    if (row.connection_url && row.connection_url !== "internal://app") {
+      const testPool = new Pool({ connectionString: row.connection_url });
+      try {
+        await testPool.query("select 1");
+      } finally {
+        await testPool.end();
+      }
+    } else {
+      await pool.query("select 1");
+    }
+    await pool.query("update sync_connections set status = 'active', updated_at = now() where id = $1", [id]);
+    return send(res, 200, { ok: true, status: "active", message: "PostgreSQL baglantisi calisiyor." });
+  }
+  await pool.query("update sync_connections set status = 'driver_needed', updated_at = now() where id = $1", [id]);
+  return send(res, 200, {
+    ok: false,
+    status: "driver_needed",
+    message: `${row.db_type} connector hazir listede, calisma motoru icin driver/ODBC kurulumu gerekir.`
+  });
+}
+
+async function listSyncQueries(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await pool.query(
+    `select q.id, q.name, q.source_connection_id, c.name as source_connection_name,
+            q.sql_text, q.parameters, q.status, q.created_at, q.updated_at
+     from sync_queries q
+     left join sync_connections c on c.id = q.source_connection_id
+     where q.tenant_id = $1
+     order by q.created_at desc`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(syncQueryPayload) });
+}
+
+async function createSyncQuery(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  if (!body.name || !body.sourceConnectionId || !body.sqlText) return send(res, 400, { error: "missing_fields" });
+  const parameters = typeof body.parameters === "string"
+    ? JSON.parse(body.parameters || "{}")
+    : body.parameters || {};
+  const result = await pool.query(
+    `insert into sync_queries (tenant_id, name, source_connection_id, sql_text, parameters, status)
+     values ($1,$2,$3,$4,$5::jsonb,$6)
+     returning id, name, source_connection_id, sql_text, parameters, status, created_at, updated_at`,
+    [session.tenant_id, body.name, body.sourceConnectionId, body.sqlText, JSON.stringify(parameters), body.status || "ready"]
+  );
+  await auditLog(session, "sync.query_created", "sync_query", result.rows[0].id, { name: body.name });
+  send(res, 201, { data: syncQueryPayload(result.rows[0]) });
+}
+
+async function previewSyncQuery(req, res, id) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const query = await pool.query(
+    `select q.*, c.connection_url, c.db_type
+     from sync_queries q
+     join sync_connections c on c.id = q.source_connection_id
+     where q.id = $1 and q.tenant_id = $2`,
+    [id, session.tenant_id]
+  );
+  const row = query.rows[0];
+  if (!row) return send(res, 404, { error: "not_found" });
+  const { sql, values } = parameterizeSql(row.sql_text, row.parameters || {});
+  const sourcePool = connectionPool(row);
+  try {
+    const result = await sourcePool.query(`${sql} limit 20`, values);
+    send(res, 200, { columns: result.fields.map((field) => field.name), data: result.rows });
+  } finally {
+    if (sourcePool !== pool) await sourcePool.end();
+  }
+}
+
+async function listSyncJobs(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await pool.query(
+    `select j.id, j.name, j.query_id, q.name as query_name, sc.name as source_connection_name,
+            j.target_connection_id, tc.name as target_connection_name, j.target_table,
+            j.write_mode, j.conflict_policy, j.schedule_type, j.schedule_value, j.enabled,
+            j.last_run_at, j.next_run_at, j.created_at, j.updated_at,
+            count(m.id)::int as mapping_count
+     from sync_jobs j
+     left join sync_queries q on q.id = j.query_id
+     left join sync_connections sc on sc.id = q.source_connection_id
+     left join sync_connections tc on tc.id = j.target_connection_id
+     left join sync_column_mappings m on m.job_id = j.id
+     where j.tenant_id = $1
+     group by j.id, q.name, sc.name, tc.name
+     order by j.created_at desc`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(syncJobPayload) });
+}
+
+async function createSyncJob(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  if (!body.name || !body.queryId || !body.targetConnectionId || !body.targetTable) {
+    return send(res, 400, { error: "missing_fields" });
+  }
+  const result = await pool.query(
+    `insert into sync_jobs
+       (tenant_id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+     returning id, name, query_id, target_connection_id, target_table, write_mode, conflict_policy, schedule_type, schedule_value, enabled, last_run_at, next_run_at, created_at, updated_at`,
+    [
+      session.tenant_id,
+      body.name,
+      body.queryId,
+      body.targetConnectionId,
+      body.targetTable,
+      body.writeMode || "insert_only",
+      body.conflictPolicy || "strict",
+      body.scheduleType || "manual",
+      body.scheduleValue || null,
+      body.enabled !== false
+    ]
+  );
+  if (Array.isArray(body.mappings)) {
+    await replaceSyncMappings(session.tenant_id, result.rows[0].id, body.mappings);
+  }
+  await auditLog(session, "sync.job_created", "sync_job", result.rows[0].id, { name: body.name });
+  send(res, 201, { data: syncJobPayload(result.rows[0]) });
+}
+
+async function listSyncMappings(req, res, jobId) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await pool.query(
+    `select id, job_id, source_column, target_column, default_value, transform, required, ordinal
+     from sync_column_mappings
+     where tenant_id = $1 and job_id = $2
+     order by ordinal asc, created_at asc`,
+    [session.tenant_id, jobId]
+  );
+  send(res, 200, { data: result.rows.map(syncMappingPayload) });
+}
+
+async function saveSyncMappings(req, res, jobId) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const body = await readJson(req);
+  await replaceSyncMappings(session.tenant_id, jobId, body.mappings || []);
+  await auditLog(session, "sync.mappings_saved", "sync_job", jobId, { count: body.mappings?.length || 0 });
+  return listSyncMappings(req, res, jobId);
+}
+
+async function replaceSyncMappings(tenant, jobId, mappings) {
+  await pool.query("delete from sync_column_mappings where tenant_id = $1 and job_id = $2", [tenant, jobId]);
+  for (const [index, mapping] of mappings.entries()) {
+    if (!mapping.sourceColumn || !mapping.targetColumn) continue;
+    await pool.query(
+      `insert into sync_column_mappings
+         (tenant_id, job_id, source_column, target_column, default_value, transform, required, ordinal)
+       values ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [
+        tenant,
+        jobId,
+        mapping.sourceColumn,
+        mapping.targetColumn,
+        mapping.defaultValue || null,
+        mapping.transform || "none",
+        Boolean(mapping.required),
+        Number(mapping.ordinal || index + 1)
+      ]
+    );
+  }
+}
+
+async function listSyncRuns(req, res) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const result = await pool.query(
+    `select r.id, r.job_id, j.name as job_name, r.status, r.rows_read, r.rows_written,
+            r.rows_skipped, r.error_message, r.started_at, r.finished_at
+     from sync_job_runs r
+     left join sync_jobs j on j.id = r.job_id
+     where r.tenant_id = $1
+     order by r.started_at desc
+     limit 30`,
+    [session.tenant_id]
+  );
+  send(res, 200, { data: result.rows.map(syncRunPayload) });
+}
+
+async function runSyncJob(req, res, jobId) {
+  const session = await requireSession(req, res);
+  if (!session) return;
+  const run = await pool.query(
+    "insert into sync_job_runs (tenant_id, job_id, status) values ($1,$2,'running') returning id, started_at",
+    [session.tenant_id, jobId]
+  );
+  const runId = run.rows[0].id;
+  try {
+    const summary = await executeSyncJob(session.tenant_id, jobId, runId);
+    await auditLog(session, "sync.job_run", "sync_job", jobId, summary);
+    send(res, 200, { data: summary });
+  } catch (error) {
+    await pool.query(
+      "update sync_job_runs set status = 'failed', error_message = $2, finished_at = now() where id = $1",
+      [runId, error.message]
+    );
+    await syncRunLog(session.tenant_id, runId, "error", error.message);
+    send(res, 500, { error: "sync_failed", message: error.message, runId });
+  }
+}
+
+async function executeSyncJob(tenant, jobId, runId) {
+  const jobResult = await pool.query(
+    `select j.*, q.sql_text, q.parameters, sc.connection_url as source_url, sc.db_type as source_type,
+            tc.connection_url as target_url, tc.db_type as target_type
+     from sync_jobs j
+     join sync_queries q on q.id = j.query_id
+     join sync_connections sc on sc.id = q.source_connection_id
+     join sync_connections tc on tc.id = j.target_connection_id
+     where j.id = $1 and j.tenant_id = $2`,
+    [jobId, tenant]
+  );
+  const job = jobResult.rows[0];
+  if (!job) throw new Error("Aktarim isi bulunamadi.");
+  if (!["postgresql"].includes(job.source_type) || !["postgresql"].includes(job.target_type)) {
+    throw new Error("Bu connector henuz calisma motoruna baglanmadi. PostgreSQL/Internal demo aktif.");
+  }
+  const mappings = await pool.query(
+    `select source_column, target_column, default_value, transform, required
+     from sync_column_mappings
+     where tenant_id = $1 and job_id = $2
+     order by ordinal asc, created_at asc`,
+    [tenant, jobId]
+  );
+  if (!mappings.rows.length) throw new Error("Kolon eslemesi yok.");
+
+  const sourcePool = connectionPool({ connection_url: job.source_url });
+  const targetPool = connectionPool({ connection_url: job.target_url });
+  try {
+    const parameters = { ...(job.parameters || {}), last_run_at: job.last_run_at || job.parameters?.last_run_at || "2000-01-01T00:00:00Z" };
+    const { sql, values } = parameterizeSql(job.sql_text, parameters);
+    const source = await sourcePool.query(sql, values);
+    let written = 0;
+    let skipped = 0;
+    if (job.write_mode === "truncate_reload") {
+      await targetPool.query(`truncate table ${safeIdentifier(job.target_table)} restart identity`);
+    }
+    for (const row of source.rows) {
+      const built = buildTargetRow(row, mappings.rows, job.conflict_policy);
+      if (built.skip) {
+        skipped += 1;
+        await syncRunLog(tenant, runId, "warn", built.message, { row });
+        continue;
+      }
+      await insertTargetRow(targetPool, job.target_table, built.values, job.write_mode);
+      written += 1;
+    }
+    await pool.query(
+      `update sync_job_runs
+       set status = 'completed', rows_read = $2, rows_written = $3, rows_skipped = $4, finished_at = now()
+       where id = $1`,
+      [runId, source.rows.length, written, skipped]
+    );
+    await pool.query("update sync_jobs set last_run_at = now(), updated_at = now() where id = $1", [jobId]);
+    await syncRunLog(tenant, runId, "info", "Aktarim tamamlandi.", { read: source.rows.length, written, skipped });
+    return { runId, status: "completed", rowsRead: source.rows.length, rowsWritten: written, rowsSkipped: skipped };
+  } finally {
+    if (sourcePool !== pool) await sourcePool.end();
+    if (targetPool !== pool && targetPool !== sourcePool) await targetPool.end();
+  }
+}
+
+function connectionPool(connection) {
+  if (!connection.connection_url || connection.connection_url === "internal://app") return pool;
+  return new Pool({ connectionString: connection.connection_url });
+}
+
+function parameterizeSql(sqlText, params) {
+  const values = [];
+  const sql = String(sqlText).replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (_, key) => {
+    values.push(params[key] ?? null);
+    return `$${values.length}`;
+  });
+  return { sql, values };
+}
+
+function buildTargetRow(row, mappings, policy) {
+  const values = {};
+  for (const mapping of mappings) {
+    let value = row[mapping.source_column];
+    if (value === undefined || value === null) value = mapping.default_value;
+    if ((value === undefined || value === null) && mapping.required) {
+      if (policy === "skip_row" || policy === "quarantine") return { skip: true, message: `${mapping.source_column} zorunlu ama bos.` };
+      throw new Error(`${mapping.source_column} zorunlu ama kaynakta yok.`);
+    }
+    if (value === undefined && policy === "strict") throw new Error(`${mapping.source_column} kaynak sonucunda yok.`);
+    if (value === undefined) continue;
+    values[mapping.target_column] = applyTransform(value, mapping.transform);
+  }
+  return { values };
+}
+
+function applyTransform(value, transform) {
+  if (value === null || value === undefined) return value;
+  if (transform === "trim") return String(value).trim();
+  if (transform === "upper") return String(value).toLocaleUpperCase("tr-TR");
+  if (transform === "lower") return String(value).toLocaleLowerCase("tr-TR");
+  if (transform === "number") return Number(value || 0);
+  return value;
+}
+
+async function insertTargetRow(targetPool, table, values, writeMode) {
+  const columns = Object.keys(values);
+  if (!columns.length) return;
+  const placeholders = columns.map((_, index) => `$${index + 1}`);
+  const suffix = writeMode === "skip_duplicates" ? " on conflict do nothing" : "";
+  await targetPool.query(
+    `insert into ${safeIdentifier(table)} (${columns.map(safeIdentifier).join(",")}) values (${placeholders.join(",")})${suffix}`,
+    columns.map((column) => values[column])
+  );
+}
+
+function safeIdentifier(value) {
+  const text = String(value || "");
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(text)) throw new Error(`Gecersiz SQL tanimlayici: ${text}`);
+  return `"${text}"`;
+}
+
+async function syncRunLog(tenant, runId, level, message, metadata = {}) {
+  await pool.query(
+    "insert into sync_run_logs (tenant_id, run_id, level, message, metadata) values ($1,$2,$3,$4,$5::jsonb)",
+    [tenant, runId, level, message, JSON.stringify(metadata)]
+  );
+}
+
 async function listOpportunities(req, res) {
   const session = await requireSession(req, res);
   if (!session) return;
@@ -1455,7 +2080,7 @@ async function handler(req, res) {
       return send(res, 200, { ok: true, service: "akis-crm-api" });
     }
     if (req.method === "GET" && url.pathname === "/api/meta") {
-      return send(res, 200, { name: "ARGEKA CRM", edition: "hybrid", api: "0.1.0" });
+      return send(res, 200, { name: "ARGEKA Sync", edition: "self-hosted", api: "0.2.0" });
     }
     if (req.method === "POST" && url.pathname === "/api/auth/login") return login(req, res);
     if (req.method === "GET" && url.pathname === "/api/auth/me") return me(req, res);
@@ -1481,6 +2106,22 @@ async function handler(req, res) {
     if (req.method === "POST" && url.pathname === "/api/oauth/sandbox-connect") return sandboxConnectOAuth(req, res);
     const oauthCallbackMatch = url.pathname.match(/^\/oauth\/([^/]+)\/callback$/);
     if (req.method === "GET" && oauthCallbackMatch) return oauthCallback(req, res, oauthCallbackMatch[1], url);
+    if (req.method === "GET" && url.pathname === "/api/sync/connections") return listSyncConnections(req, res);
+    if (req.method === "POST" && url.pathname === "/api/sync/connections") return createSyncConnection(req, res);
+    const syncConnectionTestMatch = url.pathname.match(/^\/api\/sync\/connections\/([^/]+)\/test$/);
+    if (req.method === "POST" && syncConnectionTestMatch) return testSyncConnection(req, res, syncConnectionTestMatch[1]);
+    if (req.method === "GET" && url.pathname === "/api/sync/queries") return listSyncQueries(req, res);
+    if (req.method === "POST" && url.pathname === "/api/sync/queries") return createSyncQuery(req, res);
+    const syncQueryPreviewMatch = url.pathname.match(/^\/api\/sync\/queries\/([^/]+)\/preview$/);
+    if (req.method === "POST" && syncQueryPreviewMatch) return previewSyncQuery(req, res, syncQueryPreviewMatch[1]);
+    if (req.method === "GET" && url.pathname === "/api/sync/jobs") return listSyncJobs(req, res);
+    if (req.method === "POST" && url.pathname === "/api/sync/jobs") return createSyncJob(req, res);
+    const syncMappingMatch = url.pathname.match(/^\/api\/sync\/jobs\/([^/]+)\/mappings$/);
+    if (req.method === "GET" && syncMappingMatch) return listSyncMappings(req, res, syncMappingMatch[1]);
+    if (req.method === "POST" && syncMappingMatch) return saveSyncMappings(req, res, syncMappingMatch[1]);
+    const syncRunMatch = url.pathname.match(/^\/api\/sync\/jobs\/([^/]+)\/run$/);
+    if (req.method === "POST" && syncRunMatch) return runSyncJob(req, res, syncRunMatch[1]);
+    if (req.method === "GET" && url.pathname === "/api/sync/runs") return listSyncRuns(req, res);
     if (req.method === "GET" && url.pathname === "/api/opportunities") return listOpportunities(req, res);
     if (req.method === "POST" && url.pathname === "/api/opportunities") return createOpportunity(req, res);
     const opportunityMatch = url.pathname.match(/^\/api\/opportunities\/([^/]+)$/);
@@ -1496,11 +2137,11 @@ async function handler(req, res) {
 ensureSchema()
   .then(() => {
     http.createServer(handler).listen(port, () => {
-      console.log(`ARGEKA CRM API listening on ${port}`);
+      console.log(`ARGEKA Sync API listening on ${port}`);
     });
   })
   .catch((error) => {
-    console.error("ARGEKA CRM API startup failed", error);
+    console.error("ARGEKA Sync API startup failed", error);
     process.exit(1);
   });
 

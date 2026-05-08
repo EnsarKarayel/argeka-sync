@@ -193,6 +193,108 @@ create table oauth_authorization_attempts (
   updated_at timestamptz not null default now()
 );
 
+create table sync_connections (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  name text not null,
+  db_type text not null,
+  role text not null default 'both',
+  connection_url text,
+  host text,
+  port integer,
+  database_name text,
+  username text,
+  ssl_mode text not null default 'prefer',
+  status text not null default 'draft',
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table sync_queries (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  name text not null,
+  source_connection_id uuid references sync_connections(id) on delete set null,
+  sql_text text not null,
+  parameters jsonb not null default '{}',
+  status text not null default 'draft',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table sync_jobs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  name text not null,
+  query_id uuid references sync_queries(id) on delete set null,
+  target_connection_id uuid references sync_connections(id) on delete set null,
+  target_table text not null,
+  write_mode text not null default 'insert_only',
+  conflict_policy text not null default 'strict',
+  schedule_type text not null default 'manual',
+  schedule_value text,
+  enabled boolean not null default true,
+  last_run_at timestamptz,
+  next_run_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table sync_column_mappings (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  job_id uuid not null references sync_jobs(id) on delete cascade,
+  source_column text not null,
+  target_column text not null,
+  default_value text,
+  transform text not null default 'none',
+  required boolean not null default false,
+  ordinal integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create table sync_job_runs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  job_id uuid references sync_jobs(id) on delete set null,
+  status text not null default 'queued',
+  rows_read integer not null default 0,
+  rows_written integer not null default 0,
+  rows_skipped integer not null default 0,
+  error_message text,
+  started_at timestamptz not null default now(),
+  finished_at timestamptz
+);
+
+create table sync_run_logs (
+  id uuid primary key default gen_random_uuid(),
+  tenant_id uuid not null references tenants(id) on delete cascade,
+  run_id uuid references sync_job_runs(id) on delete cascade,
+  level text not null default 'info',
+  message text not null,
+  metadata jsonb not null default '{}',
+  created_at timestamptz not null default now()
+);
+
+create table sync_demo_source (
+  id serial primary key,
+  customer_code text not null unique,
+  customer_name text not null,
+  city text,
+  balance numeric(14, 2) not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create table sync_demo_target (
+  id serial primary key,
+  code text,
+  title text,
+  city text,
+  balance numeric(14, 2),
+  loaded_at timestamptz not null default now()
+);
+
 create table webhook_endpoints (
   id uuid primary key default gen_random_uuid(),
   tenant_id uuid not null references tenants(id) on delete cascade,
@@ -247,6 +349,11 @@ create index action_items_tenant_due_idx on action_items (tenant_id, due_date);
 create index quotes_tenant_created_idx on quotes (tenant_id, created_at desc);
 create index oauth_app_settings_tenant_idx on oauth_app_settings (tenant_id);
 create index oauth_authorization_attempts_tenant_idx on oauth_authorization_attempts (tenant_id, created_at desc);
+create index sync_connections_tenant_idx on sync_connections (tenant_id, db_type);
+create index sync_queries_tenant_idx on sync_queries (tenant_id, created_at desc);
+create index sync_jobs_tenant_idx on sync_jobs (tenant_id, enabled);
+create index sync_job_runs_tenant_idx on sync_job_runs (tenant_id, started_at desc);
+create unique index sync_demo_source_customer_code_idx on sync_demo_source (customer_code);
 create index sessions_token_hash_idx on sessions (token_hash);
 create index sessions_user_idx on sessions (user_id);
 create index app_roles_tenant_idx on app_roles (tenant_id);

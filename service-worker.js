@@ -1,10 +1,10 @@
-const CACHE_NAME = "argeka-crm-v10";
+const CACHE_NAME = "argeka-sync-v1";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./assets/css/styles.css",
-  "./assets/js/app.js",
+  "./assets/js/sync-app.js",
   "./assets/icons/favicon.svg"
 ];
 

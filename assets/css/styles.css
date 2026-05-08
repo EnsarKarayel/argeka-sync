@@ -734,6 +734,85 @@ textarea:focus {
   background: #fbfcfb;
 }
 
+.record-card.is-selected {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(8, 127, 116, 0.13);
+}
+
+.record-card code {
+  display: block;
+  overflow-x: auto;
+  padding: 10px;
+  border-radius: 8px;
+  background: #eef2ef;
+  color: #274139;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+.sync-dashboard.content-grid {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.sync-flow,
+.connector-grid,
+.schedule-list,
+.mapping-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.sync-flow {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.sync-flow article,
+.connector-card {
+  display: grid;
+  gap: 8px;
+  min-height: 130px;
+  align-content: start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.sync-flow small,
+.connector-card span {
+  color: var(--muted);
+}
+
+.connector-card.is-active {
+  border-color: rgba(8, 127, 116, 0.34);
+  background: #f1faf7;
+}
+
+.mapping-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 130px 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.inline-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.inline-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.preview-table {
+  margin-top: 14px;
+}
+
 .record-card header,
 .oauth-row {
   display: flex;
@@ -1277,6 +1356,7 @@ textarea:focus {
   }
 
   .content-grid,
+  .sync-dashboard.content-grid,
   .two-column,
   .customer-layout,
   .quote-layout,
@@ -1287,6 +1367,11 @@ textarea:focus {
   .distribution-layout,
   .admin-layout,
   .oauth-card {
+    grid-template-columns: 1fr;
+  }
+
+  .sync-flow,
+  .mapping-row {
     grid-template-columns: 1fr;
   }
 

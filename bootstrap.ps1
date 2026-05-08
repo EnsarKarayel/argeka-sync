@@ -1,6 +1,6 @@
 param(
   [string]$RepoUrl = "https://github.com/EnsarKarayel/akis-crm.git",
-  [string]$InstallDir = "$env:USERPROFILE\Desktop\ARGEKA-CRM"
+  [string]$InstallDir = "$env:USERPROFILE\Desktop\ARGEKA-Sync"
 )
 
 $ErrorActionPreference = "Stop"

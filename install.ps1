@@ -126,7 +126,7 @@ function Ensure-EnvFile {
 }
 
 function Start-Stack {
-  Write-Step "ARGEKA CRM Docker servisleri baslatiliyor"
+  Write-Step "ARGEKA Sync Docker servisleri baslatiliyor"
   Push-Location $RepoRoot
   try {
     docker compose --env-file $EnvFile -f $ComposeFile up -d --build

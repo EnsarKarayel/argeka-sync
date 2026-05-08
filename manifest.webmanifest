@@ -1,7 +1,7 @@
 {
-  "name": "ARGEKA CRM",
-  "short_name": "ARGEKA CRM",
-  "description": "Gmail, Outlook, takvim, pipeline ve toplantı odaklı SaaS CRM.",
+  "name": "ARGEKA Sync",
+  "short_name": "ARGEKA Sync",
+  "description": "Self-hosted, tek yonlu ve zamanlanabilir mini ETL veri aktarim araci.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -17,4 +17,3 @@
     }
   ]
 }
-
