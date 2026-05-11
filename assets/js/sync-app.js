@@ -127,6 +127,23 @@ async function restoreSession() {
   }
 }
 
+async function startDefaultSession() {
+  els.loginMessage.textContent = "Yerel servisle baglanti kuruluyor...";
+  try {
+    const payload = await apiRequest("/api/auth/local-session", { method: "POST", body: "{}" });
+    saveSession(payload);
+    await syncAll();
+    logActivity("ARGEKA Sync calisma alani hazir.");
+    render();
+    return true;
+  } catch {
+    saveSession(null);
+    els.loginMessage.textContent = "Servis henuz hazir degil. Docker Desktop aciksa biraz bekleyip tekrar deneyin.";
+    render();
+    return false;
+  }
+}
+
 async function syncAll() {
   if (!state.session?.token) return;
   const [connections, queries, jobs, runs, scheduler, overview] = await Promise.all([
@@ -399,26 +416,12 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 
 els.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  els.loginMessage.textContent = "Giris yapiliyor...";
-  try {
-    const payload = await apiRequest("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(Object.fromEntries(new FormData(els.loginForm).entries()))
-    });
-    saveSession(payload);
-    await syncAll();
-    logActivity("ARGEKA Sync calisma alani hazir.");
-    render();
-  } catch {
-    saveSession(null);
-    els.loginMessage.textContent = "Giris basarisiz.";
-    render();
-  }
+  await startDefaultSession();
 });
 
-els.logoutButton.addEventListener("click", () => {
+els.logoutButton.addEventListener("click", async () => {
   saveSession(null);
-  render();
+  await startDefaultSession();
 });
 
 els.refreshButton.addEventListener("click", async () => {
@@ -630,8 +633,11 @@ async function initApp() {
   if (state.session?.token) {
     await syncAll();
     logActivity("ARGEKA Sync hazir.");
+    render();
+    return;
   }
   render();
+  await startDefaultSession();
 }
 
 initApp();

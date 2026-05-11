@@ -8,16 +8,11 @@ Bu kilavuz ilk kullanim icindir. Teknik terimleri mumkun oldugunca basit tuttuk.
 2. Tarayici acilir.
 3. Acilmazsa tarayiciya `http://localhost:8080` yazin.
 
-## Giris yapma
+## Ilk acilis
 
-Demo bilgiler:
+Kullanici adi veya sifre yazmaniz gerekmez. ARGEKA Sync yerel oturumu otomatik acar.
 
-```text
-E-posta: admin@argeka.local
-Sifre: admin123
-```
-
-Canli kullanimda bu sifreyi degistirin.
+Servis henuz hazir degilse ekranda tekrar deneme mesaji gorunur. Docker Desktop aciksa 1-2 dakika bekleyip `Tekrar dene` butonuna basin.
 
 ## ARGEKA Sync ne yapar?
 

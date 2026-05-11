@@ -67,3 +67,5 @@ Gercek yayin icin:
 ## ads.txt
 
 `website/ads.txt` simdilik hazirlik dosyasidir. AdSense hesabi acildiginda Google'in verdigi satir eklenmelidir.
+
+Detayli kontrol listesi icin [AdSense hazirligi](ADSENSE.md) dosyasina bakin.

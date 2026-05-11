@@ -65,17 +65,13 @@ Kurulumdan sonra:
 http://localhost:8080
 ```
 
-Demo girisi:
-
-```text
-admin@argeka.local / admin123
-```
+Panel yerel oturumu otomatik acar; web sitesi veya kurulu uygulama normal kullanimda kullanici adi ve sifre istemez.
 
 ## Ilk demo aktarim
 
 Kurulumla birlikte bir demo PostgreSQL kaynak ve hedef baglantisi gelir.
 
-1. `http://localhost:8080` adresinde giris yapin.
+1. `http://localhost:8080` adresini acin.
 2. `Aktarim Isleri` ekranina gidin.
 3. `Demo PostgreSQL -> PostgreSQL aktarim` isini secin.
 4. `Calistir` butonuna basin.

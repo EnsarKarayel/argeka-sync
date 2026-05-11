@@ -48,21 +48,16 @@ Double-click it to open ARGEKA Sync. If the browser does not open, type this add
 http://localhost:8080
 ```
 
-## First login
+## First open
 
-Demo user:
+After installation, you do not need to type a username or password. The panel starts the local session automatically.
 
-```text
-Email: admin@argeka.local
-Password: admin123
-```
-
-Change the password before real use.
+If the service is not ready yet, the screen shows a retry message. If Docker Desktop is open, wait 1-2 minutes and click `Retry`.
 
 ## First test
 
 1. Open `http://localhost:8080`.
-2. Sign in with the demo user.
+2. The panel opens automatically.
 3. Open `Connections` and check the demo source/target connections.
 4. Open `Sync Jobs`.
 5. Click `Run` on the demo PostgreSQL job.

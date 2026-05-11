@@ -151,7 +151,7 @@ function Show-Status {
   docker compose --env-file $EnvFile -f $ComposeFile ps
   Write-Host ""
   Write-Host "Web: http://localhost:$((Get-Content $EnvFile | Where-Object { $_ -match '^WEB_PORT=' } | Select-Object -First 1) -replace '^WEB_PORT=', '')" -ForegroundColor Green
-  Write-Host "Demo: admin@argeka.local / admin123" -ForegroundColor Green
+  Write-Host (T "Panel otomatik acilir; kullanici adi ve sifre gerekmez." "The panel opens automatically; no username or password is required.") -ForegroundColor Green
 }
 
 function Find-CSharpCompiler {

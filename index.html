@@ -33,21 +33,13 @@
     </script>
   </head>
   <body>
-    <section class="login-screen" id="loginScreen" aria-label="Giris">
-      <form class="login-panel" id="loginForm" method="post" autocomplete="on">
+    <section class="login-screen" id="loginScreen" aria-label="Baslatma">
+      <form class="login-panel" id="loginForm" method="post" autocomplete="off">
         <img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true">
         <h1>ARGEKA Sync</h1>
-        <p>Self-hosted veri aktarim paneline giris yapin.</p>
-        <label>
-          E-posta
-          <input name="email" type="email" value="admin@argeka.local" required>
-        </label>
-        <label>
-          Sifre
-          <input name="password" type="password" placeholder="admin123" required>
-        </label>
-        <button class="primary-button" type="submit">Giris yap</button>
-        <small id="loginMessage">Demo: admin@argeka.local / admin123</small>
+        <p>Yerel self-hosted calisma alani hazirlaniyor.</p>
+        <button class="primary-button" type="submit">Tekrar dene</button>
+        <small id="loginMessage">Uygulama otomatik aciliyor. Docker Desktop ilk acilista biraz zaman alabilir.</small>
       </form>
     </section>
 
@@ -100,7 +92,7 @@
           <span class="pill success">Self-hosted beta</span>
           <strong id="accountName">ARGEKA Sync</strong>
           <span id="accountMeta">Oturum bekleniyor</span>
-          <button class="ghost-button" id="logoutButton" type="button">Cikis</button>
+          <button class="ghost-button" id="logoutButton" type="button">Oturumu yenile</button>
         </div>
       </aside>
 

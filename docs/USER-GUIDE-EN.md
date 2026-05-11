@@ -8,16 +8,11 @@ This guide is for first use. We keep the language simple.
 2. Your browser opens.
 3. If it does not open, type `http://localhost:8080` in the browser.
 
-## Sign in
+## First open
 
-Demo user:
+You do not need to type a username or password. ARGEKA Sync starts the local session automatically.
 
-```text
-Email: admin@argeka.local
-Password: admin123
-```
-
-Change this password before real use.
+If the service is not ready yet, the screen shows a retry message. If Docker Desktop is open, wait 1-2 minutes and click `Retry`.
 
 ## What does ARGEKA Sync do?
 

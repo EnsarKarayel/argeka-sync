@@ -841,6 +841,12 @@ function isAdmin(session) {
   return session?.role === "owner" || session?.role_key === "owner" || session?.permissions?.admin === true;
 }
 
+function isLocalRequest(req) {
+  const rawHost = String(req.headers.host || "").toLowerCase();
+  const host = rawHost.startsWith("[") ? rawHost.slice(0, rawHost.indexOf("]") + 1) : rawHost.split(":")[0];
+  return host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "[::1]";
+}
+
 async function requireAdmin(req, res) {
   const session = await requireSession(req, res);
   if (!session) return null;
@@ -880,6 +886,49 @@ async function login(req, res) {
   const demoPasswordOk = user?.email === "admin@argeka.local" && body.password === "admin123";
   const passwordOk = demoPasswordOk || (user?.password_hash && bcrypt.compareSync(body.password || "", user.password_hash));
   if (!user || !passwordOk) return send(res, 401, { error: "invalid_credentials" });
+
+  const token = randomBytes(32).toString("hex");
+  await pool.query(
+    `insert into sessions (tenant_id, user_id, token_hash, expires_at)
+     values ($1, $2, $3, now() + interval '14 days')`,
+    [user.tenant_id, user.id, tokenHash(token)]
+  );
+  send(res, 200, {
+    token,
+    user: sessionUser({
+      user_id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      role_key: user.role_key,
+      role_name: user.role_name,
+      team_id: user.team_id,
+      team_name: user.team_name,
+      data_scope: user.data_scope,
+      hidden_columns: user.hidden_columns,
+      permissions: user.permissions
+    }),
+    tenant: { id: user.tenant_id, name: user.tenant_name, plan: user.plan }
+  });
+}
+
+async function localSession(req, res) {
+  if (!isLocalRequest(req)) return send(res, 403, { error: "local_only" });
+
+  const result = await pool.query(
+    `select u.id, u.tenant_id, u.email, u.full_name, u.password_hash, u.role, u.team_id, u.data_scope, u.hidden_columns,
+            r.key as role_key, r.name as role_name, r.permissions,
+            tm.name as team_name,
+            t.name as tenant_name, t.plan
+     from users u
+     join tenants t on t.id = u.tenant_id
+     left join app_roles r on r.id = u.role_id
+     left join teams tm on tm.id = u.team_id
+     order by case when lower(u.email::text) = 'admin@argeka.local' then 0 else 1 end, u.created_at asc
+     limit 1`
+  );
+  const user = result.rows[0];
+  if (!user) return send(res, 503, { error: "local_user_missing" });
 
   const token = randomBytes(32).toString("hex");
   await pool.query(
@@ -2558,6 +2607,7 @@ async function handler(req, res) {
       return send(res, 200, { name: "ARGEKA Sync", edition: "self-hosted", api: "0.2.0" });
     }
     if (req.method === "POST" && url.pathname === "/api/auth/login") return login(req, res);
+    if (req.method === "POST" && url.pathname === "/api/auth/local-session") return localSession(req, res);
     if (req.method === "GET" && url.pathname === "/api/auth/me") return me(req, res);
     if (req.method === "GET" && url.pathname === "/api/admin/overview") return adminOverview(req, res);
     if (req.method === "POST" && url.pathname === "/api/admin/users") return createAdminUser(req, res);

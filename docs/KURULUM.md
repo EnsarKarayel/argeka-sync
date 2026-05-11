@@ -50,19 +50,14 @@ http://localhost:8080
 
 ## Ilk giris
 
-Demo kullanici:
+Kurulumdan sonra kullanici adi veya sifre yazmaniz gerekmez. Panel yerel oturumu otomatik acar.
 
-```text
-E-posta: admin@argeka.local
-Sifre: admin123
-```
-
-Canli kullanimdan once sifreyi degistirin.
+Servis henuz hazir degilse ekranda tekrar deneme mesaji gorunur. Docker Desktop aciksa 1-2 dakika bekleyip `Tekrar dene` butonuna basin.
 
 ## Ilk test
 
 1. `http://localhost:8080` adresini acin.
-2. Demo kullanici ile giris yapin.
+2. Panel otomatik acilir.
 3. `Baglantilar` ekraninda demo kaynak ve hedef baglantilari gorun.
 4. `Aktarim Isleri` ekranina gidin.
 5. Demo PostgreSQL aktarim isinde `Calistir` butonuna basin.

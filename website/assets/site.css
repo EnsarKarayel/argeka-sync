@@ -160,6 +160,11 @@ h1 {
   gap: 16px;
 }
 
+.section-heading {
+  max-width: 780px;
+  margin-bottom: 24px;
+}
+
 .card {
   min-height: 170px;
   padding: 20px;
@@ -190,6 +195,63 @@ h1 {
 .section h2 {
   margin: 0 0 16px;
   font-size: 38px;
+}
+
+.flow,
+.comparison-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.flow {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.flow article {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+}
+
+.flow span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--lime);
+  font-weight: 900;
+}
+
+.flow h3,
+.download-strip h2 {
+  margin: 0 0 10px;
+}
+
+.comparison-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.download-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--white);
+}
+
+.download-strip p {
+  color: #dbe9e1;
+}
+
+.download-strip .button {
+  flex: 0 0 auto;
 }
 
 .download-panel {
@@ -255,9 +317,16 @@ h1 {
 
   .hero,
   .grid,
+  .flow,
+  .comparison-grid,
   .language-grid,
   .download-panel {
     grid-template-columns: 1fr;
+  }
+
+  .download-strip {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .hero {
