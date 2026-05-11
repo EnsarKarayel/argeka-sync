@@ -9,14 +9,14 @@ Google Ads final URL olarak dosya indirme linki kullanmayin.
 Dogru:
 
 ```text
-https://alan-adiniz/download.html
-https://alan-adiniz/en/download.html
+https://argeka.com.tr/download.html
+https://argeka.com.tr/en/download.html
 ```
 
 Yanlis:
 
 ```text
-https://alan-adiniz/downloads/ARGEKA-Sync-Setup.exe
+https://argeka.com.tr/downloads/ARGEKA-Sync-Setup.exe
 ```
 
 ## Landing page kontrol listesi

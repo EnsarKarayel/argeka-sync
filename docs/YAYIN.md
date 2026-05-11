@@ -9,13 +9,13 @@ Reklam final URL'i dogrudan kurulum dosyasi olmamalidir. Google Ads hedef sayfan
 Turkce reklam final URL:
 
 ```text
-https://alan-adiniz/download.html
+https://argeka.com.tr/download.html
 ```
 
 Ingilizce reklam final URL:
 
 ```text
-https://alan-adiniz/en/download.html
+https://argeka.com.tr/en/download.html
 ```
 
 Bu sayfa:
@@ -60,7 +60,7 @@ Gercek yayin icin:
 
 1. Domain DNS A kaydini sunucu IP adresine yonlendirin.
 2. Nginx Proxy Manager, Caddy veya Traefik ile HTTPS sertifikasi alin.
-3. Canonical URL ve sitemap icindeki `https://argeka.com.tr` degerini kendi domaininizle degistirin.
+3. Canonical URL ve sitemap `https://argeka.com.tr` icin hazirlandi; farkli domain kullanilmayacaksa degistirmeyin.
 4. Google Search Console'a `sitemap.xml` gonderin.
 5. Google Ads'te final URL olarak domain altindaki `download.html` sayfasini kullanin.
 
