@@ -64,6 +64,14 @@ Gercek yayin icin:
 4. Google Search Console'a `sitemap.xml` gonderin.
 5. Google Ads'te final URL olarak domain altindaki `download.html` sayfasini kullanin.
 
+Search Console'da site haritasi alanina sayfa adresi degil, yalnizca su XML adresi yazilmalidir:
+
+```text
+https://argeka.com.tr/sitemap.xml
+```
+
+`https://argeka.com.tr/download.html` site haritasi degil, normal HTML indirme sayfasidir.
+
 ## Google Search Console
 
 Ana sayfaya Google dogrulama meta etiketi eklendi:
@@ -80,6 +88,10 @@ google-site-verification=VZf6Fzz0OM-mEz5gWvlTMdfHlG2VZUYWcxXruaMip3w
 
 ## ads.txt
 
-`website/ads.txt` simdilik hazirlik dosyasidir. AdSense hesabi acildiginda Google'in verdigi satir eklenmelidir.
+`website/ads.txt` AdSense yayinlayici satiri ile guncellendi:
+
+```text
+google.com, pub-6534346834787678, DIRECT, f08c47fec0942fa0
+```
 
 Detayli kontrol listesi icin [AdSense hazirligi](ADSENSE.md) dosyasina bakin.

@@ -1,27 +1,31 @@
-# ARGEKA Sync AdSense Hazirligi
+# ARGEKA Sync AdSense
 
-Bu repo AdSense icin hazirlik durumundadir, fakat yayina alinacak gercek reklam kodu icin Google AdSense hesabindaki `ca-pub-...` yayinlayici kimligi gerekir.
+Bu repo AdSense yayinlayici kimligi ile guncellendi.
 
-## Hazir olanlar
+## Aktif ayarlar
 
+- Yayinci kimligi: `ca-pub-6534346834787678`
 - `website/ads.txt` dosyasi GitHub Pages yayininin kokune kopyalanir.
+- `ads.txt` icerigi:
+
+```text
+google.com, pub-6534346834787678, DIRECT, f08c47fec0942fa0
+```
+
+- Auto Ads script'i tum statik HTML sayfalarinin `<head>` bolumune eklendi.
 - Gizlilik sayfalarinda reklam ve cerez kullanimi icin aciklama bulunur.
 - Indirme sayfasi otomatik indirme baslatmaz; kullanici setup dosyasini kendi tiklar.
 - Destek, sartlar, gizlilik, dil gecisi, canonical ve sitemap dosyalari hazirdir.
 
-## AdSense onayi gelince yapilacaklar
+## Search Console sitemap
 
-1. Google AdSense hesabinda siteyi `https://argeka.com.tr` olarak ekleyin.
-2. Google'in verdigi yayinlayici kimligini not edin.
-3. `website/ads.txt` icindeki ornek satiri su formata cevirin:
+Search Console'da site haritasi olarak HTML sayfasi degil, sadece su adres gonderilmelidir:
 
 ```text
-google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+https://argeka.com.tr/sitemap.xml
 ```
 
-4. `pub-0000000000000000` yerine kendi yayinlayici kimliginizi yazin.
-5. Reklam kodu eklenecekse once ana sayfada bir adet icerik arasi yerlesimle baslayin. Indirme butonunun hemen ustune reklam koymayin.
-6. Degisiklikleri commit edip GitHub'a push edin. GitHub Pages yayini otomatik gunceller.
+`download.html` bir urun/indirme sayfasidir; site haritasi olarak gonderilirse Google "Site Haritasi HTML'dir" uyarisi verir.
 
 ## Yerlesim kurali
 

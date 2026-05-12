@@ -1,3 +1,1 @@
-# Google AdSense/Ads hazirlik dosyasi.
-# Hesap acildiginda Google'in verdigi satiri buraya ekleyin:
-# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+google.com, pub-6534346834787678, DIRECT, f08c47fec0942fa0
