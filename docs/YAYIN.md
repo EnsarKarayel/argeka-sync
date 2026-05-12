@@ -64,6 +64,20 @@ Gercek yayin icin:
 4. Google Search Console'a `sitemap.xml` gonderin.
 5. Google Ads'te final URL olarak domain altindaki `download.html` sayfasini kullanin.
 
+## Google Search Console
+
+Ana sayfaya Google dogrulama meta etiketi eklendi:
+
+```html
+<meta name="google-site-verification" content="VZf6Fzz0OM-mEz5gWvlTMdfHlG2VZUYWcxXruaMip3w">
+```
+
+DNS TXT alternatifi kullanilacaksa Turkticaret DNS tarafina su TXT kaydi eklenebilir:
+
+```text
+google-site-verification=VZf6Fzz0OM-mEz5gWvlTMdfHlG2VZUYWcxXruaMip3w
+```
+
 ## ads.txt
 
 `website/ads.txt` simdilik hazirlik dosyasidir. AdSense hesabi acildiginda Google'in verdigi satir eklenmelidir.
