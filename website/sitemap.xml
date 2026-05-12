@@ -2,6 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://argeka.com.tr/</loc></url>
   <url><loc>https://argeka.com.tr/en/</loc></url>
+  <url><loc>https://argeka.com.tr/about.html</loc></url>
+  <url><loc>https://argeka.com.tr/en/about.html</loc></url>
+  <url><loc>https://argeka.com.tr/faq.html</loc></url>
+  <url><loc>https://argeka.com.tr/en/faq.html</loc></url>
   <url><loc>https://argeka.com.tr/download.html</loc></url>
   <url><loc>https://argeka.com.tr/en/download.html</loc></url>
   <url><loc>https://argeka.com.tr/support.html</loc></url>

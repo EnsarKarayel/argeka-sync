@@ -25,6 +25,7 @@ Bu sayfa:
 - Setup'in kullanicinin kendi bilgisayarinda calistigini aciklar.
 - Turkce/English dil gecisi sunar.
 - Gizlilik, sartlar ve destek sayfalarina baglanti verir.
+- Hakkinda ve SSS sayfalariyla urunun amacini, veri guvenligi modelini ve kurulum akisini aciklar.
 - HTTP 200 ile erisilebilir olmalidir.
 - Mobil ve masaustu tarayicilarda calismalidir.
 - Google AdsBot tarafindan taranabilir olmalidir.

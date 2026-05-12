@@ -12,10 +12,11 @@ Bu repo AdSense yayinlayici kimligi ile guncellendi.
 google.com, pub-6534346834787678, DIRECT, f08c47fec0942fa0
 ```
 
-- Auto Ads script'i tum statik HTML sayfalarinin `<head>` bolumune eklendi.
+- Auto Ads script'i icerik sayfalarinin `<head>` bolumune eklendi. Indirme sayfalarinda reklam kodu bilincli olarak yoktur; reklamlar download butonu gibi algilanmasin.
 - Gizlilik sayfalarinda reklam ve cerez kullanimi icin aciklama bulunur.
 - Indirme sayfasi otomatik indirme baslatmaz; kullanici setup dosyasini kendi tiklar.
 - Destek, sartlar, gizlilik, dil gecisi, canonical ve sitemap dosyalari hazirdir.
+- Hakkinda ve SSS sayfalari, sitenin ozgun icerigini ve urun amacini daha net anlatmak icin eklendi.
 
 ## Search Console sitemap
 

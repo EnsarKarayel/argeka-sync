@@ -186,6 +186,29 @@ h1 {
   line-height: 1.65;
 }
 
+.section.inset {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.faq-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.faq-list article {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+}
+
+.faq-list h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
 .band {
   background: #eaf3ed;
   border-top: 1px solid var(--line);
