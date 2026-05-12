@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ARGEKA Sync setup dosyasini indirin, kendi Windows bilgisayariniza veya sunucunuza self-hosted mini ETL kurulumu yapin.">
+    <meta name="description" content="ARGEKA Sync kurulum dosyasını indirin, kendi Windows bilgisayarınıza veya sunucunuza mini ETL kurulumu yapın.">
     <meta name="robots" content="index, follow">
-    <title>ARGEKA Sync Setup Indir</title>
+    <title>ARGEKA Sync Kurulum Dosyasını İndir</title>
     <link rel="canonical" href="https://argeka.com.tr/download.html">
     <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/download.html">
     <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/download.html">
@@ -15,15 +15,15 @@
   <body>
     <header class="site-header">
       <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
-      <nav class="nav" aria-label="Ana menu">
-        <a href="index.html">Urun</a>
-        <a href="about.html">Hakkinda</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a>
+        <a href="about.html">Hakkında</a>
         <a href="faq.html">SSS</a>
-        <a href="download.html">Indir</a>
+        <a href="download.html">İndir</a>
         <a href="support.html">Destek</a>
         <a href="privacy.html">Gizlilik</a>
-        <a href="terms.html">Sartlar</a>
-        <span class="lang-switch" aria-label="Dil secimi">
+        <a href="terms.html">Şartlar</a>
+        <span class="lang-switch" aria-label="Dil seçimi">
           <a href="download.html" aria-current="true">TR</a>
           <a href="en/download.html">EN</a>
         </span>
@@ -31,70 +31,70 @@
     </header>
 
     <main class="section">
-      <p class="eyebrow">Self-hosted Windows setup</p>
-      <h1>Setup dosyasini indir, kendi bilgisayarinda calistir.</h1>
-      <p class="lead">ARGEKA Sync bizim sunucumuzda calismaz. Setup dosyasini indirirsiniz, kendi Windows bilgisayariniza veya Windows sunucunuza kurarsiniz. Veritabani baglantilari ve veriler sizde kalir.</p>
+      <p class="eyebrow">Kendi ortamında çalışan Windows kurulumu</p>
+      <h1>Kurulum dosyasını indir, kendi bilgisayarında çalıştır.</h1>
+      <p class="lead">ARGEKA Sync bizim sunucumuzda çalışmaz. Kurulum dosyasını indirirsiniz, kendi Windows bilgisayarınıza veya Windows sunucunuza kurarsınız. Veritabanı bağlantıları ve veriler sizde kalır.</p>
 
       <div class="download-panel">
         <div>
-          <h2>Windows Setup</h2>
-          <p>Onerilen dosya ikonlu Windows setup dosyasidir. Acildiginda Turkce veya English kurulum secilebilir.</p>
+          <h2>Windows kurulum dosyası</h2>
+          <p>Önerilen dosya ikonlu Windows kurulum dosyasıdır. Açıldığında Türkçe veya İngilizce kurulum seçilebilir.</p>
           <div class="actions">
-            <a class="button primary" href="../downloads/ARGEKA-Sync-Setup.exe">Windows setup indir</a>
-            <a class="button" href="../downloads/ARGEKA-Sync-Setup.cmd">CMD yedek setup</a>
+            <a class="button primary" href="../downloads/ARGEKA-Sync-Setup.exe">Windows kurulum dosyasını indir</a>
+            <a class="button" href="../downloads/ARGEKA-Sync-Setup.cmd">CMD yedek kurulum</a>
           </div>
-          <p class="small-note">Google Ads ve kullanici guvenligi icin bu sayfa otomatik indirme baslatmaz. Setup dosyasi yalnizca kullanici butona bastiginda indirilir.</p>
-          <p class="small-note">Windows guvenlik uyarisi gosterirse dosya imzasiz oldugu icindir. Kurumsal dagitim icin sonraki adim imzali installer hazirlamaktir.</p>
-          <p class="small-note">Kurulumdan sonra web sitesine veya uygulamaya kullanici adi ve sifre girmeniz gerekmez. Yerel calisma alani otomatik acilir.</p>
+          <p class="small-note">Google Ads ve kullanıcı güvenliği için bu sayfa otomatik indirme başlatmaz. Kurulum dosyası yalnızca kullanıcı butona bastığında indirilir.</p>
+          <p class="small-note">Windows güvenlik uyarısı gösterirse dosya henüz imzalı olmadığı içindir. Kurumsal dağıtım için sonraki adım imzalı kurulum dosyası hazırlamaktır.</p>
+          <p class="small-note">Kurulumdan sonra web sitesine veya uygulamaya kullanıcı adı ve şifre girmeniz gerekmez. Yerel çalışma alanı otomatik açılır.</p>
         </div>
         <aside>
           <h3>Ne kurulur?</h3>
           <ul class="requirements">
             <li>ARGEKA Sync web paneli</li>
             <li>API servisi</li>
-            <li>PostgreSQL veritabani</li>
+            <li>PostgreSQL veritabanı</li>
             <li>Docker servisleri</li>
-            <li>Masaustunde ARGEKA Sync.exe</li>
+            <li>Masaüstünde ARGEKA Sync.exe</li>
           </ul>
         </aside>
       </div>
 
       <section class="steps">
-        <h2>Teknik bilmeyen kullanici icin kurulum</h2>
+        <h2>Teknik bilmeyen kullanıcı için kurulum</h2>
         <ol>
-          <li><strong>Setup dosyasini indirin.</strong> Yukaridaki Windows setup indir butonuna basin.</li>
-          <li><strong>Dosyayi calistirin.</strong> Indirilen <code>ARGEKA-Sync-Setup.exe</code> dosyasina cift tiklayin.</li>
-          <li><strong>Dili secin.</strong> <code>1</code> Turkce, <code>2</code> English.</li>
-          <li><strong>Bekleyin.</strong> Setup Git, Docker Desktop ve WSL kontrollerini yapar. Gerekirse sizi yonlendirir.</li>
-          <li><strong>Yeniden baslatma istenirse tekrar calistirin.</strong> Windows yeniden baslarsa ayni setup dosyasina tekrar cift tiklayin.</li>
-          <li><strong>Programi acin.</strong> Kurulum sonunda tarayici `http://localhost:8080` adresini acar. Sonraki acilislarda masaustundeki ARGEKA Sync.exe dosyasini kullanin.</li>
-          <li><strong>Sifre beklemeyin.</strong> Panel yerel oturumu otomatik acar; sadece servis hazir degilse tekrar dene ekrani gorunur.</li>
+          <li><strong>Kurulum dosyasını indirin.</strong> Yukaridaki Windows kurulum dosyasını indir butonuna basın.</li>
+          <li><strong>Dosyayı çalıştırın.</strong> İndirilen <code>ARGEKA-Sync-Setup.exe</code> dosyasına çift tıklayın.</li>
+          <li><strong>Dili seçin.</strong> <code>1</code> Türkçe, <code>2</code> English.</li>
+          <li><strong>Bekleyin.</strong> Kurulum Git, Docker Desktop ve WSL kontrollerini yapar. Gerekirse sizi yönlendirir.</li>
+          <li><strong>Yeniden başlatma istenirse tekrar çalıştırın.</strong> Windows yeniden başlarsa aynı kurulum dosyasına tekrar çift tıklayın.</li>
+          <li><strong>Programı açın.</strong> Kurulum sonunda tarayıcı `http://localhost:8080` adresini açar. Sonraki açılışlarda masaüstündeki ARGEKA Sync.exe dosyasını kullanın.</li>
+          <li><strong>Şifre beklemeyin.</strong> Panel yerel oturumu otomatik açar; sadece servis hazır değilse tekrar dene ekranı görünür.</li>
         </ol>
       </section>
 
       <section class="language-grid">
         <article class="card">
-          <h2>Turkce belgeler</h2>
-          <p>Kurulum ve ilk kullanim adimlari sade dille anlatildi.</p>
+          <h2>Türkçe belgeler</h2>
+          <p>Kurulum ve ilk kullanım adımları sade dille anlatıldı.</p>
           <div class="actions compact">
-            <a class="button" href="../docs/KURULUM.md">Kurulum kilavuzu</a>
-            <a class="button" href="../docs/KULLANIM.md">Kullanim kilavuzu</a>
+            <a class="button" href="../docs/KURULUM.md">Kurulum kılavuzu</a>
+            <a class="button" href="../docs/KULLANIM.md">Kullanım kılavuzu</a>
           </div>
         </article>
         <article class="card">
-          <h2>English docs</h2>
+          <h2>İngilizce belgeler</h2>
           <p>Installation and first-use guide for non-technical users.</p>
           <div class="actions compact">
-            <a class="button" href="../docs/INSTALLATION-EN.md">Installation guide</a>
-            <a class="button" href="../docs/USER-GUIDE-EN.md">User guide</a>
+            <a class="button" href="../docs/INSTALLATION-EN.md">İngilizce kurulum</a>
+            <a class="button" href="../docs/USER-GUIDE-EN.md">İngilizce kullanım</a>
           </div>
         </article>
       </section>
     </main>
 
     <footer class="site-footer">
-      <span>&copy; 2026 ARGEKA Sync</span>
-      <span>Self-hosted kurulum: veriler kullanicinin kendi ortaminda kalir.</span>
+      <span>© 2026 ARGEKA Sync</span>
+      <span>Kendi ortamında çalışan kurulum: veriler kullanıcının kendi ortamında kalır.</span>
     </footer>
   </body>
 </html>
