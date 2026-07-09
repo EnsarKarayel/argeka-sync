@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ARGEKA Sync use cases: ERP data transfer, reporting database feeds, branch data consolidation and accounting integration examples.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6534346834787678" crossorigin="anonymous"></script>
+    <meta name="theme-color" content="#087f74">
+    <title>ARGEKA Sync Use Cases | Database Transfer Examples</title>
+    <link rel="canonical" href="https://argeka.com.tr/en/use-cases.html">
+    <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/use-cases.html">
+    <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/use-cases.html">
+    <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/use-cases.html">
+    <link rel="stylesheet" href="../assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="../assets/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Product</a>
+        <a href="use-cases.html">Use Cases</a>
+        <a href="data-transfer-guide.html">Guide</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="download.html">Download</a>
+        <a href="support.html">Support</a>
+        <span class="lang-switch" aria-label="Language"><a href="../use-cases.html">TR</a><a href="use-cases.html" aria-current="true">EN</a></span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Use cases</p>
+          <h1>Where does ARGEKA Sync fit?</h1>
+          <p class="lead">Small technical teams often need a reliable local transfer flow, not a large ETL platform. ARGEKA Sync focuses on that practical middle ground.</p>
+        </div>
+        <div class="hero-media"><img src="../assets/product-screen.svg" alt="ARGEKA Sync transfer panel"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading"><p class="eyebrow">Scenario 1</p><h2>Feed a reporting database from ERP data</h2></div>
+        <div class="grid">
+          <article class="card"><h3>Problem</h3><p>Running reports directly on an ERP database can slow down the operational system when sales, stock or finance tables are queried heavily.</p></article>
+          <article class="card"><h3>Approach</h3><p>Selected fields are read from the source ERP database and transferred into reporting-friendly tables on a schedule.</p></article>
+          <article class="card"><h3>Result</h3><p>Dashboards and analysis queries run without putting extra read pressure on the live system.</p></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading"><p class="eyebrow">Scenario 2</p><h2>Collect branch, store or dealer data centrally</h2></div>
+        <p>When each location runs its own operational database, teams often need stock, sales or transaction summaries in one central place. ARGEKA Sync can run one-way scheduled transfers with SQL parameters for date range, company, warehouse or branch code.</p>
+        <p>This model is useful for sales monitoring, reconciliation, stock visibility and regional performance reporting. Each run can be reviewed by status, error behavior and transferred row count.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-heading"><p class="eyebrow">Scenario 3</p><h2>Controlled mapping between accounting and operations</h2></div>
+        <div class="comparison-grid">
+          <article class="card"><h3>Accounts</h3><p>Customer or vendor records can be transferred through explicit column mappings.</p></article>
+          <article class="card"><h3>Items</h3><p>Product code, description, unit, group and active status can be moved selectively.</p></article>
+          <article class="card"><h3>Invoice summaries</h3><p>Reporting tables can use summaries instead of copying every document detail.</p></article>
+          <article class="card"><h3>Control tables</h3><p>Transfer time, row count and error notes can be tracked separately.</p></article>
+        </div>
+      </section>
+
+      <div class="band">
+        <section class="section">
+          <h2>When is ARGEKA Sync not the right fit?</h2>
+          <p>If you need real-time two-way synchronization, streaming data pipelines, complex transformation languages or enterprise data governance, a larger ETL platform may be a better option. ARGEKA Sync is designed for local, repeatable and understandable transfer jobs.</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span>Contact: admin@argeka.com.tr</span></footer>
+  </body>
+</html>

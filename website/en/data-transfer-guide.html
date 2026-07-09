@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Database transfer planning guide: source query, target table, column mapping, upsert behavior, scheduling, error policy and security checklist.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6534346834787678" crossorigin="anonymous"></script>
+    <meta name="theme-color" content="#087f74">
+    <title>Database Transfer Planning Guide | ARGEKA Sync</title>
+    <link rel="canonical" href="https://argeka.com.tr/en/data-transfer-guide.html">
+    <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/data-transfer-guide.html">
+    <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/data-transfer-guide.html">
+    <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/data-transfer-guide.html">
+    <link rel="stylesheet" href="../assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="../assets/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="index.html">Product</a>
+        <a href="use-cases.html">Use Cases</a>
+        <a href="data-transfer-guide.html">Guide</a>
+        <a href="about.html">About</a>
+        <a href="faq.html">FAQ</a>
+        <a href="download.html">Download</a>
+        <a href="support.html">Support</a>
+        <span class="lang-switch" aria-label="Language"><a href="../data-transfer-guide.html">TR</a><a href="data-transfer-guide.html" aria-current="true">EN</a></span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Technical guide</p>
+          <h1>How should a database transfer be planned?</h1>
+          <p class="lead">A successful transfer is more than a connection string. Source query, target table, key fields, error behavior and rerun strategy should be decided before scheduling the job.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading"><p class="eyebrow">Checklist</p><h2>Questions to answer before the first transfer</h2></div>
+        <div class="grid">
+          <article class="card"><h3>What is the source?</h3><p>Is it a single table, a joined query, or a date-filtered result set? The source query should be deterministic.</p></article>
+          <article class="card"><h3>How is the target updated?</h3><p>Is insert enough, or should repeated records update existing rows? This is where the upsert key is selected.</p></article>
+          <article class="card"><h3>What happens on error?</h3><p>Stopping on first error, skipping bad rows or rolling back the run all create different operational outcomes.</p></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Column mapping principles</h2>
+        <p>Column mapping connects source query fields to target table fields intentionally. Even when names match, data type, length, null behavior and default values should be reviewed. Date formats, decimal separators and character sets can create reporting issues after the transfer.</p>
+        <p>A practical approach is to test with a small sample first, then run the same job over a larger date range. Row counts and representative records should be checked before the schedule is enabled.</p>
+      </section>
+
+      <section class="section">
+        <h2>When is upsert needed?</h2>
+        <p>Upsert is needed when rerunning the same job should not create duplicate target rows. Order number, invoice number, product code or composite keys can be used to define uniqueness. Choosing the wrong key can cause data loss or unnecessary updates.</p>
+        <div class="comparison-grid">
+          <article class="card"><h3>Insert</h3><p>Adds new rows on every run. Useful for log and movement tables.</p></article>
+          <article class="card"><h3>Update</h3><p>Changes existing rows. It should be used carefully for reference data.</p></article>
+          <article class="card"><h3>Upsert</h3><p>Updates when a row exists and inserts when it does not. Useful for synchronized summary tables.</p></article>
+          <article class="card"><h3>Truncate + load</h3><p>Simple for small reference tables, risky for large operational tables.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span>Database transfer guide for technical teams</span></footer>
+  </body>
+</html>

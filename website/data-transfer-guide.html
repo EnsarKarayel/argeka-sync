@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Veritabanı aktarımı planlama rehberi: kaynak, hedef, kolon eşleme, upsert, zamanlama, hata politikası ve güvenlik kontrol listesi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6534346834787678" crossorigin="anonymous"></script>
+    <meta name="theme-color" content="#087f74">
+    <title>Veritabanı Aktarımı Planlama Rehberi | ARGEKA Sync</title>
+    <link rel="canonical" href="https://argeka.com.tr/data-transfer-guide.html">
+    <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/data-transfer-guide.html">
+    <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/data-transfer-guide.html">
+    <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/data-transfer-guide.html">
+    <link rel="stylesheet" href="assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a>
+        <a href="use-cases.html">Kullanım</a>
+        <a href="data-transfer-guide.html">Rehber</a>
+        <a href="about.html">Hakkında</a>
+        <a href="faq.html">SSS</a>
+        <a href="download.html">İndir</a>
+        <a href="support.html">Destek</a>
+        <span class="lang-switch" aria-label="Dil seçimi"><a href="data-transfer-guide.html" aria-current="true">TR</a><a href="en/data-transfer-guide.html">EN</a></span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Teknik rehber</p>
+          <h1>Veritabanı aktarımı nasıl planlanır?</h1>
+          <p class="lead">Başarılı bir aktarım işi sadece bağlantı kurmak değildir. Kaynak sorgu, hedef tablo, anahtar alan, hata politikası ve tekrar çalıştırma davranışı baştan netleşmelidir.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading"><p class="eyebrow">Kontrol listesi</p><h2>Aktarımdan önce cevaplanması gereken sorular</h2></div>
+        <div class="grid">
+          <article class="card"><h3>Kaynak veri nedir?</h3><p>Tek tablo mu, join içeren sorgu mu, tarih aralığına göre değişen kayıt kümesi mi? Kaynak sorgu deterministik olmalıdır.</p></article>
+          <article class="card"><h3>Hedef tablo nasıl güncellenir?</h3><p>Sadece insert yeterli mi, yoksa aynı kayıt tekrar gelirse update yapılmalı mı? Upsert anahtarı bu aşamada seçilir.</p></article>
+          <article class="card"><h3>Hata olursa ne olacak?</h3><p>İlk hatada durmak, hatalı satırı atlamak veya tüm aktarımı geri almak farklı operasyon sonuçları üretir.</p></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Kolon eşleme prensibi</h2>
+        <p>Kolon eşleme, kaynak sorgu çıktısındaki alanların hedef tablo alanlarına bilinçli şekilde bağlanmasıdır. İsimler aynı olsa bile veri tipi, uzunluk, boş değer ve varsayılan değer davranışı kontrol edilmelidir. Özellikle tarih, para birimi, ondalık ayracı ve karakter seti farkları aktarım sonrası rapor hatalarına neden olabilir.</p>
+        <p>Pratik yaklaşım, önce küçük bir veri örneğiyle test yapmak, sonra aynı aktarımı daha geniş tarih aralığında çalıştırmaktır. Aktarım sonucu satır sayısı ve beklenen örnek kayıtlar kontrol edilmeden zamanlama aktif edilmemelidir.</p>
+      </section>
+
+      <section class="section">
+        <h2>Upsert ne zaman gerekir?</h2>
+        <p>Aynı iş tekrar çalıştırıldığında hedef tabloda çift kayıt oluşmaması gerekiyorsa upsert gerekir. Örneğin sipariş numarası, fatura numarası, stok kodu veya birleşik anahtar alanları hedef sistemde benzersiz kayıt davranışı sağlayabilir. Yanlış anahtar seçimi veri kaybına veya gereksiz güncellemeye neden olur.</p>
+        <div class="comparison-grid">
+          <article class="card"><h3>Insert</h3><p>Her çalışmada yeni satır ekler. Günlük log ve hareket tablolarında uygundur.</p></article>
+          <article class="card"><h3>Update</h3><p>Mevcut satırları değiştirir. Referans tablolarında dikkatli kullanılmalıdır.</p></article>
+          <article class="card"><h3>Upsert</h3><p>Kayıt varsa günceller, yoksa ekler. Senkron özet tablolar için kullanışlıdır.</p></article>
+          <article class="card"><h3>Truncate + load</h3><p>Küçük referans tablolarında basit olabilir, büyük tablolarda risklidir.</p></article>
+        </div>
+      </section>
+
+      <div class="band">
+        <section class="section">
+          <h2>Güvenlik notu</h2>
+          <p>Veritabanı parolaları, bağlantı bilgileri ve aktarım yetkileri minimum erişim prensibiyle verilmelidir. Kaynak kullanıcı sadece gerekli tabloları okuyabilmeli, hedef kullanıcı sadece ilgili şemada yazabilmelidir. ARGEKA Sync kendi ortamınızda çalıştığı için bu bilgileri üçüncü taraf SaaS paneline taşımanız gerekmez.</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>© 2026 ARGEKA Sync</span><span>Teknik ekipler için veri aktarımı rehberi</span></footer>
+  </body>
+</html>
