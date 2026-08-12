@@ -1,521 +1,90 @@
 ﻿<!doctype html>
 <html lang="tr">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ARGEKA Sync; veritabanlari arasinda tek yonlu, zamanlanabilir ve parametreli veri aktarim araci.">
-    <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#087f74">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="ARGEKA Sync">
-    <meta property="og:title" content="ARGEKA Sync">
-    <meta property="og:description" content="Self-hosted mini ETL ve DB aktarim paneli.">
-    <meta property="og:type" content="website">
-    <meta property="og:image" content="assets/icons/favicon.svg">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="ARGEKA Sync">
-    <meta name="twitter:description" content="Veritabanlari arasinda zamanlanabilir tek yonlu aktarim.">
-    <title>ARGEKA Sync | Self-hosted Mini ETL</title>
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.svg">
-    <link rel="stylesheet" href="assets/css/styles.css">
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "ARGEKA Sync",
-        "applicationCategory": "DeveloperApplication",
-        "operatingSystem": "Self-hosted, Windows, Linux, Docker",
-        "description": "Teknik ekipler icin veritabanlari arasinda zamanlanabilir tek yonlu veri aktarim araci."
-      }
-    </script>
-  </head>
-  <body>
-    <section class="login-screen" id="loginScreen" aria-label="Baslatma">
-      <form class="login-panel" id="loginForm" method="post" autocomplete="off">
-        <img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true">
-        <h1>ARGEKA Sync</h1>
-        <p>Yerel self-hosted calisma alani hazirlaniyor.</p>
-        <button class="primary-button" type="submit">Tekrar dene</button>
-        <small id="loginMessage">Uygulama otomatik aciliyor. Docker Desktop ilk acilista biraz zaman alabilir.</small>
-      </form>
-    </section>
-
-    <div class="app-shell">
-      <aside class="sidebar" aria-label="Ana gezinme">
-        <div class="brand">
-          <img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true">
-          <div>
-            <strong>ARGEKA Sync</strong>
-            <span>Mini ETL ve veri aktarim merkezi</span>
-          </div>
-        </div>
-
-        <nav class="nav-stack">
-          <button class="nav-item is-active" type="button" data-view-target="dashboard">
-            <span aria-hidden="true">D</span>
-            Dashboard
-          </button>
-          <button class="nav-item" type="button" data-view-target="connections">
-            <span aria-hidden="true">B</span>
-            Baglantilar
-          </button>
-          <button class="nav-item" type="button" data-view-target="queries">
-            <span aria-hidden="true">Q</span>
-            Sorgular
-          </button>
-          <button class="nav-item" type="button" data-view-target="jobs">
-            <span aria-hidden="true">J</span>
-            Aktarim Isleri
-          </button>
-          <button class="nav-item" type="button" data-view-target="mapping">
-            <span aria-hidden="true">M</span>
-            Kolon Esleme
-          </button>
-          <button class="nav-item" type="button" data-view-target="schedule">
-            <span aria-hidden="true">Z</span>
-            Zamanlama
-          </button>
-          <button class="nav-item" type="button" data-view-target="runs">
-            <span aria-hidden="true">L</span>
-            Calisma Gecmisi
-          </button>
-          <button class="nav-item" type="button" data-view-target="admin">
-            <span aria-hidden="true">*</span>
-            Yonetim
-          </button>
-        </nav>
-
-        <div class="account-card">
-          <span class="pill success">Self-hosted beta</span>
-          <strong id="accountName">ARGEKA Sync</strong>
-          <span id="accountMeta">Oturum bekleniyor</span>
-          <button class="ghost-button" id="logoutButton" type="button">Oturumu yenile</button>
-        </div>
-      </aside>
-
-      <main class="workspace">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Tek yonlu, zamanlanabilir DB aktarim paneli</p>
-            <h1 id="view-title">Dashboard</h1>
-          </div>
-          <div class="topbar-actions">
-            <label class="search-box">
-              <span aria-hidden="true">Ara</span>
-              <input id="searchInput" type="search" placeholder="Baglanti, sorgu, is ara">
-            </label>
-            <button class="secondary-button" id="refreshButton" type="button">Yenile</button>
-            <button class="primary-button" id="runSelectedJobButton" type="button">Secili isi calistir</button>
-          </div>
-        </header>
-
-        <section class="view is-active" id="dashboard" aria-label="Dashboard">
-          <div class="content-grid sync-dashboard">
-            <section class="board-panel">
-              <div class="metric-strip">
-                <article>
-                  <span>Baglanti</span>
-                  <strong id="connectionMetric">0</strong>
-                </article>
-                <article>
-                  <span>Aktarim isi</span>
-                  <strong id="jobMetric">0</strong>
-                </article>
-                <article>
-                  <span>Son aktarim</span>
-                  <strong id="lastRunMetric">Yok</strong>
-                </article>
-              </div>
-              <div class="sync-flow">
-                <article>
-                  <span class="source-tag">1</span>
-                  <strong>Kaynak baglanti</strong>
-                  <small>PostgreSQL, MSSQL, MySQL, Oracle, SQLite, ODBC, CSV veya REST connector tanimi.</small>
-                </article>
-                <article>
-                  <span class="source-tag">2</span>
-                  <strong>Parametreli SQL</strong>
-                  <small>:last_run_at, :firma_kodu, :sube gibi parametrelerle sorgu calistirma.</small>
-                </article>
-                <article>
-                  <span class="source-tag">3</span>
-                  <strong>Kolon esleme</strong>
-                  <small>Kaynak kolon hedef kolona eslenir; eksik kolon icin strict, skip veya default politika secilir.</small>
-                </article>
-                <article>
-                  <span class="source-tag">4</span>
-                  <strong>Zamanli aktarim</strong>
-                  <small>Manuel, saatlik, gunluk veya haftalik calisma ve ayrintili log.</small>
-                </article>
-              </div>
-            </section>
-
-            <aside class="side-panel">
-              <section class="panel-section">
-                <div class="section-heading">
-                  <span>Connector durumu</span>
-                  <span class="pill">Beta</span>
-                </div>
-                <div class="connector-grid" id="connectorGrid"></div>
-              </section>
-              <section class="panel-section">
-                <div class="section-heading">
-                  <span>Son loglar</span>
-                  <button class="ghost-button" id="clearLocalLogButton" type="button">Temizle</button>
-                </div>
-                <ol class="activity-log" id="activityLog"></ol>
-              </section>
-            </aside>
-          </div>
-        </section>
-
-        <section class="view" id="connections" aria-label="Baglantilar">
-          <div class="two-column">
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Yeni baglanti</span>
-                <span class="pill">Self-hosted</span>
-              </div>
-              <form class="record-form" id="connectionForm">
-                <div class="compact-fields">
-                  <label>
-                    Ad
-                    <input name="name" required placeholder="ERP Kaynak MSSQL">
-                  </label>
-                  <label>
-                    DB tipi
-                    <select name="dbType" id="connectionDbType"></select>
-                  </label>
-                </div>
-                <div class="compact-fields">
-                  <label>
-                    Rol
-                    <select name="role">
-                      <option value="source">Kaynak</option>
-                      <option value="target">Hedef</option>
-                      <option value="both">Kaynak + Hedef</option>
-                    </select>
-                  </label>
-                  <label>
-                    SSL
-                    <select name="sslMode">
-                      <option value="prefer">Prefer</option>
-                      <option value="require">Require</option>
-                      <option value="disable">Disable</option>
-                    </select>
-                  </label>
-                </div>
-                <label>
-                  Connection URL
-                  <input name="connectionUrl" placeholder="postgres://user:pass@host:5432/db veya internal://app">
-                </label>
-                <div class="compact-fields">
-                  <label>
-                    Host
-                    <input name="host" placeholder="10.0.0.12">
-                  </label>
-                  <label>
-                    Port
-                    <input name="port" type="number" placeholder="5432">
-                  </label>
-                </div>
-                <div class="compact-fields">
-                  <label>
-                    Veritabani
-                    <input name="databaseName" placeholder="ERPDB">
-                  </label>
-                  <label>
-                    Kullanici
-                    <input name="username" placeholder="etl_user">
-                  </label>
-                </div>
-                <label>
-                  Sifre
-                  <input name="password" type="password" autocomplete="new-password" placeholder="Baglanti sifresi">
-                </label>
-                <label>
-                  Not
-                  <textarea name="notes" rows="3" placeholder="ODBC DSN, VPN veya driver notu"></textarea>
-                </label>
-                <button class="primary-button" type="submit">Baglanti kaydet</button>
-              </form>
-            </section>
-
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Baglantilar</span>
-                <span class="pill" id="connectionCountPill">0 kayit</span>
-              </div>
-              <div class="record-list" id="connectionList"></div>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="queries" aria-label="Sorgular">
-          <div class="two-column">
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Kaynak sorgu</span>
-                <span class="pill">Parametreli SQL</span>
-              </div>
-              <form class="record-form" id="queryForm">
-                <label>
-                  Ad
-                  <input name="name" required placeholder="Son guncellenen musteri bakiyeleri">
-                </label>
-                <label>
-                  Kaynak baglanti
-                  <select name="sourceConnectionId" id="querySourceSelect" required></select>
-                </label>
-                <label>
-                  SQL
-                  <textarea name="sqlText" rows="9" required placeholder="select code, title, balance from customers where updated_at >= :last_run_at"></textarea>
-                </label>
-                <label>
-                  Parametreler JSON
-                  <textarea name="parameters" rows="4" placeholder='{"last_run_at":"2000-01-01T00:00:00Z","firma_kodu":"001"}'></textarea>
-                </label>
-                <button class="primary-button" type="submit">Sorgu kaydet</button>
-              </form>
-            </section>
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Sorgular</span>
-                <button class="ghost-button" id="previewQueryButton" type="button">Secili sorguyu dene</button>
-              </div>
-              <div class="record-list" id="queryList"></div>
-              <div class="preview-table" id="queryPreview"></div>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="jobs" aria-label="Aktarim isleri">
-          <div class="two-column">
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Aktarim isi</span>
-                <span class="pill">Tek yonlu</span>
-              </div>
-              <form class="record-form" id="jobForm">
-                <label>
-                  Ad
-                  <input name="name" required placeholder="ERP musteri bakiyesi -> rapor DB">
-                </label>
-                <div class="compact-fields">
-                  <label>
-                    Sorgu
-                    <select name="queryId" id="jobQuerySelect" required></select>
-                  </label>
-                  <label>
-                    Hedef baglanti
-                    <select name="targetConnectionId" id="jobTargetSelect" required></select>
-                  </label>
-                </div>
-                <label>
-                  Hedef tablo
-                  <input name="targetTable" required placeholder="sync_demo_target">
-                </label>
-                <div class="compact-fields">
-                  <label>
-                    Yazma davranisi
-                    <select name="writeMode">
-                      <option value="insert_only">Insert only</option>
-                      <option value="skip_duplicates">Skip duplicates</option>
-                      <option value="upsert">Upsert: varsa guncelle</option>
-                      <option value="truncate_reload">Truncate and reload</option>
-                    </select>
-                  </label>
-                  <label>
-                    Kolon hatasi
-                    <select name="conflictPolicy">
-                      <option value="strict">Strict: isi durdur</option>
-                      <option value="ignore_extra">Ignore extra</option>
-                      <option value="skip_row">Sorunlu satiri atla</option>
-                      <option value="quarantine">Logla ve atla</option>
-                    </select>
-                  </label>
-                </div>
-                <label>
-                  Upsert anahtari
-                  <input name="upsertKey" placeholder="code veya customer_id">
-                </label>
-                <div class="compact-fields">
-                  <label>
-                    Zamanlama
-                    <select name="scheduleType">
-                      <option value="manual">Manuel</option>
-                      <option value="hourly">Saatlik</option>
-                      <option value="daily">Gunluk</option>
-                      <option value="weekly">Haftalik</option>
-                    </select>
-                  </label>
-                  <label>
-                    Saat / ifade
-                    <input name="scheduleValue" placeholder="02:00 veya Pzt 03:00">
-                  </label>
-                </div>
-                <button class="primary-button" type="submit">Is kaydet</button>
-              </form>
-            </section>
-
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Aktarim isleri</span>
-                <span class="pill" id="jobCountPill">0 is</span>
-              </div>
-              <div class="record-list" id="jobList"></div>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="mapping" aria-label="Kolon esleme">
-          <div class="two-column">
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Kolon esleme</span>
-                <span class="pill">Kaynak -> hedef</span>
-              </div>
-              <form class="record-form" id="mappingForm">
-                <label>
-                  Aktarim isi
-                  <select name="jobId" id="mappingJobSelect" required></select>
-                </label>
-                <div id="mappingRows" class="mapping-rows"></div>
-                <div class="button-row">
-                  <button class="secondary-button" id="addMappingRowButton" type="button">Satir ekle</button>
-                  <button class="primary-button" type="submit">Eslemeyi kaydet</button>
-                </div>
-              </form>
-            </section>
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Politika rehberi</span>
-                <span class="pill">Karar</span>
-              </div>
-              <ul class="mobile-checklist">
-                <li><strong>Strict:</strong> Eslesmeyen zorunlu kolon varsa isi durdurur.</li>
-                <li><strong>Ignore extra:</strong> Kaynaktaki fazla kolonlari hedefe yazmaz.</li>
-                <li><strong>Skip row:</strong> Sorunlu satiri atlar, kalan satirlara devam eder.</li>
-                <li><strong>Quarantine:</strong> Sorunlu satiri log metadata alanina yazar.</li>
-                <li><strong>Default value:</strong> Kaynak bos ise hedefe sabit deger yazabilir.</li>
-              </ul>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="schedule" aria-label="Zamanlama">
-          <div class="panel-block">
-            <div class="section-heading">
-              <span>Zamanlanmis isler</span>
-              <span class="pill">Self-hosted scheduler</span>
-            </div>
-            <div class="scheduler-toolbar">
-              <div class="scheduler-status" id="schedulerStatus"></div>
-              <button class="secondary-button" id="schedulerTickButton" type="button">Zamanlayiciyi simdi calistir</button>
-            </div>
-            <div class="schedule-list" id="scheduleList"></div>
-          </div>
-        </section>
-
-        <section class="view" id="runs" aria-label="Calisma gecmisi">
-          <div class="two-column">
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Calisma gecmisi</span>
-                <button class="ghost-button" id="refreshRunsButton" type="button">Yenile</button>
-              </div>
-              <div class="record-list" id="runList"></div>
-            </section>
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Hata yaklasimi</span>
-                <span class="pill">Mini ETL</span>
-              </div>
-              <ul class="mobile-checklist">
-                <li>Her run icin okunan, yazilan ve atlanan satir sayisi tutulur.</li>
-                <li>Hatalar run seviyesinde ve satir metadata'si ile loglanir.</li>
-                <li>Tek yonlu aktarim varsayilandir; cift yonlu senkron yoktur.</li>
-                <li>PostgreSQL/Internal, MSSQL ve MySQL/MariaDB motor aktif; diger DB tipleri connector mimarisine hazirdir.</li>
-              </ul>
-            </section>
-          </div>
-        </section>
-
-        <section class="view" id="admin" aria-label="Yonetim">
-          <div class="admin-layout">
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Kurulum ve lisans</span>
-                <span class="pill success" id="adminPlanPill">Beta</span>
-              </div>
-              <div class="admin-summary" id="adminSummary"></div>
-            </section>
-
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Kullanicilar</span>
-                <span class="pill">Self-hosted</span>
-              </div>
-              <form class="admin-form" id="adminUserForm">
-                <div class="compact-fields">
-                  <label>
-                    Ad soyad
-                    <input name="fullName" required placeholder="Entegrasyon Uzmani">
-                  </label>
-                  <label>
-                    E-posta
-                    <input name="email" type="email" required placeholder="uzman@firma.com">
-                  </label>
-                </div>
-                <div class="compact-fields">
-                  <label>
-                    Sifre
-                    <input name="password" type="password" minlength="6" required placeholder="En az 6 karakter">
-                  </label>
-                  <label>
-                    Rol
-                    <select name="roleId" id="adminRoleSelect" required></select>
-                  </label>
-                </div>
-                <div class="compact-fields">
-                  <label>
-                    Veri kapsami
-                    <select name="dataScope">
-                      <option value="own">Kendi kayitlari</option>
-                      <option value="team">Ekip kayitlari</option>
-                      <option value="all">Tum firma</option>
-                    </select>
-                  </label>
-                  <label>
-                    Ekip
-                    <select name="teamId" id="adminTeamSelect" required></select>
-                  </label>
-                </div>
-                <button class="primary-button" type="submit">Kullanici olustur</button>
-              </form>
-              <div class="user-list" id="adminUserList"></div>
-            </section>
-
-            <section class="panel-block">
-              <div class="section-heading">
-                <span>Sistem sagligi</span>
-                <button class="ghost-button" id="refreshAdminButton" type="button">Yenile</button>
-              </div>
-              <div class="health-grid" id="adminHealth"></div>
-            </section>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <script src="assets/js/sync-app.js"></script>
-    <script>
-      if ("serviceWorker" in navigator && location.protocol !== "file:") {
-        navigator.serviceWorker.register("service-worker.js");
-      }
-    </script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ARGEKA Sync; PostgreSQL, SQL Server ve MySQL arasinda self-hosted, zamanlanabilir ve denetlenebilir veri aktarimi yapan mini ETL aracidir.">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#087f74">
+  <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+  <link rel="canonical" href="https://argeka.com.tr/">
+  <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/">
+  <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/">
+  <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/">
+  <meta property="og:title" content="ARGEKA Sync | Self-hosted Mini ETL">
+  <meta property="og:description" content="ERP, raporlama ve operasyon verilerini kurum icinde tasimak icin self-hosted mini ETL.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://argeka.com.tr/assets/product-screen.svg">
+  <title>ARGEKA Sync | Self-hosted Mini ETL ve Veri Aktarim Araci</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"ARGEKA Sync","applicationCategory":"BusinessApplication","operatingSystem":"Self-hosted, Windows, Linux, Docker","url":"https://argeka.com.tr/","description":"PostgreSQL, Microsoft SQL Server ve MySQL/MariaDB arasinda zamanlanabilir tek yonlu veri aktarimi yapan self-hosted mini ETL araci.","offers":{"@type":"Offer","price":"0","priceCurrency":"TRY"},"author":{"@type":"Person","name":"Ensar Karayel"}}</script>
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+  <nav class="nav" aria-label="Ana menu">
+    <a href="use-cases.html">Kullanim</a><a href="data-transfer-guide.html">Rehber</a><a href="about.html">Hakkinda</a><a href="faq.html">SSS</a><a href="download.html">Indir</a><a href="support.html">Destek</a><a href="privacy.html">Gizlilik</a><a href="terms.html">Sartlar</a><span class="lang-switch"><a href="index.html" aria-current="true">TR</a><a href="en/">EN</a></span>
+  </nav>
+</header>
+<main>
+<section class="hero">
+  <div>
+    <p class="eyebrow">Self-hosted mini ETL</p>
+    <h1>Kurumsal veriyi kontrollu tasiyin.</h1>
+    <p class="lead">ARGEKA Sync, ERP ve operasyon verilerini PostgreSQL, Microsoft SQL Server ve MySQL/MariaDB arasinda parametreli SQL, kolon esleme, upsert, zamanlama ve run loglariyla tasiyan yerel veri aktarim aracidir.</p>
+    <div class="actions"><a class="button primary" href="download.html">Setup indir</a><a class="button" href="support.html">Kurulum rehberi</a></div>
+  </div>
+  <div class="hero-media"><img src="assets/product-screen.svg" alt="ARGEKA Sync dashboard ekrani"></div>
+</section>
+<div class="trust-strip" aria-label="Urun ozeti">
+  <div class="trust-item"><strong>3+</strong><span>aktif veritabani motoru</span></div>
+  <div class="trust-item"><strong>Self</strong><span>veri kurum ortaminda kalir</span></div>
+  <div class="trust-item"><strong>SQL</strong><span>acik ve denetlenebilir sorgu</span></div>
+  <div class="trust-item"><strong>Log</strong><span>her aktarim izlenebilir</span></div>
+</div>
+<section class="section section-no-top">
+  <h2>ARGEKA Sync hangi problemi cozer?</h2>
+  <p class="section-intro">Bir sirket icinde ERP, muhasebe, uretim, kalite, satis, depo ve raporlama verileri farkli veritabanlarinda durabilir. Ekipler genellikle bu verileri Excel aktarimi, manuel CSV dosyasi veya gecici SQL scriptleriyle tasir. Bu yontem hizli baslar fakat bir sure sonra kimin hangi sorguyu calistirdigi, hangi kolonun hedef tabloya yazildigi, son aktarimin ne zaman yapildigi ve hatali satirin nasil ele alindigi belirsiz hale gelir.</p>
+  <p class="section-intro">ARGEKA Sync bu ihtiyac icin hazirlanmis sade bir self-hosted mini ETL aracidir. Amaci buyuk veri entegrasyon platformlarinin karmasikligini kucuk ve orta ekiplerin gunluk islerine tasimadan; teknik kullanicinin sorgu, esleme, zamanlama ve log adimlarini tek panelden yonetmesini saglamaktir.</p>
+</section>
+<section class="section"><div class="grid">
+  <article class="card"><span class="tag">Guvenlik</span><h2>Veri kurumda kalir</h2><p>Baglanti bilgileri ve aktarilan veriler ucuncu taraf SaaS ortamina tasinmaz. Uygulama Docker ile sizin bilgisayarinizda veya sunucunuzda calisir.</p></article>
+  <article class="card"><span class="tag">Teknik akis</span><h2>SQL odakli tasarim</h2><p>Kaynak veri parametreli SQL ile okunur. last_run_at, firma kodu, sube, donem ve durum gibi parametreler tekrar kullanilabilir hale gelir.</p></article>
+  <article class="card"><span class="tag">Izlenebilirlik</span><h2>Denetlenebilir aktarim</h2><p>Her calisma icin okunan, yazilan, atlanan ve hata alan satirlar ayrilir. Boylece aktarim sadece calismis sayilmaz, kontrol edilebilir hale gelir.</p></article>
+</div></section>
+<div class="band"><section class="section">
+  <h2>ERP ve raporlama ekipleri icin kullanim alanlari</h2>
+  <p class="section-intro">ARGEKA Sync; ERP raporlama verisini rapor veritabanina tasima, kalite kayitlarini dashboard ortamina aktarma, stok hareketlerini operasyon ekranina hazirlama, cari bakiye ozetlerini periyodik tabloya yazma ve eski sistemden yeni sisteme kontrollu veri aktarma gibi islerde kullanilabilir.</p>
+  <p class="section-intro">Arac cift yonlu karmasik senkron iddiasinda bulunmaz. Varsayilan yaklasim tek yonlu, izlenebilir ve geri alinabilir aktarimdir. Bu karar ozellikle ERP sistemlerinde yanlis yazma riskini azaltir.</p>
+</section></div>
+<section class="section">
+  <h2>Aktarim akisi</h2>
+  <div class="flow">
+    <div class="flow-step"><span>1</span><strong>Baglanti</strong><p>Kaynak ve hedef veritabani tanimlanir.</p></div>
+    <div class="flow-step"><span>2</span><strong>Sorgu</strong><p>Parametreli SQL acik sekilde yazilir.</p></div>
+    <div class="flow-step"><span>3</span><strong>Esleme</strong><p>Kaynak kolon hedef kolona baglanir.</p></div>
+    <div class="flow-step"><span>4</span><strong>Yazma</strong><p>Insert, upsert veya reload secilir.</p></div>
+    <div class="flow-step"><span>5</span><strong>Zamanlama</strong><p>Manuel, saatlik veya gunluk akis kurulur.</p></div>
+    <div class="flow-step"><span>6</span><strong>Log</strong><p>Her run sonucu incelenebilir kalir.</p></div>
+  </div>
+</section>
+<section class="section">
+  <h2>Bir veri aktarim isi nasil tasarlanmali?</h2>
+  <p class="section-intro">Veri aktarimi basit bir tablo kopyalama islemi gibi gorunebilir; fakat ERP ve operasyon sistemlerinde her alanin bir is anlami vardir. Musteri kodu, cari hesap, stok karti, lot numarasi, is emri, kalite sonucu, sevk tarihi ve muhasebe donemi ayni anda dogru okunmadiginda rapor veritabani yanlis karar uretir.</p>
+  <div class="compare">
+    <article><h3>Kontrolsuz yontem</h3><ul><li>Gecici scriptler kisilerin bilgisayarinda kalir.</li><li>Kolon esleme kararinin kaydi yoktur.</li><li>Hata alan satirlar sonradan bulunamaz.</li><li>Zamanlama ve manuel calisma karisir.</li></ul></article>
+    <article><h3>ARGEKA Sync yontemi</h3><ul><li>SQL, esleme ve yazma davranisi panelde gorunur.</li><li>Her run okunan ve yazilan satirla izlenir.</li><li>Hata politikasi is riskine gore secilir.</li><li>Aktarim isi tekrar edilebilir hale gelir.</li></ul></article>
+  </div>
+</section>
+<section class="section"><div class="grid two">
+  <article class="card"><h2>Canli ERP verisi icin guvenli yaklasim</h2><p>Canli sistemlerde en buyuk risk, hizli cozum amaciyla kontrolsuz yazma islemi yapmaktir. ARGEKA Sync varsayilan olarak tek yonlu aktarim dusuncesiyle tasarlandigi icin once okuma ve hedefe yazma senaryosu netlestirilir. Upsert kullanilacaksa anahtar kolonun bos kalmadigi, hedef tabloda unique davranisinin beklendigi gibi calistigi ve iptal/iade kayitlarinin dogru filtrelendigi test edilmelidir.</p></article>
+  <article class="card"><h2>Yayina alma testi</h2><p>Bir aktarim yayina alinmadan once en az uc ornek kayit secilmelidir: normal kayit, istisna kayit ve hata uretmesi beklenen kayit. Normal kayit verinin beklenen sekilde aktigini, istisna kayit is kuralinin dogru uygulandigini, hata kaydi ise log ve politika davranisinin gercekten calistigini gosterir.</p></article>
+</div></section>
+<section class="section">
+  <div class="cta-panel"><div><h2>Yerel kurulumla deneyin.</h2><p>Setup dosyasini indirip uygulamayi kendi Windows ortaminizda calistirin. Canli ERP verisine baglanmadan once test verisiyle aktarim akisini dogrulayin.</p></div><a class="button primary" href="download.html">Setup indir</a></div>
+</section>
+</main>
+<footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="support.html">Destek</a> · <a href="privacy.html">Gizlilik</a> · <a href="terms.html">Sartlar</a></span></footer>
+</body>
 </html>
