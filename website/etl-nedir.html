@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ETL nedir, ELT ile farkı nedir, mini ETL ne zaman yeterlidir? Küçük ve orta ölçekli teknik ekipler için veri aktarımı rehberi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/etl-nedir.html">
+    <title>ETL Nedir? Mini ETL Ne Zaman Yeterlidir? | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"ETL nedir? Mini ETL ne zaman yeterlidir?","dateModified":"2026-09-25","publisher":{"@type":"Organization","name":"ARGEKA Sync"},"mainEntityOfPage":"https://argeka.com.tr/etl-nedir.html"}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a><a href="resources.html">Kaynaklar</a><a href="data-transfer-guide.html">Rehber</a><a href="download.html">İndir</a><a href="support.html">Destek</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Temel kavram</p>
+      <h1>ETL nedir, mini ETL ne zaman yeterlidir?</h1>
+      <p class="lead">ETL, verinin bir kaynaktan alınması, işlenmesi ve hedef sisteme yazılması sürecidir. Her kurumun büyük veri platformuna ihtiyacı yoktur; bazı durumlarda küçük, görünür ve yerel çalışan bir mini ETL aracı daha doğru seçim olabilir.</p>
+
+      <div class="article-layout">
+        <article class="article-body">
+          <h2 id="etl">ETL ne anlama gelir?</h2>
+          <p>ETL, Extract, Transform, Load kelimelerinin kısaltmasıdır. Extract adımı kaynak verinin okunmasıdır. Transform adımı verinin hedef sisteme uygun hale getirilmesidir. Load adımı ise verinin hedef tabloya yazılmasıdır. Bir satış raporu için ERP'den fatura satırlarını okumak, tarih ve tutar alanlarını hedef modele çevirmek, sonra raporlama veritabanına yazmak tipik bir ETL örneğidir.</p>
+          <p>Günlük hayatta ETL çoğu zaman fark edilmeden yapılır. Excel'e dışa aktarılan verinin temizlenip başka sisteme yüklenmesi de bir tür ETL'dir. Sorun, bu işlem tekrar etmeye başladığında ortaya çıkar: dosyanın kimde olduğu, hangi filtreyle alındığı, hangi kolonların değiştiği ve hatalı satırların ne olduğu belirsizleşir.</p>
+
+          <h2 id="elt">ETL ve ELT farkı</h2>
+          <p>ELT yaklaşımında veri önce hedef platforma yüklenir, dönüşüm daha sonra hedef sistemde yapılır. Büyük veri ambarlarında veya analitik platformlarda bu model faydalı olabilir. Ancak ERP veya operasyon sistemlerinden küçük ve kontrollü veri taşırken ETL daha anlaşılırdır; çünkü hangi veri okunuyor, nasıl eşleniyor ve nereye yazılıyor adım adım görülebilir.</p>
+          <table class="data-table">
+            <thead><tr><th>Yaklaşım</th><th>Ne zaman uygun?</th><th>Dikkat noktası</th></tr></thead>
+            <tbody>
+              <tr><td>ETL</td><td>Veriyi hedefe gitmeden önce sadeleştirmek ve kontrol etmek gerektiğinde.</td><td>Dönüşüm kuralları net belgelenmelidir.</td></tr>
+              <tr><td>ELT</td><td>Geniş analitik platformlarda ham veriyi önce toplamak gerektiğinde.</td><td>Hedef platform maliyeti ve yönetişim ihtiyacı artabilir.</td></tr>
+              <tr><td>Mini ETL</td><td>Tekrarlanan ama sınırlı kapsamlı aktarım işlerinde.</td><td>Karmaşık orkestrasyon beklenmemelidir.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="mini">Mini ETL ne demektir?</h2>
+          <p>Mini ETL, büyük kurumsal veri platformu kurmadan, belirli veri aktarım işlerini güvenilir hale getiren küçük araç yaklaşımıdır. Amaç her şeyi çözmek değil, tekrar eden belli işleri düzenli ve izlenebilir hale getirmektir. ERP hareketlerini raporlama veritabanına aktarmak, şube satışlarını merkezde toplamak, CRM fırsatlarını analiz tablosuna yazmak veya üretim kalite kayıtlarını dashboard için hazırlamak bu kapsama girer.</p>
+          <p>ARGEKA Sync bu yüzden gerçek zamanlı streaming, karmaşık veri gölü mimarisi veya kurumsal master data yönetimi iddiası taşımaz. Odak; SQL sorgusu, kolon eşleme, yazma davranışı, zamanlama ve logları tek yerde toplamaktır.</p>
+
+          <h2 id="ne-zaman">Ne zaman mini ETL yeterlidir?</h2>
+          <ul class="checklist">
+            <li>Aktarım tek yönlüyse ve kaynak sistem hedef sistemden geri veri beklemiyorsa.</li>
+            <li>İş saatlik, günlük veya manuel çalıştırma ile çözülebiliyorsa.</li>
+            <li>Kaynak ve hedef veritabanı sayısı sınırlıysa.</li>
+            <li>Teknik ekip SQL sorgusunu ve hedef tablo modelini kontrol edebiliyorsa.</li>
+            <li>Veri gizliliği nedeniyle dış SaaS paneline bağlantı bilgisi girilmek istenmiyorsa.</li>
+          </ul>
+
+          <h2 id="ne-zaman-degil">Ne zaman yeterli değildir?</h2>
+          <p>Gerçek zamanlı çift yönlü senkronizasyon, saniyelik olay akışı, çok büyük veri hacmi, karmaşık dönüşüm dili, veri kataloglama veya kurumsal veri yönetişimi gerekiyorsa daha büyük bir veri entegrasyon platformu düşünülmelidir. Doğru araç, problemin büyüklüğüne göre seçilmelidir; küçük ve tekrar eden iş için sade araç çoğu zaman daha verimli olur.</p>
+        </article>
+
+        <aside class="toc" aria-label="Sayfa içeriği">
+          <strong>Bu sayfada</strong>
+          <a href="#etl">ETL nedir?</a>
+          <a href="#elt">ETL ve ELT</a>
+          <a href="#mini">Mini ETL</a>
+          <a href="#ne-zaman">Ne zaman yeterli?</a>
+          <a href="#ne-zaman-degil">Ne zaman değil?</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="resources.html">Kaynak merkezi</a></span></footer>
+  </body>
+</html>

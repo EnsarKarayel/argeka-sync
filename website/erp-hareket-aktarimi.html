@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ERP hareket aktarımı nedir? Stok, cari, fatura ve üretim hareketlerini raporlama veritabanına güvenli taşımak için sorgu, eşleme, upsert ve kontrol rehberi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/erp-hareket-aktarimi.html">
+    <title>ERP Hareket Aktarımı Nasıl Tasarlanır? | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"ERP hareket aktarımı nasıl tasarlanır?","dateModified":"2026-09-25","author":{"@type":"Person","name":"Ensar Karayel"},"publisher":{"@type":"Organization","name":"ARGEKA Sync"},"mainEntityOfPage":"https://argeka.com.tr/erp-hareket-aktarimi.html"}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a><a href="resources.html">Kaynaklar</a><a href="data-transfer-guide.html">Rehber</a><a href="download.html">İndir</a><a href="support.html">Destek</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">ERP rehberi</p>
+      <h1>ERP hareket aktarımı nasıl tasarlanır?</h1>
+      <p class="lead">ERP hareket aktarımı, stok, cari, sipariş, fatura, üretim veya kalite hareketlerinin başka bir veritabanına kontrollü şekilde taşınmasıdır. Bu iş basit bir tablo kopyası gibi görünse de iş kuralı, dönem, iptal kaydı, para birimi ve anahtar alan kararları nedeniyle dikkat ister.</p>
+
+      <div class="article-layout">
+        <article class="article-body">
+          <h2 id="neden-zor">ERP hareket aktarımı neden zordur?</h2>
+          <p>ERP sistemlerinde “hareket” kelimesi genellikle işin geçmişini temsil eder. Bir stok hareketi sadece ürün kodu ve miktardan ibaret değildir; depo, lot, seri, belge tarihi, işlem tipi, kaynak belge, iptal durumu, maliyet merkezi ve kullanıcı bilgisi gibi bağlamlarla birlikte anlam kazanır. Aynı şekilde cari hareketlerde vade, borç-alacak yönü, döviz kuru ve mutabakat durumu rapor sonucunu değiştirebilir.</p>
+          <p>Bu nedenle aktarım tasarımı, “hangi tabloyu okuyalım?” sorusundan önce “hedef sistem bu veriyi hangi amaçla kullanacak?” sorusuyla başlamalıdır. Raporlama amacı varsa özet tablo yeterli olabilir. Entegrasyon amacı varsa hedef sistemin zorunlu alanları ve benzersiz anahtarları daha kritik hale gelir.</p>
+
+          <h2 id="sorgu">Kaynak sorgu nasıl seçilir?</h2>
+          <p>İyi bir kaynak sorgu tekrarlanabilir, açıklanabilir ve sınırları belli olan sorgudur. Tarih aralığı, firma kodu, şube, depo, durum veya belge tipi gibi filtreler açıkça tanımlanmalıdır. Canlı ERP üzerinde tüm hareket tablosunu her çalışmada okumak performans riski oluşturabilir; bu yüzden artımlı okuma yaklaşımı tercih edilmelidir.</p>
+          <table class="data-table">
+            <thead><tr><th>Karar</th><th>Öneri</th><th>Neden önemli?</th></tr></thead>
+            <tbody>
+              <tr><td>Tarih alanı</td><td>Belge tarihi mi, kayıt tarihi mi, güncelleme tarihi mi kullanılacak belirlenmeli.</td><td>Yanlış tarih alanı eksik veya fazla kayıt üretir.</td></tr>
+              <tr><td>İptal kayıtları</td><td>İptal ve iade durumları ayrı filtrelenmeli veya hedefte işaretlenmeli.</td><td>Raporlar net tutarı yanlış gösterebilir.</td></tr>
+              <tr><td>Anahtar</td><td>Belge no tek başına yeterli değilse firma, dönem ve satır no ile birlikte kullanılmalı.</td><td>Upsert davranışı doğru anahtara bağlıdır.</td></tr>
+              <tr><td>Performans</td><td>Index kullanan filtreler seçilmeli, gerekirse küçük partilerle okunmalı.</td><td>Canlı ERP sisteminin yavaşlamasını önler.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="esleme">Kolon eşleme nasıl düşünülür?</h2>
+          <p>Kolon eşleme sadece isim benzerliği değildir. ERP kaynak alanı `CARI_KOD` iken hedefte `customer_code` olabilir; fakat asıl kontrol edilmesi gereken veri tipi, uzunluk, boş değer ve anlamdır. Özellikle tarih, para, miktar ve açıklama alanlarında hedef sistemin beklediği format doğrulanmalıdır.</p>
+          <p>Pratik bir başlangıç için önce az sayıda alanla akış kurulabilir: benzersiz anahtar, tarih, kod, açıklama, miktar, tutar ve durum. Bu çekirdek veri doğru aktarıldıktan sonra ek alanlar kademeli olarak eklenmelidir.</p>
+
+          <h2 id="hata">Kolon eşleşmezse ne yapılmalı?</h2>
+          <p>Kolon eşleşmezse sessizce veri atlamak en riskli seçenektir. Üretim ortamında iyi politika; hatayı görünür yapmak, hangi satırın neden aktarılmadığını kaydetmek ve aktarım sonucunu raporlamaktır. Kritik finans veya stok verisinde “ilk hatada dur” yaklaşımı veri kalitesini korur. Daha az kritik raporlama akışlarında hatalı satırı karantinaya alıp kalan satırları taşımak tercih edilebilir.</p>
+          <ul class="checklist">
+            <li><strong>Strict:</strong> Hata olursa aktarım durur. Finans, stok ve kalite verisi için güvenlidir.</li>
+            <li><strong>Quarantine:</strong> Hatalı satır ayrı kayıt alanına alınır. Raporlama akışlarında kesintiyi azaltır.</li>
+            <li><strong>Skip row:</strong> Hatalı satır atlanır. Ancak neden atlandığı loglanmadan kullanılmamalıdır.</li>
+          </ul>
+
+          <h2 id="kontrol">Canlıya almadan önce kontrol listesi</h2>
+          <p>ERP hareket aktarımı canlıya alınmadan önce normal kayıt, iptal kayıt, iade kayıt, eksik alanlı kayıt ve mükerrer anahtar örneği test edilmelidir. Her testte okunan satır, yazılan satır, güncellenen satır ve hata sayısı beklenen değerle karşılaştırılmalıdır.</p>
+          <p>ARGEKA Sync bu adımları bağlantı, SQL, eşleme, yazma politikası, zamanlama ve run log başlıklarıyla görünür hale getirmeyi amaçlar. Böylece aktarım işi kişisel bir script olmaktan çıkar, teknik ekibin gözden geçirebildiği bir operasyon kaydına dönüşür.</p>
+        </article>
+
+        <aside class="toc" aria-label="Sayfa içeriği">
+          <strong>Bu sayfada</strong>
+          <a href="#neden-zor">Neden zordur?</a>
+          <a href="#sorgu">Kaynak sorgu</a>
+          <a href="#esleme">Kolon eşleme</a>
+          <a href="#hata">Hata politikası</a>
+          <a href="#kontrol">Kontrol listesi</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="resources.html">Kaynak merkezi</a></span></footer>
+  </body>
+</html>

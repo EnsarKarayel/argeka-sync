@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="KVKK hassasiyeti olan kurumlar için self-hosted veri aktarımı: veri minimizasyonu, maskeleme, yetki ayrımı, loglama ve yerel kurulum rehberi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/kvkk-veri-aktarimi.html">
+    <title>KVKK ve Self-hosted Veri Aktarımı | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"KVKK ve self-hosted veri aktarımı","dateModified":"2026-09-25","publisher":{"@type":"Organization","name":"ARGEKA Sync"},"mainEntityOfPage":"https://argeka.com.tr/kvkk-veri-aktarimi.html"}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a><a href="resources.html">Kaynaklar</a><a href="download.html">İndir</a><a href="privacy.html">Gizlilik</a><a href="support.html">Destek</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Veri gizliliği</p>
+      <h1>KVKK hassasiyeti olan firmalar için veri aktarımı nasıl düşünülmeli?</h1>
+      <p class="lead">Kişisel veri içeren ERP, CRM veya operasyon kayıtlarını taşırken teknik başarı kadar veri minimizasyonu, erişim yetkisi ve denetlenebilirlik de önemlidir. Self-hosted yaklaşım, bağlantı bilgilerini dış panele taşımadan çalışmak isteyen ekipler için güçlü bir başlangıç noktasıdır.</p>
+
+      <div class="article-layout">
+        <article class="article-body">
+          <h2 id="amac">Amaç aktarım değil, kontrollü aktarım olmalı</h2>
+          <p>Bir veri aktarım işi teknik olarak dakikalar içinde kurulabilir; fakat yanlış alanları taşımak, gereksiz kişisel veriyi hedef sisteme kopyalamak veya geniş yetkili kullanıcıyla bağlantı açmak uzun vadede risk oluşturur. KVKK hassasiyeti olan kurumlarda ilk karar “hangi veriyi taşıyoruz?” değil, “bu veriyi taşımaya gerçekten ihtiyacımız var mı?” olmalıdır.</p>
+          <p>Örneğin satış raporu için müşteri adı gerekmiyorsa müşteri kodu veya anonimleştirilmiş segment yeterli olabilir. Teslimat performansı raporu için açık adres yerine il, ilçe veya bölge seviyesi yeterli olabilir. Bu yaklaşım hem veri gizliliğini hem de hedef veritabanı yönetimini sadeleştirir.</p>
+
+          <h2 id="minimizasyon">Veri minimizasyonu kontrolü</h2>
+          <ul class="checklist">
+            <li><strong>Gereksiz alanları taşımayın:</strong> Kimlik numarası, telefon, e-posta, açık adres veya serbest açıklama alanları gerçekten gerekli değilse sorguya eklenmemelidir.</li>
+            <li><strong>Maskeleme düşünün:</strong> Raporlama için tam değer gerekmiyorsa kısmi maskeleme, hash veya segment alanları kullanılabilir.</li>
+            <li><strong>Hedef tabloyu sınırlayın:</strong> Aktarım hedefi genel amaçlı veri deposu değil, belirli bir rapor veya entegrasyon tablosu olmalıdır.</li>
+            <li><strong>Saklama süresi belirleyin:</strong> Aktarılan verinin hedefte ne kadar tutulacağı teknik ekip ve iş birimi tarafından kararlaştırılmalıdır.</li>
+          </ul>
+
+          <h2 id="yetki">Bağlantı yetkileri nasıl verilmeli?</h2>
+          <p>Veritabanı aktarım araçlarında en sık yapılan hata, günlük iş yapan geniş yetkili kullanıcıyla bağlantı açmaktır. Kaynak veritabanı kullanıcısı mümkünse sadece gerekli tablo veya view'ları okuyabilmelidir. Hedef veritabanı kullanıcısı ise yalnızca ilgili şema ve tablo üzerinde yazma yetkisine sahip olmalıdır.</p>
+          <table class="data-table">
+            <thead><tr><th>Alan</th><th>Daha güvenli tercih</th><th>Kaçınılması gereken</th></tr></thead>
+            <tbody>
+              <tr><td>Kaynak kullanıcı</td><td>Sadece gerekli view veya tabloları okuyan teknik kullanıcı.</td><td>ERP yöneticisi veya geniş yetkili üretim kullanıcısı.</td></tr>
+              <tr><td>Hedef kullanıcı</td><td>Belirli şemada insert/update yetkisi.</td><td>Tüm veritabanında sınırsız yazma yetkisi.</td></tr>
+              <tr><td>Log</td><td>Satır sayısı, hata kodu ve teknik açıklama.</td><td>Kişisel verinin tamamını hata loguna yazmak.</td></tr>
+              <tr><td>Yedek</td><td>Yerel, şifreli ve erişimi sınırlı yedek.</td><td>Paylaşımlı klasörde korumasız bağlantı dosyası.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="self-hosted">Self-hosted modelin farkı nedir?</h2>
+          <p>Self-hosted kurulumda uygulama kurumun kendi bilgisayarında veya sunucusunda çalışır. Bu model, veritabanı bağlantı bilgilerinin üçüncü taraf bir SaaS paneline girilmesini gerektirmez. Elbette self-hosted olmak tek başına uyum garantisi değildir; kurulum yapılan ortamın kullanıcı erişimi, yedekleme politikası, güncelleme alışkanlığı ve ağ güvenliği de önemlidir.</p>
+          <p>ARGEKA Sync'in konumu burada nettir: veriyi dışarı taşımak yerine, aktarım işini yerel ortamda görünür ve yönetilebilir hale getirmek. Bu yaklaşım özellikle üretim, muhasebe, perakende, sağlık dışı operasyon, B2B satış ve raporlama ekiplerinde “veri bende kalsın” ihtiyacına cevap verir.</p>
+
+          <h2 id="loglama">Loglama kişisel veri içermeli mi?</h2>
+          <p>Çoğu durumda run logları kişisel verinin kendisini değil, operasyon bilgisini tutmalıdır: çalışma zamanı, kaynak, hedef, okunan satır, yazılan satır, hata sayısı ve teknik hata mesajı. Hatalı satırı analiz etmek gerekiyorsa kişisel alanlar yerine teknik anahtar veya maskeleme kullanılmalıdır.</p>
+          <div class="note-box"><p>Bu sayfa hukuki danışmanlık değildir. KVKK kapsamındaki nihai kararlar kurumun veri işleme amacı, sözleşmeleri, açık rıza süreçleri ve iç politikalarıyla birlikte değerlendirilmelidir.</p></div>
+        </article>
+
+        <aside class="toc" aria-label="Sayfa içeriği">
+          <strong>Bu sayfada</strong>
+          <a href="#amac">Kontrollü aktarım</a>
+          <a href="#minimizasyon">Minimizasyon</a>
+          <a href="#yetki">Yetkiler</a>
+          <a href="#self-hosted">Self-hosted model</a>
+          <a href="#loglama">Loglama</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="privacy.html">Gizlilik politikası</a></span></footer>
+  </body>
+</html>

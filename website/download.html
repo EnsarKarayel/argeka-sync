@@ -1,9 +1,97 @@
-﻿<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ARGEKA Sync Windows setup dosyasi, kurulum gereksinimleri, Docker ve WSL hazirlik adimlari."><meta name="robots" content="index, follow"><meta name="google-adsense-account" content="ca-pub-6534346834787678"><link rel="canonical" href="https://argeka.com.tr/download.html"><link rel="alternate" hreflang="tr" href="https://argeka.com.tr/download.html"><link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/download.html"><title>ARGEKA Sync Setup Indir</title><link rel="stylesheet" href="assets/site.css"></head><body><header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a><nav class="nav"><a href="index.html">Urun</a><a href="support.html">Destek</a><a href="privacy.html">Gizlilik</a><a href="terms.html">Sartlar</a><span class="lang-switch"><a href="download.html" aria-current="true">TR</a><a href="en/download.html">EN</a></span></nav></header><main class="section"><p class="eyebrow">Self-hosted Windows setup</p><h1>ARGEKA Sync kurulumu</h1><p class="lead">Setup dosyasi uygulamayi sizin bilgisayarinizda veya Windows sunucunuzda calistirmak icin hazirlanmistir. Kurulum sonrasinda panel varsayilan olarak localhost uzerinden acilir; veritabani baglantilari ve aktarim kayitlari sizin ortaminizda kalir.</p><div class="download-panel"><div><h2>Windows Setup</h2><p>Onerilen kurulum dosyasi ARGEKA-Sync-Setup.exe dosyasidir. Dosya Git, Docker Desktop ve WSL durumunu kontrol eder, gerekli servisleri hazirlar ve masaustune ARGEKA Sync kisayolu ekler.</p><div class="actions"><a class="button primary" href="downloads/ARGEKA-Sync-Setup.exe">Windows setup indir</a><a class="button" href="downloads/ARGEKA-Sync-Setup.cmd">CMD yedek setup</a></div><p class="small-note">Bu sayfa otomatik indirme baslatmaz. Kullanici yalnizca indirme butonuna bastiginda dosya iner.</p></div><aside><h3>Kurulumda neler hazirlanir?</h3><ul class="requirements"><li>ARGEKA Sync web paneli</li><li>API servisi</li><li>PostgreSQL veritabani</li><li>Docker servisleri</li><li>Masaustu calistirici</li></ul></aside></div><section class="steps"><h2>Kurulumdan once kontrol listesi</h2><ol><li>Windows kullanici yetkisinin kurulum icin yeterli oldugunu kontrol edin.</li><li>Docker Desktop kurulu degilse setup sizi yonlendirir.</li><li>WSL kurulumu sonrasi Windows yeniden baslatma gerekebilir.</li><li>Kurulum bittiginde tarayicida http://localhost:8080 adresi acilir.</li><li>Canli kullanimdan once demo sifresini degistirin.</li><li>ERP veritabanina baglanmadan once yalnizca okuma yetkili teknik kullanici tercih edin.</li></ol></section><section class="section"><h2>Indirme sayfasinin amaci</h2><p>Indirme sayfasi yalnizca dosya linki vermek icin degil, kullanicinin ne kurdugunu anlamasi icin hazirlanmistir. Self-hosted uygulamalar kullanici ortaminda calistigi icin Docker, port, veritabani, yetki ve yedekleme konulari onceden bilinmelidir. ARGEKA Sync bu nedenle kurulum dokumani, kullanim kilavuzu ve destek sayfasiyla birlikte sunulur.</p></section><section class="section">
-  <h2>Kurulum sonrasi ilk kontrol</h2>
-  <p>Kurulum tamamlandiginda ilk is panelin acildigini gormek degil, servislerin karisik olmayan bir durumda calistigini dogrulamaktir. Tarayicida panel acildiktan sonra API sagligi, veritabani baglantisi, demo kullanici girisi ve Docker container durumlari kontrol edilmelidir. Eger Windows yeniden baslatma istedi ise setup dosyasi ikinci kez calistirilmalidir; bu durum WSL veya Docker kurulumu tamamlanirken normaldir.</p>
-  <p>ARGEKA Sync self-hosted calistigi icin kurulum yapan kisi bilgisayarin firewall, port, VPN ve veritabani erisim politikasini bilmelidir. Kurumsal ortamda uygulama bireysel bilgisayar yerine ekip tarafindan erisilen kontrollu bir Windows sunucuda calistirilabilir. Bu durumda yedekleme ve sifre yonetimi daha duzenli hale gelir.</p>
-</section>
-<section class="section">
-  <h2>Indirme guvenligi ve sorumluluk</h2>
-  <p>Setup dosyasi kullanici tiklamadan otomatik indirilmez. Bu hem kullanici guveni hem de reklam politikalarina uygunluk icin tercih edilir. Dosya imzalama sonraki dagitim adimidir; imzasiz dosyalarda Windows uyarisi gorulebilir. Kurumsal kullanimda dosya once test makinesinde calistirilmali, daha sonra canli ortama alinmalidir.</p>
-</section><section class="section"><h2>Kurulum dosyasini yayinlamadan once yapilan teknik kontroller</h2><p>Kurulum dosyasi yalnizca uygulamayi kopyalamaz; kullanicinin bilgisayarinda temel bagimliliklarin bulunup bulunmadigini da kontrol eder. Docker Desktop yoksa kurulumun tamamlanamayacagi acik belirtilir. WSL hazir degilse Windows tarafinda yeniden baslatma gerekebilir. Bu nedenle indirme sayfasinda otomatik baslatma yerine kullanicinin ne yapacagini okuyup karar vermesi hedeflenir.</p><p>Kurulumdan sonra ilk giris, demo sifre degisikligi, veritabani baglantisi ve yedekleme adimlari destek sayfasina baglanir. Boylece indirme sayfasi tek basina duran zayif bir dosya linki degil, urunun calisma mantigina acilan tamamlayici bir dokuman olur.</p></section></main><footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="index.html">Urun</a> · <a href="support.html">Destek</a></span></footer></body></html>
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ARGEKA Sync Windows setup dosyasını indirin. Self-hosted veri aktarımı için Docker, WSL, masaüstü kısayolu ve yerel panel kurulum adımları.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/download.html">
+    <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/download.html">
+    <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/download.html">
+    <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/download.html">
+    <title>ARGEKA Sync Setup İndir | Windows Kurulum</title>
+    <link rel="stylesheet" href="assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a>
+        <a href="resources.html">Kaynaklar</a>
+        <a href="support.html">Destek</a>
+        <a href="privacy.html">Gizlilik</a>
+        <a href="terms.html">Şartlar</a>
+        <span class="lang-switch" aria-label="Dil seçimi"><a href="download.html" aria-current="true">TR</a><a href="en/download.html">EN</a></span>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Self-hosted Windows setup</p>
+          <h1>ARGEKA Sync'i kendi bilgisayarınıza kurun.</h1>
+          <p class="lead">Kurulum dosyası uygulamayı yerel ortamda çalıştırmak için hazırlanmıştır. Panel varsayılan olarak bilgisayarınızda açılır; veritabanı bağlantıları, sorgular ve çalışma kayıtları sizin ortamınızda tutulur.</p>
+          <div class="actions">
+            <a class="button primary" href="downloads/ARGEKA-Sync-Setup.exe">Windows setup indir</a>
+            <a class="button" href="downloads/ARGEKA-Sync-Setup.cmd">CMD yedek kurulum</a>
+          </div>
+          <p class="small-note">Bu sayfa otomatik indirme başlatmaz. Dosya yalnızca indirme butonuna bastığınızda iner.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="download-panel">
+          <div>
+            <h2>Kurulumda neler hazırlanır?</h2>
+            <p>Setup dosyası Git, Docker Desktop ve WSL durumunu kontrol eder; ARGEKA Sync servislerini başlatır ve masaüstüne uygulama kısayolu ekler. Kurulumdan sonra ürün bir internet sitesine değil, sizin yerel panelinize yönlenir.</p>
+            <p>Kurumsal kullanım için kişisel bilgisayar yerine yedekleme ve erişim kuralları belli olan bir Windows sunucu tercih edilebilir.</p>
+          </div>
+          <aside>
+            <h3>Bileşenler</h3>
+            <ul class="requirements">
+              <li>ARGEKA Sync web paneli</li>
+              <li>API servisi</li>
+              <li>Yerel PostgreSQL veritabanı</li>
+              <li>Docker servisleri</li>
+              <li>Masaüstü çalıştırıcı</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Hiç teknik olmayan kullanıcı için</p>
+          <h2>Kurulumdan önce kısa kontrol listesi</h2>
+        </div>
+        <ol>
+          <li>Windows bilgisayarda yönetici yetkisi gerekip gerekmediğini kontrol edin.</li>
+          <li>Docker Desktop yüklü değilse kurulum sizi yönlendirebilir.</li>
+          <li>WSL kurulumu gerekiyorsa Windows yeniden başlatma isteyebilir.</li>
+          <li>Kurulum bittikten sonra masaüstündeki ARGEKA Sync kısayolunu kullanın.</li>
+          <li>Canlı ERP verisine bağlanmadan önce test verisiyle deneme aktarımı yapın.</li>
+          <li>Veritabanı bağlantısı için mümkünse sadece gerekli tablo veya view'ları okuyan teknik kullanıcı kullanın.</li>
+        </ol>
+      </section>
+
+      <section class="section">
+        <div class="grid">
+          <article class="card"><h3>Türkçe kurulum</h3><p>Varsayılan kurulum dosyası Türkçe yönlendirme içerir. İlk denemede setup dosyasını kullanmanız önerilir.</p></article>
+          <article class="card"><h3>İngilizce kurulum</h3><p>İngilizce komut dosyası teknik ekiplerin farklı dilde kurulum notu hazırlaması için tutulur.</p></article>
+          <article class="card"><h3>Güvenli indirme</h3><p>İndirme linkleri doğrudan ARGEKA Sync dosyalarına gider. Yanıltıcı reklam, otomatik yönlendirme veya zorunlu kayıt akışı yoktur.</p></article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="cta-panel">
+          <div><h2>Kurulumdan önce planlama rehberini okuyun.</h2><p>Kaynak sorgu, hedef tablo, kolon eşleme ve hata politikası kararlarını baştan netleştirmek canlı veri riskini azaltır.</p></div>
+          <a class="button primary" href="data-transfer-guide.html">Rehberi oku</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="resources.html">Kaynaklar</a> · <a href="support.html">Destek</a></span></footer>
+  </body>
+</html>

@@ -1,1 +1,54 @@
-﻿<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ARGEKA Sync kullanim sartlari ve sorumluluk sinirlari."><meta name="robots" content="index, follow"><meta name="google-adsense-account" content="ca-pub-6534346834787678"><link rel="canonical" href="https://argeka.com.tr/terms.html"><title>Kullanim Sartlari | ARGEKA Sync</title><link rel="stylesheet" href="assets/site.css"></head><body><header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a><nav class="nav"><a href="index.html">Urun</a><a href="download.html">Indir</a><a href="support.html">Destek</a><a href="privacy.html">Gizlilik</a></nav></header><main class="section"><h1>Kullanim sartlari</h1><p class="lead">ARGEKA Sync teknik ekipler icin hazirlanmis self-hosted veri aktarim aracidir. Uygulama canli ERP veya rapor veritabanlarinda kullanilmadan once test ortami, yedek ve yetki kontrolleri tamamlanmalidir.</p><section><h2>Kullanim sorumlulugu</h2><p>Kullanici, tanimladigi veritabani baglantilarindan, SQL sorgularindan, hedef tablo eslemelerinden ve zamanlanmis aktarim islerinden sorumludur. Yanlis sorgu, hatali upsert anahtari veya eksik filtre canli veri kalitesini etkileyebilir.</p></section><section><h2>Test ve yedek</h2><p>Canli aktarimdan once ornek veri ile test calismasi yapilmali, run loglari kontrol edilmeli ve geri donus plani hazirlanmalidir. Veri degistiren aktarimlarda yedek almadan ilerlenmemelidir.</p></section><section><h2>Garanti kapsami</h2><p>Uygulama teknik yardimci arac olarak sunulur. Her kurumun ERP veri modeli, yetki yapisi ve is kurali farkli olabilecegi icin nihai dogrulama kullaniciya aittir.</p></section><section class="section"><h2>Canli kullanimdan once kabul edilmesi gerekenler</h2><p>ARGEKA Sync ile olusturulan her aktarim isi, kullanicinin tanimladigi SQL sorgusu ve kolon eslemesine gore calisir. Bu nedenle arac dogru tasarlanmis bir aktarimi kolaylastirir; fakat hatali is kuralini otomatik olarak duzeltemez. Kullanici canli sisteme gecmeden once test calismasi yapmayi, yedek almayi ve sonuc kayitlarini kontrol etmeyi kabul eder.</p><p>Ozellikle truncate reload, upsert veya hedef tabloya toplu yazma yapan islerde geri donus plani hazirlanmalidir. ERP, muhasebe veya kalite verisi uzerinde calisan ekipler icin veri dogrulama sureci yazili hale getirilmelidir.</p></section></main><footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="privacy.html">Gizlilik</a></span></footer></body></html>
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ARGEKA Sync kullanım şartları: self-hosted veri aktarımı, test, yedekleme, kullanıcı sorumluluğu ve canlı veri kullanımı.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/terms.html">
+    <title>Kullanım Şartları | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a>
+        <a href="resources.html">Kaynaklar</a>
+        <a href="download.html">İndir</a>
+        <a href="support.html">Destek</a>
+        <a href="privacy.html">Gizlilik</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Şartlar</p>
+      <h1>Kullanım şartları</h1>
+      <p class="lead">ARGEKA Sync teknik ekipler için hazırlanmış self-hosted veri aktarımı aracıdır. Uygulama canlı ERP, CRM veya rapor veritabanlarında kullanılmadan önce test ortamı, yedek ve yetki kontrolleri tamamlanmalıdır.</p>
+
+      <section class="section">
+        <h2>Kullanım sorumluluğu</h2>
+        <p>Kullanıcı, tanımladığı veritabanı bağlantılarından, SQL sorgularından, hedef tablo eşlemelerinden ve zamanlanmış aktarım işlerinden sorumludur. Yanlış sorgu, hatalı upsert anahtarı, eksik filtre veya uyumsuz kolon tipi canlı veri kalitesini etkileyebilir.</p>
+      </section>
+
+      <section class="section">
+        <h2>Test ve yedek</h2>
+        <p>Canlı aktarım başlamadan önce örnek veri ile test çalışması yapılmalı, run logları kontrol edilmeli ve geri dönüş planı hazırlanmalıdır. Veri değiştiren aktarım işlerinde yedek almadan ilerlenmemelidir.</p>
+      </section>
+
+      <section class="section">
+        <h2>Ürün sınırları</h2>
+        <p>ARGEKA Sync küçük ve orta ölçekli, tekrarlanabilir veri aktarım işleri için tasarlanmıştır. Gerçek zamanlı çift yönlü senkronizasyon, yüksek hacimli streaming, karmaşık veri yönetişimi veya kurumsal data warehouse platformu yerine geçmez.</p>
+      </section>
+
+      <section class="section">
+        <h2>Canlı kullanımdan önce kabul edilmesi gerekenler</h2>
+        <p>ARGEKA Sync ile oluşturulan her aktarım işi, kullanıcının tanımladığı SQL sorgusu ve kolon eşlemesine göre çalışır. Araç doğru tasarlanmış bir aktarımı kolaylaştırır; fakat hatalı iş kuralını otomatik olarak düzeltemez. Kullanıcı canlı sisteme geçmeden önce test çalışması yapmayı, yedek almayı ve sonuç kayıtlarını kontrol etmeyi kabul eder.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="privacy.html">Gizlilik</a> · <a href="support.html">Destek</a></span></footer>
+  </body>
+</html>

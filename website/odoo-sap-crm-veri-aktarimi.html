@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Odoo, SAP CRM ve özel CRM sistemleri arasında müşteri, fırsat, aktivite ve satış verisi aktarımı için eşleme, veri kalitesi ve zamanlama rehberi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/odoo-sap-crm-veri-aktarimi.html">
+    <title>Odoo, SAP CRM ve Özel CRM Veri Aktarımı | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Odoo, SAP CRM ve özel CRM veri aktarımı","dateModified":"2026-09-25","publisher":{"@type":"Organization","name":"ARGEKA Sync"},"mainEntityOfPage":"https://argeka.com.tr/odoo-sap-crm-veri-aktarimi.html"}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a><a href="resources.html">Kaynaklar</a><a href="use-cases.html">Kullanım</a><a href="download.html">İndir</a><a href="support.html">Destek</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">CRM veri aktarımı</p>
+      <h1>Odoo, SAP CRM ve özel CRM verisi nasıl taşınır?</h1>
+      <p class="lead">CRM veri aktarımı sadece müşteri listesini kopyalamak değildir. Fırsat aşaması, aktivite geçmişi, satış temsilcisi, kaynak kanal, teklif durumu ve izinli iletişim bilgileri birlikte düşünülmelidir.</p>
+
+      <div class="article-layout">
+        <article class="article-body">
+          <h2 id="model">CRM veri modeli neden farklıdır?</h2>
+          <p>ERP verisi çoğu zaman belge ve hareket merkezlidir. CRM verisi ise ilişki, süreç ve temas geçmişi merkezlidir. Bir müşteri kaydı tek başına yeterli değildir; o müşterinin hangi fırsatlarla ilişkilendiği, hangi aktivitenin yapıldığı, satış hunisinde hangi aşamada olduğu ve kimin sorumluluğunda olduğu önemlidir.</p>
+          <p>Odoo, SAP CRM veya özel geliştirilmiş CRM sistemleri bu kavramları farklı tablo adları ve farklı zorunlu alanlarla tutabilir. Bu yüzden aktarım başlamadan önce kavram eşlemesi yapılmalıdır: müşteri, kişi, fırsat, aktivite, görev, teklif ve sipariş hangi kaynak alanlardan oluşuyor?</p>
+
+          <h2 id="esleme">Eşleme kararları</h2>
+          <table class="data-table">
+            <thead><tr><th>CRM kavramı</th><th>Kontrol edilmesi gereken alanlar</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr><td>Müşteri</td><td>Kod, vergi no, unvan, sektör, aktiflik, sahip kullanıcı.</td><td>Mükerrer müşteri kartı oluşabilir.</td></tr>
+              <tr><td>Kişi</td><td>Ad, soyad, e-posta, telefon, izin durumu, bağlı müşteri.</td><td>İzin ve iletişim verisi yanlış taşınabilir.</td></tr>
+              <tr><td>Fırsat</td><td>Aşama, tutar, para birimi, kapanış tarihi, kaynak kanal.</td><td>Pipeline raporu hatalı görünebilir.</td></tr>
+              <tr><td>Aktivite</td><td>Aktivite tipi, tarih, not, sorumlu kişi, tamamlanma durumu.</td><td>Geçmiş görüşme kaydı eksik kalabilir.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="mukerrer">Mükerrer kayıt nasıl önlenir?</h2>
+          <p>CRM geçişlerinde en büyük sorunlardan biri aynı müşteri veya kişinin farklı yazımlarla tekrar gelmesidir. Vergi numarası, müşteri kodu veya e-posta gibi alanlar eşsiz anahtar olarak düşünülebilir; fakat her biri kendi riskini taşır. Vergi numarası boş olabilir, e-posta kişisel veri niteliği taşıyabilir, müşteri kodu sistem değişiminde farklılaşabilir.</p>
+          <p>Bu nedenle aktarım öncesi örnek veriyle mükerrerlik analizi yapılmalıdır. Hedef sistemde manuel birleştirme mi yapılacak, yoksa aktarım sırasında belirli anahtar üzerinden upsert mi uygulanacak baştan netleşmelidir.</p>
+
+          <h2 id="izin">İzinli iletişim ve gizlilik</h2>
+          <p>CRM verisi kişisel veri içerebilir. Pazarlama izni, e-posta onayı, SMS izni ve iletişim tercihi gibi alanlar taşınırken sadece teknik doğruluk değil, hukuki ve operasyonel doğruluk da önemlidir. İzin durumu bilinmeyen kayıtları “izinli” kabul etmek hatalıdır.</p>
+          <p>Self-hosted araç yaklaşımı bağlantı bilgilerini dış servise vermeme konusunda yardımcı olur; ancak doğru alan seçimi ve yetki yönetimi yine kurumun sorumluluğundadır.</p>
+
+          <h2 id="zamanlama">Zamanlama ve iş akışı</h2>
+          <p>CRM aktarımı tek seferlik geçiş veya düzenli besleme olarak tasarlanabilir. Tek seferlik geçişte veri temizliği ve doğrulama daha uzun sürer. Düzenli beslemede ise tekrar gelen kayıtların hedefte nasıl güncelleneceği, kapanmış fırsatların yeniden açılıp açılmayacağı ve sorumlu kullanıcı değişikliklerinin nasıl ele alınacağı belirlenmelidir.</p>
+          <ul class="checklist">
+            <li>Aktarım öncesi müşteri ve kişi alanları ayrı ayrı doğrulanmalı.</li>
+            <li>Pipeline aşamaları hedef sistemdeki aşamalarla eşleştirilmeli.</li>
+            <li>Not ve aktivite alanlarında kişisel veya hassas veri bulunup bulunmadığı kontrol edilmeli.</li>
+            <li>İlk çalışma küçük bir müşteri grubu üzerinde denenmeli.</li>
+          </ul>
+        </article>
+
+        <aside class="toc" aria-label="Sayfa içeriği">
+          <strong>Bu sayfada</strong>
+          <a href="#model">CRM modeli</a>
+          <a href="#esleme">Eşleme</a>
+          <a href="#mukerrer">Mükerrer kayıt</a>
+          <a href="#izin">Gizlilik</a>
+          <a href="#zamanlama">Zamanlama</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="resources.html">Kaynak merkezi</a></span></footer>
+  </body>
+</html>

@@ -1,2 +1,58 @@
-﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Download ARGEKA Sync Windows setup and review installation requirements."><meta name="robots" content="index, follow"><meta name="google-adsense-account" content="ca-pub-6534346834787678"><link rel="canonical" href="https://argeka.com.tr/en/download.html"><title>Download ARGEKA Sync</title><link rel="stylesheet" href="../assets/site.css"></head><body><header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="../assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a><nav class="nav"><a href="index.html">Product</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav></header><main class="section"><h1>Download ARGEKA Sync setup</h1><p class="lead">The installer prepares a self-hosted local environment. After installation the panel opens at http://localhost:8080 and your database connections remain in your own environment.</p><div class="download-panel"><div><h2>Windows setup</h2><p>The setup checks Git, Docker Desktop and WSL, starts the services and adds a desktop launcher.</p><div class="actions"><a class="button primary" href="../downloads/ARGEKA-Sync-Setup.exe">Download Windows setup</a><a class="button" href="../downloads/ARGEKA-Sync-Setup.cmd">CMD fallback setup</a></div></div><aside><h3>Installed components</h3><ul class="requirements"><li>Web panel</li><li>API service</li><li>PostgreSQL database</li><li>Docker services</li><li>Desktop launcher</li></ul></aside></div><section class="section"><h2>Installation review checklist</h2><p>The setup process should be reviewed like any other self-hosted business application. After the installer finishes, confirm that Docker services are running, the panel opens in the browser, the API responds, the local database is available and the first login works. If the installation required a Windows restart during Docker or WSL preparation, run the installer again after reboot.</p><p>For a company environment, a controlled Windows server is usually better than a personal laptop. That makes backup, firewall rules, user access and restart procedures easier to manage. The installer is designed to help non-specialist users, but production use should still be validated by someone who understands database access and local service operation.</p></section>
-<section class="section"><h2>Download safety</h2><p>The download page does not trigger automatic downloads. Users choose the setup file themselves. This gives visitors a clear product context before receiving an executable file and avoids presenting the website as a thin download-only page.</p></section></main><footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="support.html">Support</a></span></footer></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Download ARGEKA Sync Windows setup and review self-hosted installation requirements.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <link rel="canonical" href="https://argeka.com.tr/en/download.html">
+    <title>Download ARGEKA Sync</title>
+    <link rel="stylesheet" href="../assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="../assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a>
+      <nav class="nav">
+        <a href="index.html">Product</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <h1>Download ARGEKA Sync setup</h1>
+      <p class="lead">The installer prepares a self-hosted local environment. After installation, the panel opens from the desktop launcher and your database connections remain in your own environment.</p>
+
+      <div class="download-panel">
+        <div>
+          <h2>Windows setup</h2>
+          <p>The setup checks Git, Docker Desktop and WSL, starts the services and adds a desktop launcher.</p>
+          <div class="actions">
+            <a class="button primary" href="../downloads/ARGEKA-Sync-Setup.exe">Download Windows setup</a>
+            <a class="button" href="../downloads/ARGEKA-Sync-Setup.cmd">CMD fallback setup</a>
+          </div>
+        </div>
+        <aside>
+          <h3>Installed components</h3>
+          <ul class="requirements">
+            <li>Web panel</li>
+            <li>API service</li>
+            <li>PostgreSQL database</li>
+            <li>Docker services</li>
+            <li>Desktop launcher</li>
+          </ul>
+        </aside>
+      </div>
+
+      <section class="section">
+        <h2>Installation review checklist</h2>
+        <p>The setup process should be reviewed like any other self-hosted business application. After the installer finishes, confirm that Docker services are running, the panel opens from the desktop launcher, the API responds and the local database is available. If the installation required a Windows restart during Docker or WSL preparation, run the installer again after reboot.</p>
+        <p>For a company environment, a controlled Windows server is usually better than a personal laptop. That makes backup, firewall rules, user access and restart procedures easier to manage. The installer is designed to help non-specialist users, but production use should still be validated by someone who understands database access and local service operation.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="support.html">Support</a></span></footer>
+  </body>
+</html>

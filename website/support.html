@@ -1,9 +1,72 @@
-﻿<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ARGEKA Sync destek, ilk giris, kurulum, yedekleme, veri aktarim ve hata kontrol rehberi."><meta name="robots" content="index, follow"><meta name="google-adsense-account" content="ca-pub-6534346834787678"><link rel="canonical" href="https://argeka.com.tr/support.html"><link rel="alternate" hreflang="tr" href="https://argeka.com.tr/support.html"><link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/support.html"><title>Destek | ARGEKA Sync</title><link rel="stylesheet" href="assets/site.css"></head><body><header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a><nav class="nav"><a href="index.html">Urun</a><a href="download.html">Indir</a><a href="privacy.html">Gizlilik</a><a href="terms.html">Sartlar</a><span class="lang-switch"><a href="support.html" aria-current="true">TR</a><a href="en/support.html">EN</a></span></nav></header><main class="section"><h1>Destek ve ilk kullanim</h1><p class="lead">ARGEKA Sync kurulumdan sonra yerel bilgisayarda calisir. Varsayilan adres http://localhost:8080, API adresi ise http://localhost:3000 olarak kurgulanir. Bu sayfa ilk kurulum, giris, baglanti, aktarim ve hata kontrolu icin temel rehberdir.</p><div class="grid"><article class="card"><h2>Ilk giris</h2><p>Demo kullanici admin@argeka.local / admin123 olarak gelir. Canli kullanimda bu sifre degistirilmeli, ekip kullanicilari icin rol ve veri kapsami ayrica tanimlanmalidir.</p></article><article class="card"><h2>Baglanti testi</h2><p>ERP veya rapor veritabanina baglanmadan once host, port, veritabani adi, kullanici yetkisi, SSL modu ve VPN gereksinimi kontrol edilmelidir.</p></article><article class="card"><h2>Yedekleme</h2><p>Projedeki backup.ps1 ve restore.ps1 dosyalari veritabani yedegi almak ve geri yuklemek icin hazirlanmistir. Canli ortamda duzenli yedek planlanmalidir.</p></article></div><section class="steps"><h2>Aktarim hatasi oldugunda nasil ilerlenir?</h2><ol><li>Son calisma gecmisinde okunan, yazilan ve hata alan satir sayisini kontrol edin.</li><li>Kaynak SQL sorgusunu ayni parametrelerle test ortaminda calistirin.</li><li>Hedef tabloda zorunlu kolon, veri tipi ve unique key kisitlarini kontrol edin.</li><li>Kolon eslemesinde kaynak kolon adinin hedef kolonla dogru eslestiginden emin olun.</li><li>Upsert kullaniliyorsa anahtar kolonun bos veya merrer olmadigini dogrulayin.</li><li>Hatali satirlari atlamak yerine once sebebini kaydedin; sonra skip row veya quarantine politikasini kullanin.</li></ol></section><section class="section"><h2>Destek kapsami</h2><p>ARGEKA Sync, teknik ekiplerin kendi ortamlarinda veri aktarim akisi kurabilmesi icin hazirlanmistir. Destek konusu kurulum, Docker servisleri, veritabani baglantisi, SQL sorgu parametreleri, kolon esleme, zamanlama, log okuma ve yedekleme basliklarini kapsar. ERP is kurallari kurumdan kuruma degistigi icin her aktarim canli sisteme alinmadan once ornek kayitlarla dogrulanmalidir.</p></section><section class="section">
-  <h2>Baglanti ve sorgu destegi</h2>
-  <p>Destek surecinde ilk bakilan konu veritabani baglantisinin dogru yetkiyle yapilip yapilmadigidir. Kaynak ERP veritabani icin mumkunse yalnizca okuma yetkili kullanici tercih edilir. Hedef rapor veritabani icin ise tablo olusturma, insert veya upsert ihtiyacina gore ayrik yetki tanimlanir. Bu ayrim hem guvenlik hem de hata ayiklama acisindan onemlidir.</p>
-  <p>SQL sorgularinda tarih alanlari ozellikle kontrol edilmelidir. Kayit tarihi, belge tarihi, hareket tarihi ve kapanis tarihi ayni is anlami tasimaz. Yanlis tarih secimi, aktarim calissa bile raporun eksik veya fazla veri uretmesine neden olabilir. Bu nedenle her sorgu ornek belgeyle karsilastirilmali ve beklenen satir sayisi not edilmelidir.</p>
-</section>
-<section class="section">
-  <h2>Kolon esleme ve hata politikasi</h2>
-  <p>Kolon esleme aktarimin en kritik adimidir. Kaynakta metin olan bir alan hedefte sayi bekliyorsa, tarih formati farkliysa veya hedef kolon zorunluysa aktarim hata verebilir. Strict politika veri kalitesini korur; ancak kesintisiz akis gereken raporlarda quarantine veya skip row yaklasimi tercih edilebilir. Hangi politikanin secilecegi teknik degil, is riski kararidir.</p>
-</section><section class="section"><h2>Canliya alma kontrol listesi</h2><p>Bir aktarim isi canliya alinmadan once kaynak sorgu, hedef tablo, kolon esleme ve yazma davranisi birlikte kontrol edilmelidir. Hedef tabloda ayni anahtara sahip kayit varsa ne olacagi, iptal kayitlarinin aktarilip aktarilmayacagi, tarih filtresinin hangi alan uzerinden calistigi ve calisma sikliginin ERP performansini etkileyip etkilemeyecegi yazili hale getirilmelidir.</p><p>Destek surecinde onerilen yontem once kucuk veri setiyle manuel calisma yapmak, sonra zamanlamayi acmak, son olarak run loglarini izlemektir. Bu sira izlenirse hata oldugunda sorun sorguda mi, baglantida mi, eslemede mi yoksa hedef kisitinda mi daha hizli anlasilir.</p></section></main><footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span>GitHub: EnsarKarayel/argeka-sync</span></footer></body></html>
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ARGEKA Sync destek rehberi: kurulum, yerel panel, Docker servisleri, veritabanı bağlantısı, veri aktarımı, yedekleme ve hata kontrolü.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/support.html">
+    <link rel="alternate" hreflang="tr" href="https://argeka.com.tr/support.html">
+    <link rel="alternate" hreflang="en" href="https://argeka.com.tr/en/support.html">
+    <link rel="alternate" hreflang="x-default" href="https://argeka.com.tr/support.html">
+    <title>Destek ve İlk Kullanım | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a>
+        <a href="resources.html">Kaynaklar</a>
+        <a href="download.html">İndir</a>
+        <a href="privacy.html">Gizlilik</a>
+        <a href="terms.html">Şartlar</a>
+        <span class="lang-switch" aria-label="Dil seçimi"><a href="support.html" aria-current="true">TR</a><a href="en/support.html">EN</a></span>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Destek</p>
+      <h1>Kurulumdan sonra nereden başlanır?</h1>
+      <p class="lead">ARGEKA Sync kurulumdan sonra yerel bilgisayarda veya şirket sunucusunda çalışır. Ürün sitesi herkese açıktır; kurulan uygulama ise sizin ortamınızdaki panele yönlenir.</p>
+
+      <div class="grid">
+        <article class="card"><h2>Yerel panel</h2><p>Kurulum tamamlandığında masaüstündeki ARGEKA Sync kısayolu paneli açar. Panel genellikle yerel adres üzerinden çalışır ve internet sitesindeki tanıtım sayfasından ayrıdır.</p></article>
+        <article class="card"><h2>Bağlantı testi</h2><p>ERP veya rapor veritabanına bağlanmadan önce host, port, veritabanı adı, kullanıcı yetkisi, SSL modu ve VPN gereksinimi kontrol edilmelidir.</p></article>
+        <article class="card"><h2>Yedekleme</h2><p>Kurulum klasöründeki yedekleme dosyaları yerel veritabanı yedeği almak için hazırlanmıştır. Canlı ortamda düzenli yedek planlanmalıdır.</p></article>
+      </div>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Sorun giderme</p>
+          <h2>Aktarım hatası olduğunda nasıl ilerlenir?</h2>
+        </div>
+        <ol>
+          <li>Son çalışma geçmişinde okunan, yazılan ve hata alan satır sayısını kontrol edin.</li>
+          <li>Kaynak SQL sorgusunu aynı parametrelerle test ortamında çalıştırın.</li>
+          <li>Hedef tabloda zorunlu kolon, veri tipi ve unique key kısıtlarını kontrol edin.</li>
+          <li>Kolon eşlemesinde kaynak kolon adının hedef kolonla doğru eşleştiğinden emin olun.</li>
+          <li>Upsert kullanılıyorsa anahtar kolonun boş veya mükerrer olmadığını doğrulayın.</li>
+          <li>Hatalı satırları atlamak yerine önce sebebini kaydedin; sonra uygun hata politikasını seçin.</li>
+        </ol>
+      </section>
+
+      <section class="section">
+        <h2>Destek kapsamı</h2>
+        <p>ARGEKA Sync, teknik ekiplerin kendi ortamlarında veri aktarım akışı kurabilmesi için hazırlanmıştır. Destek konusu kurulum, Docker servisleri, veritabanı bağlantısı, SQL sorgu parametreleri, kolon eşleme, zamanlama, log okuma ve yedekleme başlıklarını kapsar. ERP iş kuralları kurumdan kuruma değiştiği için her aktarım canlı sisteme alınmadan önce örnek kayıtlarla doğrulanmalıdır.</p>
+        <p>Kolon eşleme aktarımın en kritik adımıdır. Kaynakta metin olan bir alan hedefte sayı bekliyorsa, tarih formatı farklıysa veya hedef kolon zorunluysa aktarım hata verebilir. Strict politika veri kalitesini korur; ancak kesintisiz akış gereken raporlarda quarantine veya skip row yaklaşımı tercih edilebilir.</p>
+      </section>
+
+      <section class="section">
+        <div class="download-strip">
+          <div><p class="eyebrow">İletişim</p><h2>Destek için yazabilirsiniz.</h2><p>Kurulum, kullanım ve geri bildirim için admin@argeka.com.tr adresinden ulaşabilirsiniz.</p></div>
+          <a class="button primary" href="mailto:admin@argeka.com.tr">E-posta gönder</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span>GitHub: EnsarKarayel/argeka-sync</span></footer>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="SQL Server'dan PostgreSQL'e veri aktarımı için veri tipi, tarih, decimal, upsert, pagination, performans ve test kontrol listesi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/sql-server-postgresql-aktarim.html">
+    <title>SQL Server'dan PostgreSQL'e Veri Aktarımı | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"SQL Server'dan PostgreSQL'e veri aktarımı","dateModified":"2026-09-25","publisher":{"@type":"Organization","name":"ARGEKA Sync"},"mainEntityOfPage":"https://argeka.com.tr/sql-server-postgresql-aktarim.html"}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a><a href="resources.html">Kaynaklar</a><a href="data-transfer-guide.html">Rehber</a><a href="download.html">İndir</a><a href="support.html">Destek</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Teknik rehber</p>
+      <h1>SQL Server'dan PostgreSQL'e veri aktarımı yaparken nelere dikkat edilmeli?</h1>
+      <p class="lead">SQL Server ve PostgreSQL güçlü veritabanlarıdır; fakat veri tipi, tarih, metin, identity, upsert ve sorgu sözdizimi farkları aktarım işlerinde küçük hataları büyütebilir. Sağlıklı aktarım, kaynak sorgu ve hedef tablo davranışını birlikte düşünmekle başlar.</p>
+
+      <div class="article-layout">
+        <article class="article-body">
+          <h2 id="veri-tipleri">Veri tipi farkları</h2>
+          <p>En sık görülen sorunlardan biri SQL Server'daki veri tipinin PostgreSQL tarafında birebir karşılığının seçilmemesidir. `nvarchar` alanları PostgreSQL tarafında `text` veya uygun uzunlukta `varchar` olarak karşılanabilir. `datetime` ve `datetime2` alanlarında saat hassasiyeti, zaman dilimi ve boş değer davranışı kontrol edilmelidir. Para ve miktar alanlarında `decimal` hassasiyeti hedefte aynı şekilde korunmalıdır.</p>
+          <table class="data-table">
+            <thead><tr><th>SQL Server</th><th>PostgreSQL seçeneği</th><th>Kontrol notu</th></tr></thead>
+            <tbody>
+              <tr><td>nvarchar/varchar</td><td>text veya varchar</td><td>Uzunluk kesilmesi ve karakter seti test edilmeli.</td></tr>
+              <tr><td>datetime/datetime2</td><td>timestamp veya timestamptz</td><td>Zaman dilimi iş kuralına göre seçilmeli.</td></tr>
+              <tr><td>decimal/numeric</td><td>numeric</td><td>Precision ve scale aynı tutulmalı.</td></tr>
+              <tr><td>bit</td><td>boolean</td><td>0/1 dönüşümü ve null davranışı kontrol edilmeli.</td></tr>
+              <tr><td>identity</td><td>generated identity veya sequence</td><td>Kaynak anahtar mı, hedef anahtar mı kullanılacak belirlenmeli.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="sorgu">Kaynak sorguda artımlı okuma</h2>
+          <p>Büyük tabloları her çalışmada baştan okumak hem kaynak sistemi yorar hem de aktarım süresini uzatır. Artımlı okuma için güncelleme tarihi, hareket tarihi veya monoton artan teknik anahtar kullanılabilir. Ancak sadece `created_at` alanına güvenmek, sonradan değişen kayıtları kaçırabilir. Bu yüzden iş kuralı kayıt güncellemesini gerektiriyorsa `updated_at` benzeri alan da değerlendirilmelidir.</p>
+          <p>ARGEKA Sync gibi SQL odaklı bir araçta kaynak sorgunun görünür kalması avantajdır. Teknik ekip filtreyi, index kullanımını ve tarih aralığını doğrudan inceleyebilir.</p>
+
+          <h2 id="upsert">PostgreSQL tarafında upsert</h2>
+          <p>PostgreSQL'de upsert davranışı çoğunlukla benzersiz anahtar veya unique index üzerinden tasarlanır. Hedef tabloda doğru unique kısıt yoksa “varsa güncelle, yoksa ekle” davranışı güvenilir çalışmaz. ERP verisinde belge numarası tek başına benzersiz olmayabilir; firma, dönem, belge tipi ve satır numarasıyla birlikte anahtar oluşturmak gerekebilir.</p>
+          <ul class="checklist">
+            <li>Hedef tabloda unique davranışı açıkça tanımlanmalı.</li>
+            <li>Kaynak sorguda anahtar kolonlar boş gelmemeli.</li>
+            <li>Güncellenecek kolonlar ve korunacak kolonlar ayrılmalı.</li>
+            <li>Silinen veya iptal edilen kayıtların hedefte nasıl temsil edileceği belirlenmeli.</li>
+          </ul>
+
+          <h2 id="performans">Performans ve parça parça aktarım</h2>
+          <p>Aktarım hacmi büyüdükçe tek seferde çok fazla veri taşımak yerine tarih aralığı veya anahtar aralığıyla parça parça ilerlemek daha güvenli olabilir. Böylece hata olduğunda tüm işin baştan çalışması gerekmez. Hedef tarafta indexlerin doğru kurulması da önemlidir; fakat aktarım sırasında aşırı index yükü yazma performansını düşürebilir.</p>
+          <p>İlk canlı deneme için küçük bir dönem, örneğin son bir gün veya belirli bir depo seçilebilir. Sonuç doğruysa aralık büyütülür. Bu yaklaşım hem kaynak performansını korur hem de veri doğrulamasını kolaylaştırır.</p>
+
+          <h2 id="test">Test planı</h2>
+          <p>Test planı sadece “kaç satır geldi?” sorusuyla bitmemelidir. Normal kayıt, Türkçe karakter içeren metin, null alan, uzun açıklama, yüksek decimal değer, tarih alanı, iptal kayıt ve mükerrer anahtar örnekleri ayrıca denenmelidir. Hedef rapor bu kayıtlarla doğru sonuç veriyorsa aktarım daha güvenli hale gelir.</p>
+        </article>
+
+        <aside class="toc" aria-label="Sayfa içeriği">
+          <strong>Bu sayfada</strong>
+          <a href="#veri-tipleri">Veri tipleri</a>
+          <a href="#sorgu">Artımlı okuma</a>
+          <a href="#upsert">Upsert</a>
+          <a href="#performans">Performans</a>
+          <a href="#test">Test planı</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="resources.html">Kaynak merkezi</a></span></footer>
+  </body>
+</html>

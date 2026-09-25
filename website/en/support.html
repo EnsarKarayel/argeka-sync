@@ -1,2 +1,54 @@
-﻿<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="ARGEKA Sync support guide for installation, first login, connection testing and transfer troubleshooting."><meta name="robots" content="index, follow"><meta name="google-adsense-account" content="ca-pub-6534346834787678"><link rel="canonical" href="https://argeka.com.tr/en/support.html"><title>Support | ARGEKA Sync</title><link rel="stylesheet" href="../assets/site.css"></head><body><header class="site-header"><a class="brand" href="index.html"><img class="brand-logo" src="../assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a><nav class="nav"><a href="index.html">Product</a><a href="download.html">Download</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav></header><main class="section"><h1>Support</h1><p class="lead">After installation, ARGEKA Sync runs locally. Use http://localhost:8080 for the panel and review each connection, query, mapping and run log before production use.</p><div class="grid"><article class="card"><h2>First login</h2><p>The demo account is admin@argeka.local / admin123. Change the password before real use.</p></article><article class="card"><h2>Connection test</h2><p>Check host, port, database name, user permissions, SSL mode and VPN requirements before connecting to an ERP database.</p></article><article class="card"><h2>Backup</h2><p>Use backup.ps1 and restore.ps1 as a starting point for local backup and restore operations.</p></article></div><section class="section"><h2>Connection and query support</h2><p>Support starts with connection boundaries. Source ERP databases should use read-only technical users whenever possible, while target reporting databases can have permissions according to insert or upsert needs. SQL date fields also need review because document date, movement date, created date and closing date may not mean the same thing.</p><p>Column mapping is the contract of the transfer. If a source text value is mapped to a numeric target column, or if a required target field is empty, the run should fail or quarantine the row according to the selected policy.</p></section><section class="section"><h2>Production support workflow</h2><p>When a transfer fails, support should start with the run log. Read count, written count, skipped rows and error messages usually show whether the problem is in the source query, the target table, the mapping or the connection. The same source query should then be tested with the same parameters outside the scheduled job.</p><p>Column mapping problems are common in ERP environments. A field that looks like a number may contain text in old records, date fields may use different meanings and required target fields may not exist in the source query. ARGEKA Sync keeps these decisions visible so support can review the exact mapping instead of guessing from a hidden script.</p></section>
-<section class="section"><h2>Before enabling schedules</h2><p>Run each job manually with a small dataset first. Confirm normal records, exception records and expected failure records. Only after this review should hourly, daily or weekly schedules be enabled.</p></section></main><footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span>GitHub: EnsarKarayel/argeka-sync</span></footer></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="ARGEKA Sync support guide for installation, local panel usage, connection testing and transfer troubleshooting.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <link rel="canonical" href="https://argeka.com.tr/en/support.html">
+    <title>Support | ARGEKA Sync</title>
+    <link rel="stylesheet" href="../assets/site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="../assets/icons/logo-mark.svg" alt=""> ARGEKA Sync</a>
+      <nav class="nav">
+        <a href="index.html">Product</a>
+        <a href="download.html">Download</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <h1>Support</h1>
+      <p class="lead">After installation, ARGEKA Sync runs locally. Open it from the desktop launcher and review each connection, query, mapping and run log before production use.</p>
+
+      <div class="grid">
+        <article class="card"><h2>Local panel</h2><p>The public website is for product information and downloads. The installed application opens your local ARGEKA Sync panel on your own computer or server.</p></article>
+        <article class="card"><h2>Connection test</h2><p>Check host, port, database name, user permissions, SSL mode and VPN requirements before connecting to an ERP database.</p></article>
+        <article class="card"><h2>Backup</h2><p>Use backup.ps1 and restore.ps1 as a starting point for local backup and restore operations.</p></article>
+      </div>
+
+      <section class="section">
+        <h2>Connection and query support</h2>
+        <p>Support starts with connection boundaries. Source ERP databases should use read-only technical users whenever possible, while target reporting databases can have permissions according to insert or upsert needs. SQL date fields also need review because document date, movement date, created date and closing date may not mean the same thing.</p>
+        <p>Column mapping is the contract of the transfer. If a source text value is mapped to a numeric target column, or if a required target field is empty, the run should fail or quarantine the row according to the selected policy.</p>
+      </section>
+
+      <section class="section">
+        <h2>Production support workflow</h2>
+        <p>When a transfer fails, support should start with the run log. Read count, written count, skipped rows and error messages usually show whether the problem is in the source query, the target table, the mapping or the connection. The same source query should then be tested with the same parameters outside the scheduled job.</p>
+        <p>Column mapping problems are common in ERP environments. A field that looks like a number may contain text in old records, date fields may use different meanings and required target fields may not exist in the source query. ARGEKA Sync keeps these decisions visible so support can review the exact mapping instead of guessing from a hidden script.</p>
+      </section>
+
+      <section class="section">
+        <h2>Before enabling schedules</h2>
+        <p>Run each job manually with a small dataset first. Confirm normal records, exception records and expected failure records. Only after this review should hourly, daily or weekly schedules be enabled.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span>GitHub: EnsarKarayel/argeka-sync</span></footer>
+  </body>
+</html>

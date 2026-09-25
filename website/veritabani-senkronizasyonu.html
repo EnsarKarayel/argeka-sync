@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Veritabanı senkronizasyonu ve tek yönlü veri aktarımı arasındaki farklar: çakışma, zamanlama, upsert, hata yönetimi ve güvenli tasarım rehberi.">
+    <meta name="robots" content="index, follow">
+    <meta name="google-adsense-account" content="ca-pub-6534346834787678">
+    <meta name="theme-color" content="#087f74">
+    <link rel="canonical" href="https://argeka.com.tr/veritabani-senkronizasyonu.html">
+    <title>Veritabanı Senkronizasyonu Nasıl Planlanır? | ARGEKA Sync</title>
+    <link rel="stylesheet" href="assets/site.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Veritabanı senkronizasyonu nasıl planlanır?","dateModified":"2026-09-25","publisher":{"@type":"Organization","name":"ARGEKA Sync"},"mainEntityOfPage":"https://argeka.com.tr/veritabani-senkronizasyonu.html"}</script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/icons/logo-mark.svg" alt="" aria-hidden="true"> ARGEKA Sync</a>
+      <nav class="nav" aria-label="Ana menü">
+        <a href="index.html">Ürün</a><a href="resources.html">Kaynaklar</a><a href="data-transfer-guide.html">Rehber</a><a href="download.html">İndir</a><a href="support.html">Destek</a>
+      </nav>
+    </header>
+
+    <main class="section">
+      <p class="eyebrow">Senkronizasyon rehberi</p>
+      <h1>Veritabanı senkronizasyonu ile tek yönlü aktarım aynı şey değildir.</h1>
+      <p class="lead">Birçok ekip “senkronizasyon” derken aslında kaynak sistemden hedef raporlama veritabanına planlı veri aktarımını kasteder. Bu ayrımı baştan yapmak, çakışma ve veri kaybı riskini azaltır.</p>
+
+      <div class="article-layout">
+        <article class="article-body">
+          <h2 id="fark">Senkronizasyon ve aktarım farkı</h2>
+          <p>Tek yönlü aktarımda kaynak sistem karar vericidir; hedef sistem veriyi okur, raporlar veya başka bir sürece hazırlar. Çift yönlü senkronizasyonda ise iki taraf da veri üretebilir ve değişiklikler karşılıklı taşınır. Bu ikinci model çakışma çözümü, sahiplik, zaman damgası ve geri alma politikası gerektirir.</p>
+          <p>ERP, raporlama ve operasyon dashboard ihtiyaçlarında çoğu zaman tek yönlü aktarım daha güvenlidir. Kaynak ERP değişmeden kalır, hedef sistem ise rapor veya analiz katmanı olarak çalışır.</p>
+
+          <h2 id="karar">Hangi model seçilmeli?</h2>
+          <table class="data-table">
+            <thead><tr><th>İhtiyaç</th><th>Uygun model</th><th>Gerekçe</th></tr></thead>
+            <tbody>
+              <tr><td>ERP verisini raporlama veritabanına taşımak</td><td>Tek yönlü aktarım</td><td>Hedef sadece okuma ve analiz için kullanılır.</td></tr>
+              <tr><td>İki şubenin müşteri kartını karşılıklı güncellemesi</td><td>Çift yönlü senkronizasyon</td><td>Çakışma çözümü gerekir.</td></tr>
+              <tr><td>Günlük fatura özetlerini dashboard'a beslemek</td><td>Zamanlanmış aktarım</td><td>Saatlik veya günlük çalışma yeterlidir.</td></tr>
+              <tr><td>Anlık stok seviyesini uygulamada göstermek</td><td>Gerçek zamanlı mimari</td><td>Mini ETL yerine olay tabanlı yaklaşım gerekebilir.</td></tr>
+            </tbody>
+          </table>
+
+          <h2 id="zamanlama">Zamanlama nasıl seçilir?</h2>
+          <p>Zamanlama iş ihtiyacına göre belirlenmelidir. Her beş dakikada bir çalışmak teknik olarak mümkün olsa bile kaynak sistemi yorabilir. Günlük rapor için gece çalışması yeterli olabilir. Saatlik takip gereken operasyonlarda daha dar aralıklar kullanılabilir. Kritik olan, çalışma sıklığının iş değeri ve sistem maliyetiyle birlikte değerlendirilmesidir.</p>
+          <ul class="checklist">
+            <li>Rapor ne kadar güncel olmalı?</li>
+            <li>Kaynak sorgu index kullanıyor mu?</li>
+            <li>Aktarım iş saatlerinde ERP performansını etkiliyor mu?</li>
+            <li>Hata olduğunda bir sonraki çalışma ne yapacak?</li>
+            <li>Aynı kayıt tekrar gelirse hedef tablo nasıl davranacak?</li>
+          </ul>
+
+          <h2 id="cakisma">Çakışma riski nasıl azaltılır?</h2>
+          <p>Tek yönlü aktarımda bile aynı kayıt hedefe birden fazla kez gelebilir. Bu nedenle upsert anahtarı doğru seçilmelidir. Çift yönlü senkronizasyonda ise aynı kaydın iki tarafta farklı güncellenmesi gibi çakışmalar oluşur. Hangi tarafın kazanacağı, alan bazlı birleştirme yapılıp yapılmayacağı ve manuel onay gerekip gerekmediği önceden tanımlanmalıdır.</p>
+          <p>ARGEKA Sync varsayılan olarak tek yönlü ve zamanlanabilir akışlara odaklanır. Bu tercih, küçük ve orta ölçekli ekiplerde gereksiz çakışma karmaşasını azaltır.</p>
+
+          <h2 id="log">İzleme ve loglama</h2>
+          <p>Bir aktarım işi çalıştıktan sonra sadece “başarılı” demek yeterli değildir. Okunan satır, yazılan satır, güncellenen satır, atlanan satır ve hata sayısı ayrı görülmelidir. Bu sayılar beklenen değerlerden saparsa ekip hızlıca sorgu, bağlantı, eşleme veya hedef kısıtlarını kontrol edebilir.</p>
+        </article>
+
+        <aside class="toc" aria-label="Sayfa içeriği">
+          <strong>Bu sayfada</strong>
+          <a href="#fark">Model farkı</a>
+          <a href="#karar">Model seçimi</a>
+          <a href="#zamanlama">Zamanlama</a>
+          <a href="#cakisma">Çakışma</a>
+          <a href="#log">Loglama</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><span>&copy; 2026 ARGEKA Sync</span><span><a href="resources.html">Kaynak merkezi</a></span></footer>
+  </body>
+</html>
